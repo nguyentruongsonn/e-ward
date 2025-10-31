@@ -27,64 +27,68 @@
             </div>
         </div>
     </div>
-<nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top shadow p-0">
-    <a href="{{ route('home') }}" class="navbar-brand d-flex align-items-center border-end px-4 px-lg-5">
-        <h2 class="m-0" style="color:#32C36C;">ABC</h2>
-    </a>
+    <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top shadow p-0">
+        <a href="{{ route('home') }}" class="navbar-brand d-flex align-items-center border-end px-4 px-lg-5">
+            <h2 class="m-0" style="color:#32C36C;">ABC</h2>
+        </a>
 
-    <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+        <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-        <div class="navbar-nav ms-auto p-4 p-lg-0">
-            <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->is('/') ? 'active' : '' }}">TRANG
-                CHỦ</a>
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">THÔNG TIN & DỊCH VỤ</a>
-                <div class="dropdown-menu bg-light m-0">
-                    <a href="{{ route('admin.login') }}" class="dropdown-item">THỦ TỤC HÀNH CHÍNH</a>
-                    <a href="{{ route('history') }}" class="dropdown-item">DỊCH VỤ CÔNG TRỰC TUYẾN</a>
-                    <a href="{{ route('outstanding-service') }}" class="dropdown-item">DỊCH VỤ CÔNG NỔI BẬT</a>
-                    <a href="{{ route('404') }}" class="dropdown-item">TRA CỨU HỒ SƠ</a>
-                    <a href="{{ route('404') }}" class="dropdown-item">CÂU HỎI THƯỜNG GẶP</a>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto p-4 p-lg-0">
+                <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->is('/') ? 'active' : '' }}">TRANG
+                    CHỦ</a>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">THÔNG TIN & DỊCH VỤ</a>
+                    <div class="dropdown-menu bg-light m-0">
+                        <a href="{{ route('admin.login') }}" class="dropdown-item">THỦ TỤC HÀNH CHÍNH</a>
+                        <a href="{{ route('history') }}" class="dropdown-item">DỊCH VỤ CÔNG TRỰC TUYẾN</a>
+                        <a href="{{ route('outstanding-service') }}" class="dropdown-item">DỊCH VỤ CÔNG NỔI BẬT</a>
+                        <a href="{{ route('404') }}" class="dropdown-item">TRA CỨU HỒ SƠ</a>
+                        <a href="{{ route('404') }}" class="dropdown-item">CÂU HỎI THƯỜNG GẶP</a>
+                    </div>
                 </div>
-            </div>
-            <a href="" class="nav-item nav-link">THANH TOÁN TRỰC TUYẾN</a>
-            <a href="{{ route('contact') }}" class="nav-item nav-link">ĐÁNH GIÁ DỊCH VỤ</a>
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">HỖ TRỢ</a>
-                  <div class="dropdown-menu bg-light m-0">
-                    <a href="{{ route('support.about') }}" class="dropdown-item">GIỚI THIỆU</a>
-                    <a href="{{ route('support.terms') }}" class="dropdown-item">ĐIỀU KHOẢN SỬ DỤNG</a>
-                    <a href="{{ route('support.guide') }}" class="dropdown-item">HƯỚNG DẪN SỬ DỤNG</a>
-                    <a href="{{ route('support.notice') }}" class="dropdown-item">THÔNG BÁO</a>
+                <a href="" class="nav-item nav-link">THANH TOÁN TRỰC TUYẾN</a>
+                <a href="{{ route('contact') }}" class="nav-item nav-link">ĐÁNH GIÁ DỊCH VỤ</a>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">HỖ TRỢ</a>
+                    <div class="dropdown-menu bg-light m-0">
+                        <a href="{{ route('support.about') }}" class="dropdown-item">GIỚI THIỆU</a>
+                        <a href="{{ route('support.terms') }}" class="dropdown-item">ĐIỀU KHOẢN SỬ DỤNG</a>
+                        <a href="{{ route('support.guide') }}" class="dropdown-item">HƯỚNG DẪN SỬ DỤNG</a>
+                        <a href="{{ route('support.notice') }}" class="dropdown-item">THÔNG BÁO</a>
+                    </div>
                 </div>
+
+
             </div>
 
+            @auth
+                {{-- Nếu đã đăng nhập --}}
+                <a href="{{ route('logout') }}"
+                    class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block text-white">
+                    ĐĂNG XUẤT
+                </a>
+            @else
+                {{-- Chưa đăng nhập --}}
+                <button type="button" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block "
+                    data-bs-toggle="modal" data-bs-target="#loginModal">
+                    ĐĂNG NHẬP
+                </button>
 
+                <button class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block" onclick="redirectToRegister()">ĐĂNG
+                    KÝ</button>
+
+
+
+
+
+            @endauth
         </div>
-
-        @auth
-            {{-- Nếu đã đăng nhập --}}
-            <a href="{{ route('logout') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block text-white">
-                ĐĂNG XUẤT
-            </a>
-        @else
-            {{-- Chưa đăng nhập --}}
-            <button type="button" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block " data-bs-toggle="modal" data-bs-target="#loginModal">
-                ĐĂNG NHẬP
-            </button>
-
-            <button class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block" onclick="redirectToRegister()">ĐĂNG KÝ</button>
-
-
-
-
-
-        @endauth
-    </div>
-</nav>
+    </nav>
+</div>
 
 {{-- Modal đăng nhập --}}
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
