@@ -10,14 +10,13 @@ return new class extends Migration
     {
         Schema::create('thanhphanhoso', function (Blueprint $table) {
             $table->increments('maThanhPhan');
-            $table->integer('maTruongHop')->unsigned();
-            $table->integer('tenThanhPhan');
-            $table->timestamps();
+            $table->integer('maTTHC')->unsigned();
+            $table->string('tenThanhPhan',500);
 
             // Khóa ngoại
-            $table->foreign('maTruongHop')
-                ->references('maTruongHop')
-                ->on('truonghopthuchien');
+            $table->foreign('maTTHC')
+                ->references('maTTHC')
+                ->on('tthc');
 
         });
     }

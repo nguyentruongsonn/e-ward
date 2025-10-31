@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('giayto', function (Blueprint $table) {
             $table->increments('maGiayTo');
-            $table->string('tenGiayTo', 500);
+            $table->string('tenGiayTo', 2000);
             $table->enum('loaiGiayTo', [
                 'Tài liệu',
                 'Mẫu đơn',
@@ -22,7 +22,6 @@ return new class extends Migration
                 'Bản ghi',
                 'Khác',
             ]);
-            $table->timestamps();
 
         });
     }

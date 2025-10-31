@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('quaylamviec', function (Blueprint $table) {
             $table->increments('maQuayLamViec');
             $table->string('tenQuayLamViec', 500);
-            $table->timestamps();
         });
     }
 

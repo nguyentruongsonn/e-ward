@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('congdan', function (Blueprint $table) {
             $table->increments('IDCD');
             $table->integer('IDnguoiDung')->unsigned();
-            $table->timestamps();
 
             // Khóa ngoại
             $table->foreign('IDnguoiDung')

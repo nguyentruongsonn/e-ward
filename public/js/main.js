@@ -46,6 +46,232 @@
         time: 2000
     });
 
+//================ Check Họ và Tên =================
+var hovaten = $("#hovaten");
+var tbhovaten = $("#tbhovaten");
+
+function checkhovaten(){
+    var re = /^[a-zA-Z\s\u00C0-\u1EF9]+$/u;
+    if(hovaten.val() == ""){
+        tbhovaten.html("Vui lòng nhập họ và tên");
+        tbhovaten.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    if(!re.test(hovaten.val())){
+        tbhovaten.html("Họ và tên không hợp lệ");
+        tbhovaten.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    tbhovaten.html("");
+    return true;
+}
+hovaten.blur(checkhovaten);
+
+
+//================ Check CCCD =================
+var cccd = $("#cccd");
+var tbcccd = $("#tbcccd");
+
+function checkcccd(){
+    var re = /^\d{12}$/;
+    if(cccd.val() == ""){
+        tbcccd.html("Vui lòng nhập số CCCD");
+        tbcccd.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    if(!re.test(cccd.val())){
+        tbcccd.html("Số CCCD không hợp lệ");
+        tbcccd.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    tbcccd.html("");
+    return true;
+}
+cccd.blur(checkcccd);
+
+
+//================ Check Email =================
+var em = $("#emaill");
+var tbem = $("#tbemail");
+
+function checkemail(){
+    var re = /^([A-Za-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+    if(em.val() == ""){
+        tbem.html("Vui lòng nhập email");
+        tbem.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    if(!re.test(em.val())){
+        tbem.html("Email không hợp lệ");
+        tbem.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    tbem.html("");
+    return true;
+}
+em.blur(checkemail);
+
+
+//================ Check Password =================
+var mk = $("#passwordd");
+var tbmk = $("#tbpassword");
+
+function checkpassword(){
+    var re = /^([A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if(mk.val() == ""){
+        tbmk.html("Vui lòng nhập mật khẩu");
+        tbmk.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    if(!re.test(mk.val())){
+        tbmk.html("Mật khẩu phải bắt đầu bằng chữ hoa, có chữ thường và số, tối thiểu 8 ký tự");
+        tbmk.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    tbmk.html("");
+    return true;
+}
+mk.blur(checkpassword);
+
+
+//================ Check Confirm Password =================
+var xnmk = $("#password_confirmation");
+var tbxnmk = $("#tbpassword_confirmation");
+
+function checkconfirmpassword(){
+    if(xnmk.val() == ""){
+        tbxnmk.html("Vui lòng xác nhận mật khẩu");
+        tbxnmk.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    if(xnmk.val() != mk.val()){
+        tbxnmk.html("Mật khẩu không trùng khớp");
+        tbxnmk.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    tbxnmk.html("");
+    return true;
+}
+xnmk.blur(checkconfirmpassword);
+
+
+//================ Check Phone =================
+var phone = $("#phone");
+var tbphone = $("#tbphone");
+
+function checkphone(){
+    var re = /^(?:\+84|84|0)(?:3[2-9]|86|9[6-8]|7[0,6-9]|8[1-5,8]|90|91|93|94|89)[0-9]{7}$/;
+    if(phone.val() == ""){
+        tbphone.html("Vui lòng nhập số điện thoại");
+        tbphone.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    if(!re.test(phone.val())){
+        tbphone.html("Số điện thoại không hợp lệ");
+        tbphone.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+     tbphone.html("");
+    return true;
+}
+phone.blur(checkphone);
+
+
+//================ Check Quê Quán =================
+var quequan = $("#quequan");
+var tbquequan = $("#tbquequan");
+
+function checkquequan(){
+    if(quequan.val() == ""){
+        tbquequan.html("Vui lòng nhập quê quán");
+        tbquequan.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    tbquequan.html("");
+    return true;
+}
+quequan.blur(checkquequan);
+
+
+//================ Check Nơi Tạm Trú =================
+var tamtru = $("#tamtru");
+var tbtamtru = $("#tbtamtru");
+
+function checknoitamtru(){
+    if(tamtru.val() == ""){
+        tbtamtru.html("Vui lòng nhập nơi tạm trú");
+        tbtamtru.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    tbtamtru.html("");
+    return true;
+}
+tamtru.blur(checknoitamtru);
+
+
+//================ Check Nơi Thường Trú =================
+var thuongtru = $("#thuongtru");
+var tbthuongtru = $("#tbthuongtru");
+
+function checknoithuongtru(){
+    if(thuongtru.val() == ""){
+        tbthuongtru.html("Vui lòng nhập nơi thường trú");
+        tbthuongtru.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    tbthuongtru.html("");
+    return true;
+}
+thuongtru.blur(checknoithuongtru);
+
+
+
+//========================================Register ====================================
+var btnDangKy = $("#submit_register");
+
+btnDangKy.click(function(event) {
+    event.preventDefault(); // Ngăn chặn hành động mặc định (reload trang)
+
+    // Lấy các phần tử để kiểm tra
+    var hovaten = $("#hovaten");
+    var cccd = $("#cccd");
+    var em = $("#email");
+    var mk = $("#password");
+    var xnmk = $("#confirmpassword");
+    var phone = $("#phone");
+    var quequan = $("#quequan");
+    var thuongtru = $("#noithuongtru");
+    var tamtru = $("#noitamtru");
+
+    // Kiểm tra lần lượt
+    if (!checkhovaten()) {
+        hovaten.focus();
+    } if (!checkcccd()) {
+        cccd.focus();
+    } if (!checkemail()) {
+        em.focus();
+    } if (!checkpassword()) {
+        mk.focus();
+    } if (!checkconfirmpassword()) {
+        xnmk.focus();
+    } if (!checkphone()) {
+        phone.focus();
+    } if (!checkquequan()) {
+        quequan.focus();
+    } if (!checknoithuongtru()) {
+        thuongtru.focus();
+    } if (!checknoitamtru()) {
+        tamtru.focus();
+    }
+});
+
+    function redirectToRegister() {
+        window.location.href = "{{ route('register') }}";
+    }
+
+
+
+
 
     // Header carousel
     $(".header-carousel").owlCarousel({

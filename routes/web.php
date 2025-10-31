@@ -4,12 +4,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OutstandingServiceController;
 
 Route::get('/outstanding-service', [OutstandingServiceController::class, 'index'])->name('outstanding-service');
+Route::get('/outstanding-service/{id}', [OutstandingServiceController::class, 'show'])->name('outstanding-service.show');
 
 Route::view('/', 'pages.home')->name('home');
 Route::view('/about', 'pages.about')->name('about');
 
 Route::view('/contact', 'pages.contact')->name('contact');
 Route::view('/history', 'pages.history')->name('history');
+Route::view('/register', 'pages.register')->name('register');
 Route::view('/404', 'pages.404')->name('404');
 Route::view('/admin/login', 'admin.login')->name('admin.login');
 

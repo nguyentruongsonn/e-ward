@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('thanhphangiayto', function (Blueprint $table) {
+            $table->increments('maTPGT');
             $table->integer('maThanhPhan')->unsigned();
             $table->integer('maGiayTo')->unsigned();
+            $table->integer('soLuongBanChinh');
+            $table->integer('soLuongBanSao');
 
             $table->foreign('maThanhPhan')->references('maThanhPhan')->on('thanhphanhoso')->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('maGiayTo')->references('maGiayTo')->on('giayto')->onDelete('cascade')->onUpdate('cascade');

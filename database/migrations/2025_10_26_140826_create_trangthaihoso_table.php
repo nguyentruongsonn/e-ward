@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('trangthaihoso', function (Blueprint $table) {
             $table->increments('maTrangThai');
             $table->string('tenTrangThai', 50);
-            $table->timestamps();
         });
     }
 
