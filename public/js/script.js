@@ -132,8 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const today = new Date();
         for (let i = 1; i <= daysInMonth; i++) {
             const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
-            const isToday = dayDate.getDate() === today.getDate() && 
-                          dayDate.getMonth() === today.getMonth() && 
+            const isToday = dayDate.getDate() === today.getDate() &&
+                          dayDate.getMonth() === today.getMonth() &&
                           dayDate.getFullYear() === today.getFullYear();
             const dayCell = createDayCell(dayDate, false, isToday);
             daysGrid.appendChild(dayCell);
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function createDayCell(date, isOtherMonth, isToday = false) {
         const dayCell = document.createElement('div');
         dayCell.className = `day-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'current-day' : ''}`;
-        
+
         const dayNumber = document.createElement('div');
         dayNumber.className = 'day-number';
         dayNumber.textContent = date.getDate();
@@ -166,36 +166,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Get events for this day
         const dayEvents = getEventsForDate(date);
-        
+
         // Display up to 3 events (or 2 if one is multi-line)
         const maxEventsToShow = 3;
         let eventsShown = 0;
         let spaceUsed = 0;
-        
+
         for (const event of dayEvents) {
             if (eventsShown >= maxEventsToShow || spaceUsed >= maxEventsToShow) break;
-            
+
             const eventElement = document.createElement('div');
             eventElement.className = 'day-event';
             eventElement.textContent = event.title;
             eventElement.style.backgroundColor = event.color;
-            
+
             // Estimate if this event will take more space (long title)
             const takesMoreSpace = event.title.length > 15;
             if (takesMoreSpace) spaceUsed += 1.5;
             else spaceUsed += 1;
-            
+
             if (spaceUsed <= maxEventsToShow) {
                 dayEventsContainer.appendChild(eventElement);
                 eventsShown++;
-                
+
                 eventElement.addEventListener('click', (e) => {
                     e.stopPropagation();
                     showEventDetails(event.id);
                 });
             }
         }
-        
+
         // Show "+X more" if there are more events
         if (dayEvents.length > eventsShown) {
             const moreEvents = document.createElement('div');
@@ -250,9 +250,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const dayHeader = document.createElement('div');
             dayHeader.className = 'week-day-header';
-            
-            const isToday = dayDate.getDate() === today.getDate() && 
-                           dayDate.getMonth() === today.getMonth() && 
+
+            const isToday = dayDate.getDate() === today.getDate() &&
+                           dayDate.getMonth() === today.getMonth() &&
                            dayDate.getFullYear() === today.getFullYear();
             if (isToday) {
                 dayHeader.classList.add('current-day');
@@ -296,20 +296,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     eventElement.className = 'week-event';
                     eventElement.textContent = event.title;
                     eventElement.style.backgroundColor = event.color;
-                    
+
                     // Calculate position and height based on event duration
                     const startMinutes = new Date(event.startTime).getHours() * 60 + new Date(event.startTime).getMinutes();
                     const endMinutes = new Date(event.endTime).getHours() * 60 + new Date(event.endTime).getMinutes();
                     const duration = endMinutes - startMinutes;
                     const height = (duration / 60) * 60; // 60px per hour
-                    
+
                     const position = (startMinutes % 60) / 60 * 60;
-                    
+
                     eventElement.style.top = `${position}px`;
                     eventElement.style.height = `${height}px`;
-                    
+
                     dayCell.appendChild(eventElement);
-                    
+
                     eventElement.addEventListener('click', (e) => {
                         e.stopPropagation();
                         showEventDetails(event.id);
@@ -364,20 +364,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 eventElement.className = 'day-event';
                 eventElement.textContent = `${formatTime(new Date(event.startTime))} - ${event.title}`;
                 eventElement.style.backgroundColor = event.color;
-                
+
                 // Calculate position and height based on event duration
                 const startMinutes = new Date(event.startTime).getHours() * 60 + new Date(event.startTime).getMinutes();
                 const endMinutes = new Date(event.endTime).getHours() * 60 + new Date(event.endTime).getMinutes();
                 const duration = endMinutes - startMinutes;
                 const height = (duration / 60) * 60; // 60px per hour
-                
+
                 const position = (startMinutes % 60) / 60 * 60;
-                
+
                 eventElement.style.top = `${position}px`;
                 eventElement.style.height = `${height}px`;
-                
+
                 timeBlock.appendChild(eventElement);
-                
+
                 eventElement.addEventListener('click', (e) => {
                     e.stopPropagation();
                     showEventDetails(event.id);
@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get upcoming events (today and future)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         const upcomingEvents = events
             .filter(event => new Date(event.startTime) >= today)
             .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
@@ -416,10 +416,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const eventElement = document.createElement('div');
             eventElement.className = 'event-item';
             eventElement.style.borderLeftColor = event.color;
-            
+
             const startDate = new Date(event.startTime);
             const endDate = new Date(event.endTime);
-            
+
             eventElement.innerHTML = `
                 <div class="event-title">
                     <span>${event.title}</span>
@@ -428,9 +428,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="event-time">${formatDateTime(startDate, endDate)}</div>
                 ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
             `;
-            
+
             eventsList.appendChild(eventElement);
-            
+
             eventElement.addEventListener('click', () => {
                 showEventDetails(event.id);
             });
@@ -457,33 +457,33 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCurrentDateDisplay() {
         switch (currentView) {
             case 'day':
-                currentDateElement.textContent = currentDate.toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    month: 'long', 
-                    day: 'numeric', 
-                    year: 'numeric' 
+                currentDateElement.textContent = currentDate.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
                 });
                 break;
             case 'week':
                 const startOfWeek = new Date(currentDate);
                 startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-                
+
                 const endOfWeek = new Date(startOfWeek);
                 endOfWeek.setDate(startOfWeek.getDate() + 6);
-                
+
                 currentDateElement.textContent = `
-                    ${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - 
-                    ${endOfWeek.toLocaleDateString('en-US', { 
-                        month: endOfWeek.getMonth() !== startOfWeek.getMonth() ? 'short' : undefined, 
-                        day: 'numeric', 
-                        year: endOfWeek.getFullYear() !== startOfWeek.getFullYear() ? 'numeric' : undefined 
+                    ${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} -
+                    ${endOfWeek.toLocaleDateString('en-US', {
+                        month: endOfWeek.getMonth() !== startOfWeek.getMonth() ? 'short' : undefined,
+                        day: 'numeric',
+                        year: endOfWeek.getFullYear() !== startOfWeek.getFullYear() ? 'numeric' : undefined
                     })}
                 `;
                 break;
             case 'month':
-                                currentDateElement.textContent = currentDate.toLocaleDateString('en-US', { 
-                    month: 'long', 
-                    year: 'numeric' 
+                                currentDateElement.textContent = currentDate.toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric'
                 });
                 break;
         }
@@ -491,12 +491,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function switchView(view) {
         currentView = view;
-        
+
         // Update active view button
         viewOptions.forEach(option => {
             option.classList.toggle('active', option.dataset.view === view);
         });
-        
+
         renderCalendar();
     }
 
@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function() {
         eventStartTimeInput.value = '09:00';
         eventEndTimeInput.value = '10:00';
         eventColorInput.value = '#4e73df';
-        
+
         // Show modal
         eventModal.style.display = 'flex';
     }
@@ -560,17 +560,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function saveEvent(e) {
         e.preventDefault();
-        
+
         // Create event object
         const eventId = Date.now().toString();
         const startDateTime = new Date(eventDateInput.value);
         const startTimeParts = eventStartTimeInput.value.split(':');
         startDateTime.setHours(parseInt(startTimeParts[0]), parseInt(startTimeParts[1]));
-        
+
         const endDateTime = new Date(eventDateInput.value);
         const endTimeParts = eventEndTimeInput.value.split(':');
         endDateTime.setHours(parseInt(endTimeParts[0]), parseInt(endTimeParts[1]));
-        
+
         const newEvent = {
             id: eventId,
             title: eventTitleInput.value,
@@ -580,16 +580,16 @@ document.addEventListener('DOMContentLoaded', function() {
             color: eventColorInput.value,
             reminder: eventReminderInput.checked
         };
-        
+
         // Add to events array
         events.push(newEvent);
         saveEventsToStorage();
-        
+
         // Update UI
         renderCalendar();
         renderEventsList();
         closeModals();
-        
+
         // Set reminder if needed
         if (newEvent.reminder) {
             setReminder(newEvent);
@@ -599,76 +599,76 @@ document.addEventListener('DOMContentLoaded', function() {
     function showEventDetails(eventId) {
         const event = events.find(e => e.id === eventId);
         if (!event) return;
-        
+
         selectedEventId = eventId;
-        
+
         // Populate details
         detailsTitle.textContent = event.title;
-        detailsDate.textContent = new Date(event.startTime).toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            month: 'long', 
-            day: 'numeric', 
-            year: 'numeric' 
+        detailsDate.textContent = new Date(event.startTime).toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
         });
-        
+
         detailsTime.textContent = `${formatTime(new Date(event.startTime))} - ${formatTime(new Date(event.endTime))}`;
         detailsDescription.textContent = event.description || 'No description';
-        
+
         // Show modal
         eventDetailsModal.style.display = 'flex';
     }
 
     function editEvent() {
         if (!selectedEventId) return;
-        
+
         const event = events.find(e => e.id === selectedEventId);
         if (!event) return;
-        
+
         // Populate form with event data
         eventTitleInput.value = event.title;
         eventDateInput.valueAsDate = new Date(event.startTime);
-        
+
         const startDate = new Date(event.startTime);
         eventStartTimeInput.value = `${startDate.getHours().toString().padStart(2, '0')}:${startDate.getMinutes().toString().padStart(2, '0')}`;
-        
+
         const endDate = new Date(event.endTime);
         eventEndTimeInput.value = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
-        
+
         eventDescriptionInput.value = event.description || '';
         eventColorInput.value = event.color;
         eventReminderInput.checked = event.reminder || false;
-        
+
         // Change form submit to update instead of create
         eventForm.onsubmit = function(e) {
             e.preventDefault();
-            
+
             // Update event
             const startDateTime = new Date(eventDateInput.value);
             const startTimeParts = eventStartTimeInput.value.split(':');
             startDateTime.setHours(parseInt(startTimeParts[0]), parseInt(startTimeParts[1]));
-            
+
             const endDateTime = new Date(eventDateInput.value);
             const endTimeParts = eventEndTimeInput.value.split(':');
             endDateTime.setHours(parseInt(endTimeParts[0]), parseInt(endTimeParts[1]));
-            
+
             event.title = eventTitleInput.value;
             event.startTime = startDateTime.toISOString();
             event.endTime = endDateTime.toISOString();
             event.description = eventDescriptionInput.value;
             event.color = eventColorInput.value;
             event.reminder = eventReminderInput.checked;
-            
+
             saveEventsToStorage();
-            
+
             // Update UI
             renderCalendar();
             renderEventsList();
             closeModals();
-            
+
             // Reset form submit handler
             eventForm.onsubmit = saveEvent;
         };
-        
+
         // Show edit modal
         closeModals();
         eventModal.style.display = 'flex';
@@ -676,11 +676,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function deleteEvent() {
         if (!selectedEventId) return;
-        
+
         if (confirm('Are you sure you want to delete this event?')) {
             events = events.filter(event => event.id !== selectedEventId);
             saveEventsToStorage();
-            
+
             // Update UI
             renderCalendar();
             renderEventsList();
@@ -695,10 +695,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function setReminder(event) {
         const reminderTime = new Date(event.startTime);
         reminderTime.setMinutes(reminderTime.getMinutes() - 15); // 15 minutes before
-        
+
         const now = new Date();
         const timeUntilReminder = reminderTime - now;
-        
+
         if (timeUntilReminder > 0) {
             setTimeout(() => {
                 showReminderNotification(event);
@@ -723,28 +723,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Helper functions
     function formatTime(date) {
-        return date.toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
-            minute: '2-digit', 
-            hour12: true 
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
         });
     }
 
     function formatDateTime(startDate, endDate) {
         const isSameDay = startDate.toDateString() === endDate.toDateString();
-        
+
         if (isSameDay) {
-            return `${startDate.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
+            return `${startDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
             })} • ${formatTime(startDate)} - ${formatTime(endDate)}`;
         } else {
-            return `${startDate.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
-            })} ${formatTime(startDate)} - ${endDate.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
+            return `${startDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            })} ${formatTime(startDate)} - ${endDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
             })} ${formatTime(endDate)}`;
         }
     }

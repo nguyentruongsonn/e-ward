@@ -20,12 +20,13 @@
     <div class="container">
         <div class="row g-4">
             @foreach($tthcs as $tthc)
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="service-item rounded h-100 p-4">
-                        <h5 class="mb-3">{{ $tthc->tenTTHC }}</h5>
-                        <p>Thời hạn: {{ $tthc->thoiHanGiaiQuyet }}</p>
-                        <p>Phí: {{ number_format($tthc->phi, 0, ',', '.') }} đ</p>
-                        <a href="#" class="btn btn-outline-primary">Xem chi tiết</a>
+                <div class="col-lg-12  wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="service-items rounded h-100 p-4">
+                        <a href="{{ route('outstanding-service.show', ['id' => $tthc->maTTHC]) }}" class="text-dark"> <i class="fa-duotone fa-solid fa-file-lines" style="color: green;"></i>
+                            {{ $tthc->tenTTHC }}
+                        </a>
+
+
                     </div>
                 </div>
             @endforeach
