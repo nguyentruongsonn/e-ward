@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('dinhDang');
             $table->string('kichThuoc');
             $table->datetime('ngayTai');
+            $table->timestamps();
 
             $table->foreign('maHSXL')->references('maHSXL')->on('hosoxuly');
             $table->foreign('maGiayTo')->references('maGiayTo')->on('giayto');

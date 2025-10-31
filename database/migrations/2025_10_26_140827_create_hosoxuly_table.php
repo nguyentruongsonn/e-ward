@@ -12,12 +12,10 @@ return new class extends Migration
             $table->increments('maHSXL');
             $table->integer('maTTHC')->unsigned();
             $table->integer('IDCD')->unsigned();
-            $table->unsignedInteger('maForm')->nullable();
             $table->string('tenChuHoSo', 255);
             $table->string('doiTuongThucHien', 255)->nullable();
             $table->string('email', 255);
             $table->string('soDienThoai', 10);
-            $table->json('dulieu'); //dữ liệu công dân gửi form
             $table->date('ngayTiepNhan')->nullable();
             $table->date('ngayHenTra')->nullable();
             $table->integer('maTrangThai')->unsigned();
@@ -29,14 +27,9 @@ return new class extends Migration
             $table->date('ngayKetThucXuLy')->nullable();
             $table->string('donViXuLy', 255);
             $table->text('ghiChu')->nullable();
-
+            $table->timestamps();
 
             // Khóa ngoại
-
-            $table->foreign('maForm')
-                ->references('maForm')
-                ->on('formtructuyen');
-
             $table->foreign('maTTHC')
                 ->references('maTTHC')
                 ->on('tthc');

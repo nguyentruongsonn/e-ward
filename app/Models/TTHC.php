@@ -24,26 +24,4 @@ class TTHC extends Model
         'canCuPhapLy',
         'ketQuaThucHien'
     ];
-
-    public $timestamps = false;
-
-    public function linhVuc()
-    {
-        return $this->belongsTo(\App\Models\LinhVuc::class, 'maLinhVuc', 'maLinhVuc');
-    }
-
-    public function cachThucHiens()
-    {
-        return $this->hasMany(\App\Models\CachThucHien::class, 'maTTHC', 'maTTHC');
-    }
-
-    public function thanhPhanHoSos()
-    {
-        return $this->hasMany(\App\Models\ThanhPhanHoSo::class, 'maTTHC', 'maTTHC');
-    }
-
-    public function doiTuongs()
-    {
-        return $this->belongsToMany(\App\Models\DoiTuongThucHien::class, 'thutucdoituong', 'maTTHC', 'maDoiTuong');
-    }
 }

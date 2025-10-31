@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('doituongthuchien', function (Blueprint $table) {
-            $table->increments('maDoiTuong');
-            $table->string('tenDoiTuong');
+        Schema::create('truonghopthuchien', function (Blueprint $table) {
+            $table->increments('maTruongHop');
+            $table->integer('maTTHC')->unsigned();
+            $table->string('tenTruongHop');
+
+            $table->foreign('maTTHC')->references('maTTHC')->on('TTHC');
+
         });
     }
 
@@ -22,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('doituongthuchien');
+        Schema::dropIfExists('truonghopthuchien');
     }
 };

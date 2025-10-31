@@ -8,10 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('canbo', function (Blueprint $table) {
-            $table->increments('IDCB');
+        Schema::create('taikhoan', function (Blueprint $table) {
+            $table->increments('IDtaiKhoan');
             $table->integer('IDnguoiDung')->unsigned();
-            $table->integer('maQuayLamViec')->unsigned();
+            $table->string('email', 255);
+            $table->string('password', 255);
             $table->timestamps();
 
             // Khóa ngoại
@@ -20,15 +21,11 @@ return new class extends Migration
                 ->on('nguoi')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-
-            $table->foreign('maQuayLamViec')
-                ->references('maQuayLamViec')
-                ->on('quaylamviec');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('canbo');
+        Schema::dropIfExists('taikhoan');
     }
 };

@@ -27,7 +27,7 @@
             </div>
         </div>
     </div>
-<nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top shadow p-0">
+    <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top p-0">
     <a href="{{ route('home') }}" class="navbar-brand d-flex align-items-center border-end px-4 px-lg-5">
         <h2 class="m-0" style="color:#32C36C;">ABC</h2>
     </a>
@@ -72,16 +72,13 @@
             </a>
         @else
             {{-- Chưa đăng nhập --}}
-            <button type="button" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block " data-bs-toggle="modal" data-bs-target="#loginModal">
+            <button type="button" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block" data-bs-toggle="modal" data-bs-target="#loginModal">
                 ĐĂNG NHẬP
             </button>
 
-            <button class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block" onclick="redirectToRegister()">ĐĂNG KÝ</button>
-
-
-
-
-
+            <button type="button" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block " data-bs-toggle="modal" data-bs-target="#registerModal">
+                ĐĂNG KÝ
+            </button>
         @endauth
     </div>
 </nav>
@@ -123,3 +120,59 @@
         </div>
     </div>
 </div>
+
+{{-- Modal đăng ký --}}
+<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="card-body">
+              <div class="text-center mb-3">
+                  <h3 class="card-title">ĐĂNG KÝ</h3>
+              </div>
+
+              <form action="#" method="POST">
+                  @csrf
+                  <div class="mb-3">
+                      <label for="name" class="form-label text-muted">Tên Khách Hàng</label>
+                      <input type="text" class="form-control" id="name" name="name" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="email" class="form-label text-muted">Địa chỉ Email</label>
+                      <input type="email" class="form-control" id="email" name="email" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="password" class="form-label text-muted">Mật khẩu</label>
+                      <input type="password" class="form-control" id="password" name="password" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="address" class="form-label text-muted">Địa Chỉ</label>
+                      <input type="text" class="form-control" id="address" name="address" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="phone" class="form-label text-muted">Số Điện Thoại</label>
+                      <input type="text" class="form-control" id="phone" name="phone" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label class="form-label text-muted">Giới Tính</label><br>
+                      <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="gender" value="Nam" required>
+                          <label class="form-check-label">Nam</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="gender" value="Nữ" required>
+                          <label class="form-check-label">Nữ</label>
+                      </div>
+                  </div>
+
+                  <button type="submit" class="btn btn-dark w-100">ĐĂNG KÝ</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+

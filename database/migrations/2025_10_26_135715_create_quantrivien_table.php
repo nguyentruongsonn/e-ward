@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('quantrivien', function (Blueprint $table) {
             $table->increments('IDQTV');
             $table->integer('IDnguoiDung')->unsigned();
+            $table->timestamps();
 
             // Khóa ngoại
             $table->foreign('IDnguoiDung')

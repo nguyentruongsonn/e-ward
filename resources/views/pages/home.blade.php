@@ -40,7 +40,7 @@
                     <a href="#" class="d-flex"> <i class="fa-solid fa-file-signature"></i> Chứng thực</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"> <i class="fa-solid fa-house-user"></i>Quản lý, đăng ký cư trú</a>
+                    <a href="#" class="d-flex"> <i class="fa-solid fa-house-user"></i> Đăng ký cư trú</a>
                 </div>
                 <div class="object-items rounded ">
                     <a href="#" class="d-flex"><i class="fa-solid fa-map"></i> Đất đai</a>
@@ -55,13 +55,13 @@
                     <a href="#" class="d-flex"> <i class="fa-solid fa-children"></i> Nuôi con nuôi</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"> <i class="fa-solid fa-fire-extinguisher"></i> Trẻ em</a>
+                    <a href="#" class="d-flex"> <i class="fa-solid fa-fire-extinguisher"></i> Phòng cháy chữa cháy</a>
                 </div>
                 <div class="object-items rounded ">
                     <a href="#" class="d-flex"><i class="fa-solid fa-utensils"></i> An toàn toàn thưc phẩm</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"><i class="fa-solid fa-briefcase"></i>Việc làm</a>
+                    <a href="#" class="d-flex"><i class="fa-solid fa-briefcase"></i> Lao động và việc làm</a>
                 </div>
 
 
@@ -72,35 +72,35 @@
                     <a href="#" class="d-flex text-dark">DOANH NGHIỆP</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"><i class="fa-solid fa-store"></i> Thành lập và hoạt động của doanh nghiệp</a>
+                    <a href="#" class="d-flex"><i class="fa-solid fa-store"></i> Thành lập và hoạt động hộ kinh doanh</a>
                 </div>
 
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"><i class="fa-solid fa-apple-whole"></i> Xây dựng</a>
+                    <a href="#" class="d-flex"><i class="fa-solid fa-apple-whole"></i> An toàn thực phẩm</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"><i class="fa-solid fa-building"></i> Cụm công nghiệp</a>
+                    <a href="#" class="d-flex"><i class="fa-solid fa-building"></i> Xây dựng</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"><i class="fa-solid fa-leaf"></i> Kinh doanh khí</a>
+                    <a href="#" class="d-flex"><i class="fa-solid fa-leaf"></i> Môi trường</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"><i class="fa-solid fa-paw"></i>Kinh tế hợp tác và Phát triển nông thôn</a>
+                    <a href="#" class="d-flex"><i class="fa-solid fa-paw"></i> Thú y / Chăn nuôi / Trồng trọt</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"> <i class="fa-solid fa-handshake"></i>Công nghiệp địa phương</a>
+                    <a href="#" class="d-flex"> <i class="fa-solid fa-handshake"></i> Kinh tế hợp tác – Hợp tác xã</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"> <i class="fa-solid fa-fire"></i>Lưu thông hàng hóa trong nước</a>
+                    <a href="#" class="d-flex"> <i class="fa-solid fa-fire"></i> Phòng cháy, chữa cháy</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"> <i class="fa-solid fa-users"></i> Bảo vệ quyền lợi người tiêu dùng</a>
+                    <a href="#" class="d-flex"> <i class="fa-solid fa-users"></i> Lao động, tiền lương</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"> <i class="fa-solid fa-house"></i>Quản lý công sản</a>
+                    <a href="#" class="d-flex"> <i class="fa-solid fa-house"></i> Nhà ở và công sở</a>
                 </div>
                 <div class="object-items rounded ">
-                    <a href="#" class="d-flex"><i class="fa-solid fa-water"></i>Tài chính đất đai</a>
+                    <a href="#" class="d-flex"><i class="fa-solid fa-water"></i>Tài nguyên nước / Thủy lợi</a>
                 </div>
 
             </div>

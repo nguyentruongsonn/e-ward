@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('linhvuc', function (Blueprint $table) {
             $table->increments('maLinhVuc');
             $table->string('tenLinhVuc', 500);
+            $table->timestamps();
         });
     }
 
