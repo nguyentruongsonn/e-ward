@@ -1,0 +1,438 @@
+/* ===============================
+   SUPPORT SECTION STYLING
+   (Giống Cổng Dịch vụ công Quốc gia)
+   =============================== */
+
+/* === Thanh cam (menu con) === */
+.support-header {
+    background-color: #c46a32;
+    /* Màu cam đất */
+    border-bottom: 3px solid #a6551e;
+    z-index: 10;
+}
+
+.support-header .nav {
+    gap: 5px;
+}
+
+.support-header .nav-link {
+    color: #fff;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 8px 18px;
+    border-radius: 0;
+    transition: all 0.2s ease;
+}
+
+.support-header .nav-link:hover {
+    background-color: #a6551e;
+    color: #fff;
+}
+
+.support-header .nav-link.active {
+    background-color: #8f4a1d;
+    color: #fff !important;
+    font-weight: 600;
+}
+
+/* === Breadcrumb (Thanh chỉ đường) === */
+.breadcrumb {
+    background-color: #fff;
+    margin-top: 15px;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.breadcrumb-item {
+    font-size: 14px;
+    color: #777;
+}
+
+.breadcrumb-item a {
+    color: #009966;
+    /* Xanh lá nhẹ */
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #c46a32;
+    /* Đổi sang cam khi hover */
+    text-decoration: underline;
+}
+
+.breadcrumb-item+.breadcrumb-item::before {
+    content: ">";
+    color: #aaa;
+    margin: 0 5px;
+}
+
+.breadcrumb-item.active {
+    color: #444;
+    font-weight: 500;
+}
+
+
+/* about */
+
+.main-title .-none {
+    padding-left: 0px;
+    height: auto;
+}
+
+.main-title {
+    margin: 0px;
+    font-size: 28px;
+    font-weight: 300;
+    display: block;
+    margin-bottom: 20px;
+    color: #333333;
+    font-weight: 500;
+    line-height: 36px;
+    /* padding-left: 110px; */
+    position: relative;
+    text-align: justify;
+}
+
+.about-page .icon-box {
+    width: 80px;
+    height: 80px;
+    background-color: #fbe5ce;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 30px;
+    color: #a65c2a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.highlight-box {
+    background-color: #f8e8d4;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.about-page p,
+.about-page li {
+    font-weight: 500;
+    color: #333;
+}
+
+.about-page h4,
+.about-page h5,
+.about-page h2 {
+    font-weight: 700;
+    color: #222;
+}
+
+
+/* Timeline */
+.timeline-container {
+    position: relative;
+    padding-top: 20px;
+}
+
+.timeline-line {
+    position: absolute;
+    top: 30px;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background-color: #e4a670;
+    z-index: 0;
+}
+
+.timeline-item {
+    position: relative;
+    text-align: left;
+    margin-bottom: 30px;
+    padding-left: 40px;
+}
+
+.timeline-item .circle {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    position: absolute;
+    left: 0;
+    top: 6px;
+}
+
+.timeline-item h5 {
+    margin-bottom: 8px;
+}
+
+/* === Timeline ngang giống dichvucong.gov.vn === */
+.timeline-horizontal {
+    position: relative;
+    padding: 40px 0 20px;
+}
+
+.timeline-horizontal .timeline-track {
+    position: absolute;
+    top: 48px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background-color: #c46a32;
+    z-index: 0;
+}
+
+.timeline-horizontal .col-md-4 {
+    z-index: 1;
+}
+
+.timeline-horizontal .timeline-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    position: absolute;
+    top: 42px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #c46a32;
+}
+
+.text-brown {
+    color: #c46a32 !important;
+}
+
+.bg-brown {
+    background-color: #c46a32 !important;
+}
+
+.timeline-horizontal h5 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.timeline-horizontal p {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Làm timeline responsive trên mobile */
+@media (max-width: 768px) {
+    .timeline-horizontal .timeline-track {
+        left: 5%;
+        right: 5%;
+    }
+
+    .timeline-horizontal .timeline-dot {
+        top: 20px;
+    }
+}
+
+/* ===============================
+   TERMS PAGE STYLING
+   =============================== */
+.terms-page {
+    font-size: 16px;
+    color: #333;
+    line-height: 1.7;
+}
+
+.text-brown {
+    color: #c46a32 !important;
+}
+
+.terms-page h2 {
+    font-size: 22px;
+    color: #c46a32;
+    font-weight: 700;
+}
+
+.terms-page h5 {
+    margin-top: 30px;
+    font-size: 18px;
+    color: #c46a32;
+    font-weight: 700;
+}
+
+.terms-page p {
+    font-weight: 500;
+}
+
+.list-custom {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 10px;
+}
+
+.list-custom li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 10px;
+}
+
+.list-custom li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #c46a32;
+    font-weight: bold;
+}
+
+.center {
+    text-align: center !important;
+}
+
+.divider-gray {
+    margin: 20px 0px;
+    height: 1px;
+    background: #E9F0F8;
+}
+
+/* === Support sidebar (Danh mục hỗ trợ) === */
+.support-sidebar .list-group-item.active {
+    background-color: #CE7A58;
+    border-color: #CE7A58;
+    color: #fff;
+    font-weight: 600;
+}
+
+.support-sidebar .list-group-item-action:hover {
+    background-color: #f4ddd3;
+    color: #333;
+}
+
+/* === Guide numbered circles === */
+.guide-step-circle {
+    background-color: #CE7A58 !important;
+    color: #ffffff !important;
+}
+
+/* === FAQ page === */
+.btn-faq-search {
+    background-color: #CE7A58;
+    border-color: #CE7A58;
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-faq-search:hover {
+    opacity: .95;
+    color: #fff;
+}
+
+/* FAQ accordion styling */
+.faq-accordion .accordion-button {
+    background-color: #CE7A58;
+    color: #ffffff;
+}
+
+.faq-accordion .accordion-button:not(.collapsed) {
+    background-color: #CE7A58;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+.faq-accordion .accordion-button:focus {
+    box-shadow: 0 0 0 .2rem rgba(206, 122, 88, .25);
+}
+
+.faq-accordion .accordion-body {
+    border: 1px solid #CE7A58;
+    border-top: none;
+}
+
+/* === FAQ page hover overrides === */
+.support-faq-page a:hover {
+    color: #CE7A58;
+}
+
+.support-faq-page .list-group-item-action:hover {
+    color: #CE7A58;
+    background-color: #f7e3db;
+}
+
+.support-faq-page .btn:hover {
+    background-color: #CE7A58;
+    border-color: #CE7A58;
+}
+
+/* === FAQ page border and focus styling === */
+.support-faq-page .form-control,
+.support-faq-page .form-select {
+    border-color: #CE7A58;
+}
+
+.support-faq-page .form-control:focus,
+.support-faq-page .form-select:focus {
+    border-color: #CE7A58;
+    box-shadow: 0 0 0 .2rem rgba(206, 122, 88, .25);
+}
+
+.faq-accordion .accordion-item {
+    border: 1px solid #CE7A58;
+}
+
+.faq-accordion .accordion-button.collapsed {
+    border-bottom: 1px solid #CE7A58;
+}
+
+/* ===============================
+   NOTICE PAGE STYLING
+   =============================== */
+.support-notice-page .border {
+    border-color: #CE7A58 !important;
+}
+
+.support-notice-page a.notice-open {
+    color: #CE7A58;
+    font-weight: 600;
+}
+
+.support-notice-page a.notice-open:hover {
+    color: #CE7A58;
+    text-decoration: underline;
+}
+
+/* Modal theming */
+.notice-modal .modal-header {
+    background-color: #CE7A58;
+    color: #ffffff;
+}
+
+.notice-modal .modal-title {
+    color: #ffffff;
+}
+
+.notice-modal .btn-close {
+    filter: invert(1) grayscale(100%);
+    opacity: 1;
+}
+
+.notice-modal .modal-content {
+    border: 1px solid #CE7A58;
+    box-shadow: 0 8px 24px rgba(206, 122, 88, 0.25);
+}
+
+.notice-modal .modal-body {
+    line-height: 1.7;
+}
+
+.notice-modal .btn-secondary {
+    background-color: #CE7A58;
+    border-color: #CE7A58;
+}
+
+.notice-modal .btn-secondary:hover {
+    background-color: #c0694f;
+    border-color: #c0694f;
+}
+
+/* Notice card hover animation */
+.support-notice-page .notice-card {
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.support-notice-page .notice-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(206, 122, 88, 0.22);
+    border-color: #CE7A58 !important;
+}

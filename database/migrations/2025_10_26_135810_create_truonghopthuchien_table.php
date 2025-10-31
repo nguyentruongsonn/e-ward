@@ -12,13 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('truonghopthuchien', function (Blueprint $table) {
-            $table->increments('maTruongHop');
-            $table->integer('maTTHC')->unsigned();
-            $table->string('tenTruongHop');
+        $table->increments('maTruongHop');
+        $table->unsignedInteger('maTTHC');
+        $table->string('tenTruongHop');
 
-            $table->foreign('maTTHC')->references('maTTHC')->on('TTHC');
-
-        });
+        $table->foreign('maTTHC')->references('maTTHC')->on('tthc');
+    });
     }
 
     /**
