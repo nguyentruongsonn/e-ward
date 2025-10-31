@@ -11,8 +11,7 @@ return new class extends Migration
         Schema::create('canbo', function (Blueprint $table) {
             $table->increments('IDCB');
             $table->integer('IDnguoiDung')->unsigned();
-            $table->integer('maQuayLamViec')->unsigned();
-            $table->timestamps();
+            $table->integer('maQuayLamViec')->unsigned()->nullable();
 
             // Khóa ngoại
             $table->foreign('IDnguoiDung')

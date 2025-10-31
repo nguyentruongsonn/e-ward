@@ -12,16 +12,14 @@ return new class extends Migration
             $table->increments('maTTHC');
             $table->string('tenTTHC', 500);
             $table->integer('maLinhVuc')->unsigned();
-            $table->integer('maQuayLamViec')->unsigned();
-            $table->string('doiTuongThucHien', 500);
+            $table->integer('maQuayLamViec')->unsigned()->nullable();
             $table->text('trinhTuThucHien');
-            $table->string('thoiHanGiaiQuyet', 500);
-            $table->float('phi');
-            $table->float('lePhi');
-            $table->string('yeuCauDieuKien', 500);
+            $table->string('coQuanThucHien');
+            $table->enum('trangThai',['Công khai','Chờ công khai','Bãi bỏ'])->nullable();
+            $table->text('yeuCauDieuKien');
             $table->string('canCuPhapLy', 500);
             $table->string('ketQuaThucHien', 500);
-            $table->timestamps();
+
 
             // Khóa ngoại
             $table->foreign('maLinhVuc')
@@ -31,6 +29,8 @@ return new class extends Migration
             $table->foreign('maQuayLamViec')
                 ->references('maQuayLamViec')
                 ->on('quaylamviec');
+
+
         });
     }
 
