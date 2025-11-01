@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OutstandingServiceController;
-use App\Http\Controllers\SupportController;
 
 Route::get('/outstanding-service', [OutstandingServiceController::class, 'index'])->name('outstanding-service');
 Route::get('/outstanding-service/{id}', [OutstandingServiceController::class, 'show'])->name('outstanding-service.show');
@@ -20,13 +19,3 @@ Route::view('/admin/login', 'admin.login')->name('admin.login');
 // Route::post('/login', [LoginController::class, 'login'])->name('login');
 // Route::post('/register', [RegisterController::class, 'register'])->name('register');
 // Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
-// hổ trợ
-// Nhóm route Hỗ Trợ
-Route::controller(SupportController::class)->group(function () {
-    Route::get('/support/about', 'about')->name('support.about');
-    Route::get('/support/terms', 'terms')->name('support.terms');
-    Route::get('/support/guide', 'guide')->name('support.guide');
-    Route::get('/support/notice', 'notice')->name('support.notice');
-    Route::get('/support/faq', 'faq')->name('support.faq');
-});
-
