@@ -11,7 +11,8 @@ class OutstandingServiceController extends Controller
     public function index()
     {
         // Lấy danh sách các thủ tục hành chính nổi bật
-        $tthcs = TTHC::orderBy('tenTTHC', 'asc')->get();
+        // eager load doiTuongs to avoid N+1 queries
+        $tthcs = TTHC::with('doiTuongs')->orderBy('tenTTHC', 'asc')->get();
 
         return view('pages.outstanding-service', compact('tthcs'));
     }
@@ -56,7 +57,7 @@ public function show($id)
 
     // Đối tượng thực hiện (n-n qua thutucdoituong)
     $doiTuongs = DB::table('thutucdoituong as td')
-        ->join('doituongthuchien as d', 'd.maDoiTuong', '=', 'td.maDoiTuong')
+        ->leftjoin('doituongthuchien as d', 'd.maDoiTuong', '=', 'td.maDoiTuong')
         ->where('td.maTTHC', $id)
         ->select('d.tenDoiTuong')
         ->get();
