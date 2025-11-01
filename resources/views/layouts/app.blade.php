@@ -37,8 +37,7 @@
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/support.css') }}">
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @stack('styles')
 </head>
 
@@ -50,7 +49,7 @@
     <main>
         @yield('content')
     </main>
-
+    @include('partials.chat_ai')
 
     @include('partials.footer')
 

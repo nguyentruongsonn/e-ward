@@ -25,6 +25,18 @@
         }
     });
 
+    $(window).scroll(function () {
+        if ($(this).scrollTop() > 300) {
+            $('.chat-toggle-button').fadeIn('slow');
+        } else {
+            $('.chat-toggle-button').fadeOut('slow');
+        }
+    });
+
+    $('.chat-toggle-button').click(function () {
+        $('html, body').animate({scrollTop: 0}, 1500, 'easeInOutExpo');
+        return false;
+    });
 
     // Back to top button
     $(window).scroll(function () {
@@ -320,6 +332,9 @@ function checkgender(){
     });
 
 })(jQuery);
+
+// Chatbot
+
 
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements

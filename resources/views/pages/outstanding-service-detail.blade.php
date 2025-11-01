@@ -26,12 +26,18 @@
             <div class="col-lg-9 wow fadeInUp" data-wow-delay="0.1s">
                 <div class="service-items rounded h-100 p-4">
                     <div class="d-flex flex-wrap justify-content-between align-items-center mb-5">
-                        <h3 class="mb-4 mb-sm-0 fw-semibold text-uppercase">
+
+
+                        <div class="col-8">
+                        <h3 class="fw-semibold text-uppercase">
                             <i class="fa-solid fa-file-lines h-100 w-100 text-primary"></i>{{ $tthc->tenTTHC }}
                         </h3>
+                        </div>
+                        <div class="col-4 justify-content-end d-flex">
                         <button type="button" class="btn btn-primary shadow-sm" onclick="openCustomModal()">
                             <i class="fa-solid fa-circle-info me-1"></i> Xem thông tin chi tiết
                         </button>
+                        </div>
                     </div>
                     <div class="row g-4 mb-4">
                         <div class="col-md-12">
@@ -44,7 +50,7 @@
                     <div class="mb-4">
                         <h6 class="mb-2 text-uppercase ">Cách thực hiện</h6>
                         <div class="table-responsive rounded mb-0">
-                            <table class="table-service-cth table table-sm table-striped table-hover rounded table-bordered align-middle mb-0"style="text-align: justify ">
+                            <table class="table-service-cth table table-sm table-striped  rounded table-bordered align-middle mb-0"style="text-align: justify ">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Kênh</th>
@@ -92,7 +98,7 @@
                                          data-bs-parent="#thanhPhanAccordion">
                                         <div class="accordion-body p-0">
                                             <div class="table-responsive">
-                                                <table class="table table-sm table-hover table-bordered align-middle mb-0">
+                                                <table class="table table-sm  table-bordered align-middle mb-0">
                                                     <thead class="table-dark">
                                                         <tr class="py-3 bg-dark">
                                                             <th style="width: 60px">#</th>
@@ -160,7 +166,7 @@
                             <h6 class="card-title text-uppercase mb-3">Thực hiện thủ tục</h6>
                             <div class="d-grid gap-2">
                                 <button type="button" class="btn btn-outline-primary">
-                                    <i class="fa-regular fa-calendar-check me-1"></i> Đặt lịch nộp hồ sơ
+                                    <i class="fa-regular fa-calendar-check me-1"></i> <a href="{{ route('appointment',['id'=>$tthc->maTTHC]) }}">Đặt lịch nộp hồ sơ</a>
                                 </button>
                                 <button type="button" class="btn btn-primary">
                                     <i class="fa-solid fa-paper-plane me-1"></i> Nộp hồ sơ trực tuyến
@@ -194,7 +200,7 @@
         </div>
     </div>
 
-    <a href="#" aria-hidden="true" style="position:absolute;inset:0;"></a>
+
 
 </div>
 <!-- Modal xem bản đồ  -->
@@ -231,7 +237,7 @@
                     <strong class="col-2">Cách thực hiện:</strong>
                     <div class="col-10">
                         <div class="table-responsive rounded">
-                        <table class="table-service-cth table-sm  table-hover table-bordered align-middle mb-0">
+                        <table class="table-service-cth table-sm   table-bordered align-middle mb-0">
                             <thead class="">
                                 <tr>
                                     <th>Kênh</th>
