@@ -67,10 +67,12 @@
 
             @auth
                 {{-- Nếu đã đăng nhập --}}
-                <a href="{{ route('logout') }}"
-                    class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block text-white">
-                    ĐĂNG XUẤT
-                </a>
+                <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block text-white">
+                        ĐĂNG XUẤT
+                    </button>
+                </form>
             @else
                 {{-- Chưa đăng nhập --}}
                 <button type="button" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block "
@@ -78,8 +80,8 @@
                     ĐĂNG NHẬP
                 </button>
 
-                <button class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block" onclick="redirectToRegister()">ĐĂNG
-                    KÝ</button>
+                <a href="{{ route('register') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">ĐĂNG
+                    KÝ</a>
 
 
 
@@ -99,12 +101,19 @@
                     <h3 class="card-title">ĐĂNG NHẬP</h3>
                 </div>
 
-                <form action="#" method="POST">
+                <form action="{{ route('login') }}" method="POST">
                     @csrf
+
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
                     <div class="mb-3">
                         <label for="email" class="form-label text-muted">Địa chỉ Email</label>
                         <input type="email" class="form-control" id="email" name="email"
-                            placeholder="abc@gmail.com" required>
+                            placeholder="abc@gmail.com" value="{{ old('email') }}" required>
                     </div>
 
                     <div class="mb-3">
