@@ -19,7 +19,14 @@
                         <div class="card-body">
                             <h4 class="card-title text-center mb-3">Đăng ký</h4>
 
-                            <form action="{{ route('register') }}" method="POST" novalidate>
+                            @if(session('status'))
+                                <div class="alert alert-success">{{ session('status') }}</div>
+                            @endif
+                            @if($errors->any())
+                                <div class="alert alert-danger">{{ $errors->first() }}</div>
+                            @endif
+
+                            <form action="{{ route('register.submit') }}" method="POST" novalidate>
                                 @csrf
 
                                 <div class="mb-3">
@@ -131,12 +138,13 @@
                                 <div class="mb-3">
                                     <label class="form-label d-block">Giới tính</label>
                                     <div class="btn-group" role="group" aria-label="Gender">
-                                        <input type="radio" class="btn-check" name="gender" id="gender_male" value="Nam" required>
+                                        <input type="radio" class="btn-check" name="gender" id="gender_male" value="Nam" required checked>
                                         <label class="btn btn-outline-secondary  border border-primary" for="gender_male">Nam</label>
 
                                         <input type="radio" class="btn-check" name="gender" id="gender_female" value="Nữ"  required>
                                         <label class="btn btn-outline-secondary  border border-primary" for="gender_female">Nữ</label>
                                     </div>
+                                    <span id="tbgender"></span>
                                 </div>
 
                                 <div class="d-grid">

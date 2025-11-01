@@ -129,14 +129,14 @@ var mk = $("#passwordd");
 var tbmk = $("#tbpassword");
 
 function checkpassword(){
-    var re = /^([A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    var re = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
     if(mk.val() == ""){
         tbmk.html("Vui lòng nhập mật khẩu");
         tbmk.css({"color":"red","font-size":"15px"});
         return false;
     }
     if(!re.test(mk.val())){
-        tbmk.html("Mật khẩu phải bắt đầu bằng chữ hoa, có chữ thường và số, tối thiểu 8 ký tự");
+        tbmk.html("Mật khẩu tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
         tbmk.css({"color":"red","font-size":"15px"});
         return false;
     }
@@ -242,40 +242,39 @@ thuongtru.blur(checknoithuongtru);
 var btnDangKy = $("#submit_register");
 
 btnDangKy.click(function(event) {
-    event.preventDefault(); // Ngăn chặn hành động mặc định (reload trang)
+    event.preventDefault();
 
-    // Lấy các phần tử để kiểm tra
-    var hovaten = $("#hovaten");
-    var cccd = $("#cccd");
-    var em = $("#email");
-    var mk = $("#password");
-    var xnmk = $("#confirmpassword");
-    var phone = $("#phone");
-    var quequan = $("#quequan");
-    var thuongtru = $("#noithuongtru");
-    var tamtru = $("#noitamtru");
+    // Chạy các hàm kiểm tra đã định nghĩa phía trên
+    var ok = true;
+    if (!checkhovaten()) { $("#hovaten").focus(); ok = false; }
+    else if (!checkcccd()) { $("#cccd").focus(); ok = false; }
+    else if (!checkemail()) { $("#emaill").focus(); ok = false; }
+    else if (!checkpassword()) { $("#passwordd").focus(); ok = false; }
+    else if (!checkconfirmpassword()) { $("#password_confirmation").focus(); ok = false; }
+    else if (!checkphone()) { $("#phone").focus(); ok = false; }
+    else if (!checkquequan()) { $("#quequan").focus(); ok = false; }
+    else if (!checknoithuongtru()) { $("#thuongtru").focus(); ok = false; }
+    else if (!checknoitamtru()) { $("#tamtru").focus(); ok = false; }
+    else if (!checkgender()) { ok = false; }
 
-    // Kiểm tra lần lượt
-    if (!checkhovaten()) {
-        hovaten.focus();
-    } if (!checkcccd()) {
-        cccd.focus();
-    } if (!checkemail()) {
-        em.focus();
-    } if (!checkpassword()) {
-        mk.focus();
-    } if (!checkconfirmpassword()) {
-        xnmk.focus();
-    } if (!checkphone()) {
-        phone.focus();
-    } if (!checkquequan()) {
-        quequan.focus();
-    } if (!checknoithuongtru()) {
-        thuongtru.focus();
-    } if (!checknoitamtru()) {
-        tamtru.focus();
+    // Nếu hợp lệ thì submit form
+    if (ok) {
+        $(this).closest('form')[0].submit();
     }
 });
+
+//================ Check Gender =================
+function checkgender(){
+    var selected = $("input[name='gender']:checked").length > 0;
+    var tbgender = $("#tbgender");
+    if(!selected){
+        tbgender.html("Vui lòng chọn giới tính");
+        tbgender.css({"color":"red","font-size":"15px"});
+        return false;
+    }
+    tbgender.html("");
+    return true;
+}
 
     function redirectToRegister() {
         window.location.href = "{{ route('register') }}";

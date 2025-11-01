@@ -53,5 +53,43 @@
 
     @include('partials.footer')
 
+    <!-- Bootstrap JS (for modals, dropdowns, etc.) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    @stack('scripts')
+
+    @if(session('register_success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Hiện alert
+                alert('{{ session('register_success') }}');
+                
+                // Mở modal đăng nhập sau 500ms để đảm bảo Bootstrap đã load
+                setTimeout(function() {
+                    var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                    loginModal.show();
+                }, 500);
+            });
+        </script>
+    @endif
+
+    @if(session('login_success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Hiện alert
+                alert('{{ session('login_success') }}');
+            });
+        </script>
+    @endif
+
+    @if(session('open_login_modal'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Mở modal đăng nhập nếu có lỗi
+                var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                loginModal.show();
+            });
+        </script>
+    @endif
 </body>
 </html>
