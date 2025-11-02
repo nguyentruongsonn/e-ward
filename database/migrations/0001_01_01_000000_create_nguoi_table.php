@@ -9,15 +9,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('nguoi', function (Blueprint $table) {
-            $table->increments('IDnguoiDung');
+            $table->increments('IDnguoiDung'); // INT UNSIGNED AUTO_INCREMENT
             $table->string('maCCCD')->nullable();
-            $table->string('hoTen'); // giữ nguyên kiểu như SQL (int 255)
+            $table->string('hoTen'); // VARCHAR(255)
             $table->enum('gioiTinh', ['Nam', 'Nữ'])->nullable();
             $table->date('ngaySinh')->nullable();
             $table->string('queQuan', 500)->nullable();
             $table->string('noiThuongTru', 500)->nullable();
             $table->string('noiTamTru', 500)->nullable();
             $table->string('email', 255);
+            $table->string('password')->nullable();
+            $table->string('remember_token', 100)->nullable();
             $table->string('soDienThoai', 10);
             $table->enum('vaiTro', ['Công dân/ Tổ chức', 'Cán bộ', 'Lãnh đạo', 'Quản trị viên']);
         });
