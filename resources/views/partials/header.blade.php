@@ -53,10 +53,10 @@
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">HỖ TRỢ</a>
                     <div class="dropdown-menu bg-light m-0">
-                        <a href="{{ route('support.about') }}" class="dropdown-item">GIỚI THIỆU</a>
-                        <a href="{{ route('support.terms') }}" class="dropdown-item">ĐIỀU KHOẢN SỬ DỤNG</a>
-                        <a href="{{ route('support.guide') }}" class="dropdown-item">HƯỚNG DẪN SỬ DỤNG</a>
-                        <a href="{{ route('support.notice') }}" class="dropdown-item">THÔNG BÁO</a>
+                        <a href="#" class="dropdown-item">GIỚI THIỆU</a>
+                        <a href="#" class="dropdown-item">ĐIỀU KHOẢN SỬ DỤNG</a>
+                        <a href="#" class="dropdown-item">HƯỚNG DẪN SỬ DỤNG</a>
+                        <a href="#" class="dropdown-item">THÔNG BÁO</a>
                     </div>
                 </div>
 
