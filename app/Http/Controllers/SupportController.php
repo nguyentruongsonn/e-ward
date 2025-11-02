@@ -70,3 +70,4 @@ class SupportController extends Controller
         return view('support.faq', compact('categories', 'faqs', 'q', 'categoryId'));
     }
 }
+// mới

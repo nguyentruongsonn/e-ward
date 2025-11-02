@@ -28,3 +28,4 @@ Route::controller(SupportController::class)->group(function () {
     Route::get('/support/faq', 'faq')->name('support.faq');
 });
 
+// mới

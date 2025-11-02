@@ -22,4 +22,4 @@ class Notice extends Model
     ];
 }
 
-
+// mới
