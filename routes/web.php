@@ -6,6 +6,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OutstandingServiceController;
 use App\Http\Controllers\LichHenController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\SupportController;
 // ...existing code...
 
 
@@ -54,3 +55,11 @@ Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.se
 // Route::post('/login', [LoginController::class, 'login'])->name('login');
 // Route::post('/register', [RegisterController::class, 'register'])->name('register');
 // Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+// hổ trợ
+Route::controller(SupportController::class)->group(function () {
+    Route::get('/support/about', 'about')->name('support.about');
+    Route::get('/support/terms', 'terms')->name('support.terms');
+    Route::get('/support/guide', 'guide')->name('support.guide');
+    Route::get('/support/notice', 'notice')->name('support.notice');
+    Route::get('/support/faq', 'faq')->name('support.faq');
+});
