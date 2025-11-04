@@ -7,6 +7,8 @@ use App\Http\Controllers\OutstandingServiceController;
 use App\Http\Controllers\LichHenController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SupportController;
+use Illuminate\Support\Facades\Mail;
+
 // ...existing code...
 
 
@@ -37,7 +39,7 @@ if (app()->environment('local')) {
             return 'Thiếu ?to=email@example.com';
         }
         try {
-            \Mail::to($to)->send(new \App\Mail\OtpCodeMail('123456'));
+            Mail::to($to)->send(new \App\Mail\OtpCodeMail('123456'));
             return 'Đã gửi mail test tới ' . $to;
         } catch (\Throwable $e) {
             return 'Gửi mail thất bại: ' . $e->getMessage();

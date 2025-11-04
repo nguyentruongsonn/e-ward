@@ -233,7 +233,191 @@ class FormTrucTuyenSeeder extends Seeder
                         ]
                     ]
                 ])
+            ],
+                [
+                'maForm' => 2,
+                'maTTHC' => 3, // Ví dụ: mã thủ tục Đăng ký kết hôn
+                'cauHinhForm' => json_encode([
+
+                    // ==================================================
+                    // 🧾 FORM 1: THÔNG TIN NGƯỜI NỘP
+                    // ==================================================
+                    [
+                        'group' => 'Thông tin người nộp hồ sơ',
+                        'fields' => [
+                            ['label' => 'Họ và tên', 'name' => 'ho_ten', 'type' => 'text'],
+                            ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date'],
+                            ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text'],
+                            ['label' => 'Email', 'name' => 'email', 'type' => 'email'],
+                            [
+                                'label' => 'Giấy tờ tùy thân',
+                                'name' => 'loai_giay_to',
+                                'type' => 'select',
+                                'options' => [
+                                    'Chứng minh nhân dân',
+                                    'Căn cước công dân',
+                                    'Hộ chiếu',
+                                    'Thẻ căn cước'
+                                ]
+                            ],
+                            ['label' => 'Số giấy tờ', 'name' => 'so_giay_to', 'type' => 'text'],
+                            ['label' => 'Nơi cấp giấy tờ', 'name' => 'noi_cap_giay_to', 'type' => 'text'],
+                            ['label' => 'Quốc gia', 'name' => 'quoc_gia', 'type' => 'text'],
+                            ['label' => 'Tỉnh/Thành phố', 'name' => 'tinh_thanh', 'type' => 'text'],
+                            ['label' => 'Phường/Xã', 'name' => 'phuong_xa', 'type' => 'text'],
+                            ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet', 'type' => 'text'],
+                            ['label' => 'Tên cơ quan / doanh nghiệp / hộ kinh doanh', 'name' => 'ten_co_quan', 'type' => 'text'],
+                            ['label' => 'Mã số thuế / Mã doanh nghiệp', 'name' => 'ma_so_thue', 'type' => 'text']
+                        ]
+                    ],
+
+                    // ==================================================
+                    // 💍 FORM 2: THÔNG TIN KẾT HÔN
+                    // ==================================================
+                    [
+                        'group' => 'Thông tin kết hôn',
+                        'fields' => [
+                            [
+                                'label' => 'Loại đăng ký',
+                                'name' => 'loai_dang_ky',
+                                'type' => 'radio',
+                                'options' => [
+                                    'Đăng ký mới',
+                                    'Đăng ký lại',
+                                    'Ghi sổ việc đã kết hôn ở nước ngoài'
+                                ]
+                            ],
+                            [
+                                'label' => 'Loại hồ sơ liên thông',
+                                'name' => 'loai_ho_so_lien_thong',
+                                'type' => 'select',
+                                'options' => [
+                                    'Loại hồ sơ liên thông',
+                                    'Không phải'
+                                ]
+                            ],
+                            ['label' => 'Số lượng bản sao đề nghị cấp', 'name' => 'so_luong_ban_sao', 'type' => 'number']
+                        ]
+                    ],
+
+                    // ==================================================
+                    // 👰 FORM 3: THÔNG TIN BÊN NỮ
+                    // ==================================================
+                    [
+                        'group' => 'Thông tin bên nữ',
+                        'fields' => [
+                            ['label' => 'Họ', 'name' => 'ho_nu', 'type' => 'text'],
+                            ['label' => 'Đệm', 'name' => 'dem_nu', 'type' => 'text'],
+                            ['label' => 'Tên', 'name' => 'ten_nu', 'type' => 'text'],
+                            ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nu', 'type' => 'number'],
+                            ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nu', 'type' => 'number'],
+                            ['label' => 'Năm sinh', 'name' => 'nam_sinh_nu', 'type' => 'number'],
+                            [
+                                'label' => 'Loại cư trú',
+                                'name' => 'loai_cu_tru_nu',
+                                'type' => 'radio',
+                                'options' => ['Thường trú', 'Tạm trú', 'Nơi ở hiện tại']
+                            ],
+                            ['label' => 'Quốc gia cư trú', 'name' => 'quoc_gia_nu', 'type' => 'text'],
+                            ['label' => 'Tỉnh/Thành phố', 'name' => 'tinh_thanh_nu', 'type' => 'text'],
+                            ['label' => 'Phường/Xã', 'name' => 'phuong_xa_nu', 'type' => 'text'],
+                            ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet_nu', 'type' => 'text'],
+                            ['label' => 'Dân tộc', 'name' => 'dan_toc_nu', 'type' => 'text'],
+                            ['label' => 'Quốc tịch', 'name' => 'quoc_tich_nu', 'type' => 'text'],
+                            [
+                                'label' => 'Loại giấy tờ tùy thân',
+                                'name' => 'loai_giay_to_nu',
+                                'type' => 'select',
+                                'options' => [
+                                    'Chứng minh nhân dân',
+                                    'Hộ chiếu',
+                                    'Thẻ căn cước',
+                                    'Căn cước công dân',
+                                    'Giấy chứng minh quân đội nhân dân',
+                                    'Giấy chứng minh sĩ quan quân đội'
+                                ]
+                            ],
+                            ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nu', 'type' => 'text'],
+                            ['label' => 'Ngày cấp', 'name' => 'ngay_cap_nu', 'type' => 'date'],
+                            ['label' => 'Nơi cấp', 'name' => 'noi_cap_nu', 'type' => 'text'],
+                            ['label' => 'Số lần kết hôn của người vợ', 'name' => 'so_lan_ket_hon_nu', 'type' => 'number'],
+                            ['label' => 'Số định danh cá nhân', 'name' => 'so_dinh_danh_nu', 'type' => 'text'],
+                            [
+                                'label' => 'Loại tình trạng hôn nhân',
+                                'name' => 'tinh_trang_hon_nhan_nu',
+                                'type' => 'select',
+                                'options' => [
+                                    'Hiện tại chưa đăng ký kết hôn với ai',
+                                    'Hiện tại đang có vợ/chồng',
+                                    'Đã ly hôn, hiện tại chưa đăng ký kết hôn với ai',
+                                    'Đã có vợ/chồng nhưng người kia đã mất, hiện tại chưa đăng ký kết hôn với ai',
+                                    'Khác'
+                                ]
+                            ],
+                            ['label' => 'Tình trạng hôn nhân', 'name' => 'tinh_trang_hon_nhan_khac_nu', 'type' => 'textarea']
+                        ]
+                    ],
+
+                    // ==================================================
+                    // 🤵 FORM 4: THÔNG TIN BÊN NAM
+                    // ==================================================
+                    [
+                        'group' => 'Thông tin bên nam',
+                        'fields' => [
+                            ['label' => 'Họ', 'name' => 'ho_nam', 'type' => 'text'],
+                            ['label' => 'Đệm', 'name' => 'dem_nam', 'type' => 'text'],
+                            ['label' => 'Tên', 'name' => 'ten_nam', 'type' => 'text'],
+                            ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nam', 'type' => 'number'],
+                            ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nam', 'type' => 'number'],
+                            ['label' => 'Năm sinh', 'name' => 'nam_sinh_nam', 'type' => 'number'],
+                            [
+                                'label' => 'Loại cư trú',
+                                'name' => 'loai_cu_tru_nam',
+                                'type' => 'radio',
+                                'options' => ['Thường trú', 'Tạm trú', 'Nơi ở hiện tại']
+                            ],
+                            ['label' => 'Quốc gia cư trú', 'name' => 'quoc_gia_nam', 'type' => 'text'],
+                            ['label' => 'Tỉnh/Thành phố', 'name' => 'tinh_thanh_nam', 'type' => 'text'],
+                            ['label' => 'Phường/Xã', 'name' => 'phuong_xa_nam', 'type' => 'text'],
+                            ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet_nam', 'type' => 'text'],
+                            ['label' => 'Dân tộc', 'name' => 'dan_toc_nam', 'type' => 'text'],
+                            ['label' => 'Quốc tịch', 'name' => 'quoc_tich_nam', 'type' => 'text'],
+                            [
+                                'label' => 'Loại giấy tờ tùy thân',
+                                'name' => 'loai_giay_to_nam',
+                                'type' => 'select',
+                                'options' => [
+                                    'Chứng minh nhân dân',
+                                    'Hộ chiếu',
+                                    'Thẻ căn cước',
+                                    'Căn cước công dân',
+                                    'Giấy chứng minh quân đội nhân dân',
+                                    'Giấy chứng minh sĩ quan quân đội'
+                                ]
+                            ],
+                            ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nam', 'type' => 'text'],
+                            ['label' => 'Ngày cấp', 'name' => 'ngay_cap_nam', 'type' => 'date'],
+                            ['label' => 'Nơi cấp', 'name' => 'noi_cap_nam', 'type' => 'text'],
+                            ['label' => 'Số lần kết hôn của người chồng', 'name' => 'so_lan_ket_hon_nam', 'type' => 'number'],
+                            ['label' => 'Số định danh cá nhân', 'name' => 'so_dinh_danh_nam', 'type' => 'text'],
+                            [
+                                'label' => 'Loại tình trạng hôn nhân',
+                                'name' => 'tinh_trang_hon_nhan_nam',
+                                'type' => 'select',
+                                'options' => [
+                                    'Hiện tại chưa đăng ký kết hôn với ai',
+                                    'Hiện tại đang có vợ/chồng',
+                                    'Đã ly hôn, hiện tại chưa đăng ký kết hôn với ai',
+                                    'Đã có vợ/chồng nhưng người kia đã mất, hiện tại chưa đăng ký kết hôn với ai',
+                                    'Khác'
+                                ]
+                            ],
+                            ['label' => 'Tình trạng hôn nhân', 'name' => 'tinh_trang_hon_nhan_khac_nam', 'type' => 'textarea']
+                        ]
+                    ]
+                ])
             ]
+
         ]);
     }
 }
