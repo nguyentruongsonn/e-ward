@@ -6,8 +6,10 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OutstandingServiceController;
 use App\Http\Controllers\LichHenController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\SubmitController;
 use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\PaymentController;
 
 // ...existing code...
 
@@ -53,6 +55,10 @@ Route::view('/appointment/{id}', 'pages.appointment')->name('appointment');
 
 
 Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+
+// Nộp hồ sơ trực tuyến (API)
+Route::get('/nop-ho-so/{maTTHC}', [SubmitController::class, 'showByTTHC'])->name('nop-ho-so.show');
+Route::post('/nop-ho-so/{maTTHC}', [SubmitController::class, 'submitApi'])->name('nop-ho-so.submit');
 // // Auth routes (giả sử đã cài Laravel Breeze hoặc Auth)
 // Route::post('/login', [LoginController::class, 'login'])->name('login');
 // Route::post('/register', [RegisterController::class, 'register'])->name('register');
@@ -65,3 +71,5 @@ Route::controller(SupportController::class)->group(function () {
     Route::get('/support/notice', 'notice')->name('support.notice');
     Route::get('/support/faq', 'faq')->name('support.faq');
 });
+Route::post('/vnpay_payment',[PaymentController::class,'vnpay_payment']);
+Route::get('/vnpay_return',[PaymentController::class,'vnpay_return'])->name('vnpay.return');

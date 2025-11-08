@@ -169,7 +169,7 @@
                                     <i class="fa-regular fa-calendar-check me-1"></i> <a href="{{ route('appointment',['id'=>$tthc->maTTHC]) }}">Đặt lịch nộp hồ sơ</a>
                                 </button>
                                 <button type="button" class="btn btn-primary">
-                                    <i class="fa-solid fa-paper-plane me-1"></i> Nộp hồ sơ trực tuyến
+                                    <i class="fa-solid fa-paper-plane me-1"></i><a href="{{ route('nop-ho-so.submit',['maTTHC'=>$tthc->maTTHC]) }}">Nộp hò sơ</a>
                                 </button>
                             </div>
                         </div>

@@ -35,7 +35,7 @@ return new class extends Migration
 
             $table->foreign('maForm')
                 ->references('maForm')
-                ->on('formtructuyen');
+                ->on('formtructuyen')->onDelete('set null');
 
             $table->foreign('maTTHC')
                 ->references('maTTHC')

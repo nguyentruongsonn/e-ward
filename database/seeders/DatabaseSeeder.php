@@ -29,8 +29,9 @@ class DatabaseSeeder extends Seeder
             // QuanTriVienSeeder::class,
             ThanhPhanHoSoSeeder::class,
             GiayToSeeder::class,
-            ThanhPhanGiayToSeeder::class
-
+            ThanhPhanGiayToSeeder::class,
+            FormTrucTuyenSeeder::class,
+            LePhiSeeder::class
         ]);
 
     }

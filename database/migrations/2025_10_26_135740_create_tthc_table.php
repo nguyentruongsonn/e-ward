@@ -14,6 +14,7 @@ return new class extends Migration
             $table->integer('maLinhVuc')->unsigned();
             $table->integer('maQuayLamViec')->unsigned()->nullable();
             $table->text('trinhTuThucHien');
+            $table->string('doiTuongThucHien');
             $table->string('coQuanThucHien');
             $table->enum('trangThai',['Công khai','Chờ công khai','Bãi bỏ'])->nullable();
             $table->text('yeuCauDieuKien');
