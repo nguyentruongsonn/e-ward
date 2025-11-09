@@ -73,3 +73,4 @@ Route::controller(SupportController::class)->group(function () {
 });
 Route::post('/vnpay_payment',[PaymentController::class,'vnpay_payment']);
 Route::get('/vnpay_return',[PaymentController::class,'vnpay_return'])->name('vnpay.return');
+Route::view('form','pages.form')->name('form');

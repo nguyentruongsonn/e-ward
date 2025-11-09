@@ -1092,4 +1092,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if ('Notification' in window) {
         Notification.requestPermission();
     }
+
+
+    // nộp hồ sơ
 });

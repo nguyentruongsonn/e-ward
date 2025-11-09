@@ -132,20 +132,23 @@
 
     {{-- FORM --}}
     {{-- Đặt id cho form để JS có thể gọi reportValidity() --}}
-    <form id="nopHoSoForm" method="POST" action="#" enctype="multipart/form-data" novalidate>
+    <form id="nopHoSoForm" method="POST" action="" enctype="multipart/form-data" novalidate>
         @csrf
+        <input type="hidden" name="maTTHC" value="{{ $maTTHC ?? ($hoSo->maTTHC ?? '') }}" id="maTTHCInput">
+        <input type="hidden" name="tong_tien" id="tongTienInput" value="0">
 
         {{-- ========================== STEP 1 ========================== --}}
         <div class="form-section" data-step="1">
             <h5>Thông tin hồ sơ</h5>
             <div class="row">
-                @foreach($config as $group)
-                    @if(isset($group['group']) && !empty($group['fields']))
-                        <div class="col-12">
-                            <h5 class="mt-4 mb-3" style="border-bottom: 1px solid #eee; padding-bottom: 5px; padding-top:30px;">{{ $group['group'] }}</h5>
-                        </div>
+                @if(isset($config) && is_array($config))
+                    @foreach($config as $group)
+                        @if(isset($group['group']) && !empty($group['fields']))
+                            <div class="col-12">
+                                <h5 class="mt-4 mb-3" style="border-bottom: 1px solid #eee; padding-bottom: 5px; padding-top:30px;">{{ $group['group'] }}</h5>
+                            </div>
 
-                        @foreach($group['fields'] as $field)
+                            @foreach($group['fields'] as $field)
                             @if(isset($field['type']) && $field['type'] === 'row')
                                 <div class="col-12">
                                     <div class="row g-3 mb-2">
@@ -219,6 +222,11 @@
                         @endforeach
                     @endif
                 @endforeach
+                @else
+                    <div class="col-12">
+                        <p class="text-muted">Không có thông tin form để hiển thị.</p>
+                    </div>
+                @endif
             </div>
 
             <div class="d-flex justify-content-between mt-3">
@@ -324,8 +332,8 @@
             {{-- Hình thức nhận kết quả --}}
             <div class="mb-4">
                 <div class="row">
+                    <h5>Hình thức nhận kết quả</h5>
                     <div class="col-4">
-                        <label class="form-label required"><h5>Hình thức nhận kết quả</h5></label>
                         <select name="hinh_thuc_nhan_ket_qua" id="hinhThucNhanKetQua" class="form-select" required>
                             <option value="">-- Chọn hình thức --</option>
                             <option value="Nhận trực tuyến">Nhận trực tuyến</option>
@@ -410,20 +418,20 @@
                     </div>
                 </div>
                                 {{-- Thông tin thu phí tại nhà --}}
-                <div class="mt-4 mb-4">
+                <div class="mt-4 mb-1">
                     <h6 class="mt-5">Thông tin thu phí hồ sơ/ trả về kết quả tại nhà</h6>
                     <p class="text-danger">(Nhân viên bưu chính sẽ thu phí trực tiếp tại nhà khi thu hồ sơ/trả kết quả)</p>
                 </div>
             </div>
 
             {{-- Bảng lệ phí --}}
-            <div class="my-5 py-5 ">
-                <label class="mb-3"><h5>Thông tin phí, lệ phí</h5></label>
+            <div class="mt-5 mb-1 ">
+                <h5>Thông tin phí, lệ phí</h5>
                 <div class="table-responsive rounded">
                     <table class="table table-bordered align-middle rounded" id="lePhiTable">
                         <thead class="bg-primary">
                             <tr>
-                                <th class="text-dark">Số lượng>Loại lệ phí</th>
+                                <th class="text-dark">Loại lệ phí</th>
                                 <th style="width: 100px" class="text-dark">Số lượng</th>
                                 <th style="width: 200px" class="text-dark">Mức lệ phí</th>
                                 <th style="width: 150px" class="text-dark">Thành tiền</th>
@@ -473,33 +481,43 @@
             </div>
 
             {{-- Hình thức thanh toán --}}
-            <div class="my-5 pt-5 border-top">
+            <div class="mt-5 mb-1 ">
                 <div class="row">
+                    <h5>Hình thức thanh toán</h5>
                     <div class="col-8">
-                        <label class="form-label required" ><h5>Chọn hình thức thanh toán</h5></label>
-                        <select name="hinh_thuc_thanh_toan" class="form-select mt-2" required>
-                            <option value="">-- Chọn hình thức --</option>
-                            <option value="Thanh toán trực tuyến payment">Thanh toán trực tuyến payment</option>
-                            <option value="Thanh toán trực tiếp">Thanh toán trực tiếp</option>
+                        <select name="hinh_thuc_thanh_toan" id="hinhThucThanhToan" class="form-select mt-2" required>
+                            <option value="Thanh toán QR" selected>Thanh toán QR</option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            {{-- Đề nghị xuất biên lai --}}
-            <div class="mb-4">
-                <label class="form-label"><strong>Đề nghị cá nhân/doanh nghiệp/cơ sở lựa chọn:</strong></label>
-                <div class="mt-2">
-                    <div class="form-check">
-                        <input class="" type="radio" name="xuat_bien_lai" id="bien_lai_ca_nhan" value="Xuất biên lai cho cá nhân" checked>
-                        <label class="" for="bien_lai_ca_nhan">Xuất biên lai cho cá nhân</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="" type="radio" name="xuat_bien_lai" id="bien_lai_doanh_nghiep" value="Xuất biên lai cho doanh nghiệp/cơ sở">
-                        <label class="" for="bien_lai_doanh_nghiep">Xuất biên lai cho doanh nghiệp/cơ sở</label>
-                    </div>
-                </div>
+            {{-- Hiển thị QR Code khi có số tiền > 0 --}}
+{{-- File: .../nop-ho-so.blade.php --}}
+
+<div id="qrPaymentSection" class="mt-4 mb-4" style="display: none;">
+    <div class="card border-primary">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fa fa-qrcode"></i> Thanh toán qua QR Code</h5>
+        </div>
+        <div class="card-body text-center">
+            <p class="text-muted mb-3">Vui lòng quét mã QR bên dưới để thanh toán</p>
+            <div id="qrCodeContainer" class="mb-3">
+                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid" style="max-width: 300px;">
             </div>
+            <div class="alert alert-info">
+                <strong>Số tiền cần thanh toán:</strong>
+                <span id="qrAmount" class="fw-bold text-primary"></span>
+            </div>
+
+            {{-- THÊM DÒNG NÀY VÀO --}}
+            <div id="paymentStatus" class="mt-3 small text-center"></div>
+            {{-- KẾT THÚC DÒNG CẦN THÊM --}}
+
+            <input type="hidden" name="ma_giao_dich" id="maGiaoDich" value="">
+        </div>
+    </div>
+</div>
 
             {{-- Checkbox xác nhận --}}
             <div class="mb-4">
@@ -512,8 +530,8 @@
             </div>
 
             {{-- Đăng ký thông tin hoàn tiền --}}
-            <div class="my-5 py-5 border-top">
-                <label class="mb-3"><strong>Đăng ký thông tin hoàn tiền</strong></label>
+            <div class="mt-5 mb-1">
+                <h5>Đăng ký thông tin hoàn tiền</h5>
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label">Số tài khoản</label>
@@ -540,15 +558,225 @@
 
             <div class="d-flex justify-content-between mt-4">
                 <button type="button" class="btn btn-secondary prev-step">Quay lại</button>
-                <button type="button" class="btn btn-primary next-step">Tiếp tục</button>
-                <input type="submit">
+                <div>
+                    <button type="button" class="btn btn-primary" id="btnSubmitHoSo">Nộp hồ sơ</button>
+                </div>
             </div>
         </div>
 
         {{-- ========================== STEP 4 ========================== --}}
         <div class="form-section hidden" data-step="4">
-            <h5>Xác nhận và nộp hồ sơ</h5>
-            {{-- ... Nội dung Step 4 không đổi ... --}}
+            @if(isset($isSuccess) && $isSuccess)
+                <div class="text-center mb-4">
+                    <div class="mb-3">
+                        <i class="fa fa-check-circle text-success" style="font-size: 64px;"></i>
+                    </div>
+                    <h3 class="text-success mb-3">Nộp hồ sơ thành công!</h3>
+                    <p class="text-muted">Mã hồ sơ của bạn: <strong class="text-primary">{{ $maHSXL ?? '' }}</strong></p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Thông tin người nộp</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong>Họ tên:</strong> {{ $hoSo->tenChuHoSo ?? ($dulieu['ho_ten'] ?? '—') }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Ngày sinh:</strong> {{ $dulieu['ngay_sinh'] ?? '—' }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>CMND/CCCD:</strong> {{ $dulieu['so_cmnd'] ?? $dulieu['so_cccd'] ?? '—' }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Nơi cấp:</strong> {{ $dulieu['noi_cap'] ?? '—' }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Số điện thoại:</strong> {{ $hoSo->soDienThoai ?? '—' }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Email:</strong> {{ $hoSo->email ?? '—' }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <strong>Địa chỉ:</strong> {{ $dulieu['dia_chi'] ?? '—' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Thành phần hồ sơ đã nộp</h5>
+                    </div>
+                    <div class="card-body">
+                        @php
+                            $hasAnyFiles = false;
+                        @endphp
+                        @forelse($thanhPhanHoSos ?? [] as $tenThanhPhan => $giayTos)
+                            @php
+                                // Lọc chỉ những giấy tờ đã có file đã nộp
+                                $giayTosCoFile = collect();
+                                foreach ($giayTos as $giayTo) {
+                                    // Đảm bảo maGiayTo được cast về int để so sánh
+                                    $maGiayToInt = (int)$giayTo->maGiayTo;
+                                    $files = $tailieuNop[$maGiayToInt] ?? collect();
+                                    if ($files->isNotEmpty()) {
+                                        $giayTosCoFile->push((object)[
+                                            'maGiayTo' => $giayTo->maGiayTo,
+                                            'tenGiayTo' => $giayTo->tenGiayTo,
+                                            'soLuongBanChinh' => $giayTo->soLuongBanChinh,
+                                            'soLuongBanSao' => $giayTo->soLuongBanSao,
+                                            'files' => $files
+                                        ]);
+                                        $hasAnyFiles = true;
+                                    }
+                                }
+                            @endphp
+                            @if($giayTosCoFile->isNotEmpty())
+                                <div class="mb-4">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fa fa-folder-open"></i> {{ $tenThanhPhan }}
+                                    </h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width: 30%;">Tên giấy tờ</th>
+                                                    <th style="width: 20%;" class="text-center">Số lượng</th>
+                                                    <th style="width: 50%;">Tệp tin đã nộp</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($giayTosCoFile as $giayTo)
+                                                    <tr>
+                                                        <td>
+                                                            <strong>{{ $giayTo->tenGiayTo }}</strong>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            @if($giayTo->soLuongBanChinh)
+                                                                <span class="badge bg-success me-1">Bản chính: {{ $giayTo->soLuongBanChinh }}</span>
+                                                            @endif
+                                                            @if($giayTo->soLuongBanSao)
+                                                                <span class="badge bg-info">Bản sao: {{ $giayTo->soLuongBanSao }}</span>
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @foreach($giayTo->files as $file)
+                                                                <div class="mb-2 p-2 bg-light rounded border">
+                                                                    <div class="d-flex align-items-center justify-content-between">
+                                                                        <div class="d-flex align-items-center">
+                                                                            @php
+                                                                                $fileExtension = strtolower(pathinfo($file->tenTep, PATHINFO_EXTENSION));
+                                                                                $fileIcon = 'fa-file';
+                                                                                if (in_array($fileExtension, ['pdf'])) {
+                                                                                    $fileIcon = 'fa-file-pdf text-danger';
+                                                                                } elseif (in_array($fileExtension, ['doc', 'docx'])) {
+                                                                                    $fileIcon = 'fa-file-word text-primary';
+                                                                                } elseif (in_array($fileExtension, ['xls', 'xlsx'])) {
+                                                                                    $fileIcon = 'fa-file-excel text-success';
+                                                                                } elseif (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                                                                                    $fileIcon = 'fa-file-image text-info';
+                                                                                }
+                                                                                $fileSize = $file->kichThuoc ?? 0;
+                                                                                $fileSizeFormatted = $fileSize > 0 ? number_format($fileSize / 1024, 2) . ' KB' : '—';
+                                                                            @endphp
+                                                                            <i class="fa {{ $fileIcon }} me-2" style="font-size: 18px;"></i>
+                                                                            <div>
+                                                                                <a href="{{ asset('storage/' . $file->duongDan) }}" target="_blank" class="text-decoration-none fw-bold">
+                                                                                    {{ $file->tenTep }}
+                                                                                </a>
+                                                                                <div class="small text-muted">
+                                                                                    <i class="fa fa-calendar"></i> {{ \Carbon\Carbon::parse($file->ngayTai)->format('d/m/Y H:i') }}
+                                                                                    <span class="ms-2">
+                                                                                        <i class="fa fa-hdd-o"></i> {{ $fileSizeFormatted }}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <a href="{{ asset('storage/' . $file->duongDan) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                            <i class="fa fa-download"></i> Tải xuống
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @endif
+                        @empty
+                            <p class="text-muted">Không có thành phần hồ sơ</p>
+                        @endforelse
+                        @if(!$hasAnyFiles)
+                            <div class="alert alert-info text-center">
+                                <i class="fa fa-info-circle"></i> Chưa có giấy tờ nào được nộp kèm file.
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Thông tin lệ phí</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Loại lệ phí</th>
+                                        <th>Số lượng</th>
+                                        <th>Mức lệ phí</th>
+                                        <th>Thành tiền</th>
+                                        <th>Mô tả</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($lePhiChiTiet ?? [] as $lePhi)
+                                        <tr>
+                                            <td>{{ $lePhi['loaiLePhi'] }}</td>
+                                            <td>{{ $lePhi['soLuong'] }}</td>
+                                            <td>{{ number_format($lePhi['mucLePhi'], 0, ',', '.') }} VNĐ</td>
+                                            <td><strong>{{ number_format($lePhi['thanhTien'], 0, ',', '.') }} VNĐ</strong></td>
+                                            <td class="small">{{ $lePhi['moTa'] }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">Không có lệ phí</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                                <tfoot class="table-primary">
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Tổng:</strong></td>
+                                        <td colspan="2"><strong>{{ number_format($hoSo->lePhi ?? 0, 0, ',', '.') }} VNĐ</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 mb-4">
+                    <button type="button" class="btn btn-info" onclick="window.print()">
+                        <i class="fa fa-print"></i> In phiếu nộp hồ sơ
+                    </button>
+                    <button type="button" class="btn btn-warning" id="btnBienLai">
+                        <i class="fa fa-receipt"></i> Thông tin biên lai thanh toán
+                    </button>
+                    <a href="{{ route('home') }}" class="btn btn-success">
+                        <i class="fa fa-check"></i> Đồng ý
+                    </a>
+                </div>
+            @else
+                <h5>Nộp hồ sơ</h5>
+                <p class="text-muted">Vui lòng hoàn thành các bước trước để nộp hồ sơ.</p>
+            @endif
         </div>
 
     </form>
@@ -682,6 +910,8 @@ document.addEventListener("DOMContentLoaded", function () {
         dangKyNhanKetQuaTaiNha.addEventListener('change', toggleDiaChiNhanKetQua);
     }
 
+
+
     // Khởi tạo trạng thái ban đầu
     toggleBuuChinhSection();
 
@@ -771,6 +1001,366 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Khởi tạo tính toán lệ phí khi trang load
     tinhThanhTien();
+
+    // Cập nhật QR code khi tổng tiền thay đổi
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('so-luong') || e.target.classList.contains('muc-le-phi')) {
+            tinhThanhTien();
+            // Nếu đang chọn thanh toán QR, cập nhật lại QR code
+            if (hinhThucThanhToan && hinhThucThanhToan.value === 'Thanh toán QR') {
+                generateQRCode();
+            }
+        }
+    });
+
+    // ========== KIỂM TRA THANH TOÁN VỚI CASSO API ==========
+    const api_key = 'AK_CS.1f57ef80bd2d11f0a73fcb966f33aa53.ZbCZFwFUAE2cm31dPyfnRq9k3FVcCLTPPiYCrS4wNt8xQ9DeKu1v75GM5Q6MMQlnggRcZulM';
+    const api_get_paid = 'https://oauth.casso.vn/v2/transactions';
+
+    let paymentCheckInterval = null;
+    let checkInterval = 10000;
+    let consecutiveErrors = 0;
+    const MAX_ERRORS = 3;
+
+    /**
+     * Hiển thị thông báo thanh toán thành công với animation đẹp
+     */
+    function showPaymentSuccessNotification(maGiaoDich, amount) {
+        const paymentStatusEl = document.getElementById('paymentStatus');
+        if (!paymentStatusEl) return;
+
+        // Tạo HTML cho thông báo thành công với animation
+        const successHTML = `
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="animation: slideInDown 0.5s ease-out;">
+                <div class="d-flex align-items-center">
+                    <div class="me-3" style="font-size: 2rem;">
+                        <i class="fa fa-check-circle"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="alert-heading mb-2">
+                            <i class="fa fa-check-circle"></i> Thanh toán thành công!
+                        </h5>
+                        <div class="mb-2">
+                            <strong>Mã giao dịch:</strong> <code>${maGiaoDich}</code><br>
+                            <strong>Số tiền:</strong> <span class="text-success fw-bold">${amount.toLocaleString('vi-VN')} VNĐ</span><br>
+                            <small class="text-muted">Thời gian: ${new Date().toLocaleString('vi-VN')}</small>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        `;
+
+        paymentStatusEl.innerHTML = successHTML;
+
+        // Thêm animation CSS nếu chưa có
+        if (!document.getElementById('paymentSuccessStyles')) {
+            const style = document.createElement('style');
+            style.id = 'paymentSuccessStyles';
+            style.textContent = `
+                @keyframes slideInDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                }
+                .payment-success-icon {
+                    animation: pulse 2s infinite;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    /**
+     * Hàm kiểm tra thanh toán
+     */
+    async function checkPayment(maGiaoDich, amountToFind) {
+        try {
+            const toDate = new Date();
+            const fromDate = new Date();
+            fromDate.setDate(fromDate.getDate() - 7);
+
+            const apiUrl = `${api_get_paid}?fromDate=${fromDate.toISOString().split('T')[0]}&toDate=${toDate.toISOString().split('T')[0]}&pageSize=100&page=1`;
+
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `apikey ${api_key}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                if (response.status === 429) {
+                    consecutiveErrors++;
+                    checkInterval = Math.min(checkInterval * 2, 60000);
+                    const paymentStatusEl = document.getElementById('paymentStatus');
+                    if (paymentStatusEl && paymentCheckInterval) {
+                        paymentStatusEl.innerHTML = `<div class="alert alert-warning"><i class="fa fa-exclamation-triangle"></i> Quá nhiều yêu cầu. Đang đợi ${checkInterval/1000} giây...</div>`;
+                    }
+                    if (paymentCheckInterval) {
+                        clearInterval(paymentCheckInterval);
+                        paymentCheckInterval = setInterval(() => checkPayment(maGiaoDich, amountToFind), checkInterval);
+                    }
+                    return;
+                }
+                consecutiveErrors++;
+                if (consecutiveErrors >= MAX_ERRORS) {
+                    stopPaymentCheck();
+                }
+                return;
+            }
+
+            consecutiveErrors = 0;
+            checkInterval = 10000;
+
+            const data = await response.json();
+
+            if (!data || !data.data || !data.data.records) {
+                return;
+            }
+
+            const successfulTransaction = data.data.records.find(transaction => {
+                const description = transaction.description || transaction.content || '';
+                const amount = transaction.amount || 0;
+
+                // Kiểm tra số tiền khớp
+                const amountMatch = amount === amountToFind;
+                if (!amountMatch) return false;
+
+                // Tìm kiếm linh hoạt: tìm mã giao dịch với hoặc không có dấu gạch dưới/khoảng trắng
+                // Loại bỏ khoảng trắng, dấu gạch dưới và dấu gạch ngang để so sánh
+                const normalizedDescription = description.replace(/[\s_\-]/g, '').toUpperCase();
+                const normalizedMaGiaoDich = maGiaoDich.replace(/[\s_\-]/g, '').toUpperCase();
+
+                // Tìm kiếm theo nhiều cách:
+                // 1. Tìm mã đầy đủ (đã normalize)
+                // 2. Tìm mã gốc
+                // 3. Tìm phần đầu của mã (HS + timestamp - ít nhất 10 ký tự đầu)
+                const codeMatch = normalizedDescription.includes(normalizedMaGiaoDich) ||
+                                 description.includes(maGiaoDich) ||
+                                 normalizedDescription.includes(maGiaoDich.replace(/[\s_\-]/g, '').toUpperCase()) ||
+                                 (maGiaoDich.length >= 10 && (
+                                     normalizedDescription.includes(maGiaoDich.substring(0, 10).replace(/[\s_\-]/g, '').toUpperCase()) ||
+                                     description.includes(maGiaoDich.substring(0, 10))
+                                 ));
+
+                // Log để debug
+                if (description.includes('HS') || description.toUpperCase().includes('HS')) {
+                    console.log("Giao dịch khả nghi:", {
+                        description,
+                        normalizedDescription,
+                        maGiaoDich,
+                        normalizedMaGiaoDich,
+                        amount,
+                        amountToFind,
+                        amountMatch,
+                        codeMatch
+                    });
+                }
+
+                return codeMatch;
+            });
+
+            if (successfulTransaction) {
+                console.log("✅ Thanh toán thành công!", successfulTransaction);
+
+                stopPaymentCheck();
+
+                // Hiển thị thông báo thành công đẹp
+                showPaymentSuccessNotification(maGiaoDich, amountToFind);
+
+                isPaymentChecked = true;
+            } else {
+                const paymentStatusEl = document.getElementById('paymentStatus');
+                if (paymentStatusEl && paymentCheckInterval) {
+                    paymentStatusEl.innerHTML = `<div class="alert alert-info"><i class="fa fa-spinner fa-spin"></i> Đang kiểm tra thanh toán... (Mã: ${maGiaoDich})<br><small>Lần kiểm tra: ${new Date().toLocaleTimeString()}</small></div>`;
+                }
+            }
+        } catch (error) {
+            console.error("Lỗi kiểm tra thanh toán:", error);
+            consecutiveErrors++;
+            if (error.message.includes('Failed to fetch') || error.message.includes('ERR_INTERNET_DISCONNECTED')) {
+                const paymentStatusEl = document.getElementById('paymentStatus');
+                if (paymentStatusEl) {
+                    paymentStatusEl.innerHTML = `<div class="alert alert-warning"><i class="fa fa-wifi"></i> Mất kết nối internet. Đang đợi kết nối lại...</div>`;
+                }
+                checkInterval = Math.min(checkInterval * 1.5, 30000);
+                if (paymentCheckInterval) {
+                    clearInterval(paymentCheckInterval);
+                    paymentCheckInterval = setInterval(() => checkPayment(maGiaoDich, amountToFind), checkInterval);
+                }
+            } else if (consecutiveErrors >= MAX_ERRORS) {
+                stopPaymentCheck();
+            }
+        }
+    }
+
+    /**
+     * Bắt đầu kiểm tra thanh toán
+     */
+    function startPaymentCheck(maGiaoDich, amount) {
+        console.log("Bắt đầu kiểm tra thanh toán:", { maGiaoDich, amount });
+
+        stopPaymentCheck();
+        checkInterval = 10000;
+        consecutiveErrors = 0;
+
+        if (!maGiaoDich || !amount) {
+            console.error("Thiếu thông tin để kiểm tra thanh toán");
+            return;
+        }
+
+        const paymentStatusEl = document.getElementById('paymentStatus');
+        if (paymentStatusEl) {
+            paymentStatusEl.innerHTML = `<div class="alert alert-info"><i class="fa fa-spinner fa-spin"></i> Đang kiểm tra thanh toán... (Mã: ${maGiaoDich})</div>`;
+        }
+
+        paymentCheckInterval = setInterval(() => {
+            checkPayment(maGiaoDich, amount);
+        }, checkInterval);
+
+        setTimeout(() => {
+            checkPayment(maGiaoDich, amount);
+        }, 1000);
+    }
+
+    /**
+     * Dừng kiểm tra thanh toán
+     */
+    function stopPaymentCheck() {
+        if (paymentCheckInterval) {
+            clearInterval(paymentCheckInterval);
+            paymentCheckInterval = null;
+        }
+        checkInterval = 10000;
+        consecutiveErrors = 0;
+    }
+
+    // ========== XỬ LÝ QR CODE PAYMENT ==========
+    const hinhThucThanhToan = document.getElementById('hinhThucThanhToan');
+    const qrPaymentSection = document.getElementById('qrPaymentSection');
+    const qrCodeImage = document.getElementById('qrCodeImage');
+    const qrAmount = document.getElementById('qrAmount');
+    const maGiaoDichInput = document.getElementById('maGiaoDich');
+
+    let isPaymentChecked = false;
+
+    function generateQRCode() {
+        const tongLePhiEl = document.getElementById('tongLePhi');
+        let tongTien = 0;
+        if (tongLePhiEl) {
+            const tongTienText = tongLePhiEl.textContent.replace(/[^\d]/g, '');
+            tongTien = parseInt(tongTienText) || 0;
+        }
+
+        if (tongTien > 0) {
+            // Reset trạng thái thanh toán
+            isPaymentChecked = false;
+
+            // Reset trạng thái hiển thị
+            const paymentStatusEl = document.getElementById('paymentStatus');
+            if (paymentStatusEl) {
+                paymentStatusEl.innerHTML = '';
+            }
+
+            // Tạo mã giao dịch duy nhất (không có dấu gạch dưới để dễ nhập khi chuyển khoản)
+            const timestamp = Date.now();
+            const randomStr = Math.random().toString(36).substr(2, 6).toUpperCase();
+            const maGiaoDich = 'HS' + timestamp + randomStr;
+            maGiaoDichInput.value = maGiaoDich;
+
+            // Lấy thông tin ngân hàng từ config
+            const bankId = '{{ config("services.vietqr.bank_id", "MB") }}';
+            const accountNo = '{{ config("services.vietqr.account_no", "914040399999") }}';
+
+            // Tạo URL QR code
+            const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${tongTien}&addInfo=${maGiaoDich}`;
+
+            qrCodeImage.src = qrUrl;
+            qrAmount.textContent = tongTien.toLocaleString('vi-VN') + ' VNĐ';
+            qrPaymentSection.style.display = 'block';
+
+            // Bắt đầu kiểm tra thanh toán tự động
+            startPaymentCheck(maGiaoDich, tongTien);
+        } else {
+            qrPaymentSection.style.display = 'none';
+            stopPaymentCheck();
+            // Xóa trạng thái khi không có tiền
+            const paymentStatusEl = document.getElementById('paymentStatus');
+            if (paymentStatusEl) {
+                paymentStatusEl.innerHTML = '';
+            }
+        }
+    }
+
+    // Tự động hiển thị QR code khi có số tiền
+    if (hinhThucThanhToan) {
+        // Kiểm tra và hiển thị QR code ngay khi trang load
+        setTimeout(function() {
+            generateQRCode();
+        }, 500);
+    }
+
+    // Dừng kiểm tra khi rời khỏi trang
+    window.addEventListener('beforeunload', function() {
+        stopPaymentCheck();
+    });
+
+    // ========== XỬ LÝ SUBMIT FORM ==========
+    const btnSubmitHoSo = document.getElementById('btnSubmitHoSo');
+    if (btnSubmitHoSo) {
+        btnSubmitHoSo.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            if (!validateStep(currentStep)) {
+                return;
+            }
+
+            const tongLePhiEl = document.getElementById('tongLePhi');
+            let tongTien = 0;
+            if (tongLePhiEl) {
+                const tongTienText = tongLePhiEl.textContent.replace(/[^\d]/g, '');
+                tongTien = parseInt(tongTienText) || 0;
+            }
+
+            const tongTienInput = document.getElementById('tongTienInput');
+            if (tongTienInput) {
+                tongTienInput.value = tongTien;
+            }
+
+            // Kiểm tra nếu có tiền nhưng chưa thanh toán
+            if (tongTien > 0 && !isPaymentChecked) {
+                alert('Vui lòng quét mã QR và thanh toán trước khi nộp hồ sơ. Hệ thống đang tự động kiểm tra thanh toán của bạn.');
+                return;
+            }
+
+            // Luôn submit về route nop-ho-so.submit
+            form.action = '{{ route("nop-ho-so.submit", ["maTTHC" => $tthc->maTTHC ?? ""]) }}';
+            form.submit();
+        });
+    }
+
+    // ========== TỰ ĐỘNG HIỂN THỊ STEP 4 NẾU THÀNH CÔNG ==========
+    if(isset($isSuccess) && $isSuccess)
+        currentStep = 4;
+        showStep(4);
+        // Đánh dấu tất cả các step trước đó là completed
+        document.querySelectorAll('.step').forEach((s, i) => {
+            if (i < 3) {
+                s.classList.add('completed');
+                s.querySelector('.circle').innerHTML = '<i class="fa fa-check"></i>';
+            }
+        });
 });
 </script>
 @endsection

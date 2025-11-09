@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'vietqr' => [
+        'bank_id' => env('VIETQR_BANK_ID', 'MB'),
+        'account_no' => env('VIETQR_ACCOUNT_NO', '914040399999'),
+    ],
+
+    'casso' => [
+        'api_key' => env('CASSO_API_KEY', 'AK_CS.1f57ef80bd2d11f0a73fcb966f33aa53.ZbCZFwFUAE2cm31dPyfnRq9k3FVcCLTPPiYCrS4wNt8xQ9DeKu1v75GM5Q6MMQlnggRcZulM'),
+        'api_url' => env('CASSO_API_URL', 'https://oauth.casso.vn/v2/transactions'),
+    ],
+
 ];

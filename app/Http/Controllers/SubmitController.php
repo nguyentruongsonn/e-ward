@@ -40,12 +40,42 @@ class SubmitController extends Controller
             ->orderBy('maLePhi')
             ->get();
 
+        // Kiểm tra nếu có session data từ submit thành công
+        $isSuccess = session('success', false);
+        $maHSXL = session('maHSXL');
+        $hoSo = session('hoSo');
+        $dulieu = session('dulieu', []);
+        $tailieuNop = session('tailieuNop', collect());
+        $lePhiChiTiet = session('lePhiChiTiet', []);
+
+        // Nếu có maHSXL từ session, lấy lại dữ liệu từ database
+        if ($isSuccess && $maHSXL) {
+            if (!$hoSo) {
+                $hoSo = DB::table('hosoxuly')->where('maHSXL', $maHSXL)->first();
+            }
+            if ($hoSo && empty($dulieu)) {
+                $dulieu = json_decode($hoSo->dulieu ?? '{}', true);
+            }
+            if ($tailieuNop->isEmpty()) {
+                $tailieuNop = DB::table('tailieunop')
+                    ->where('maHSXL', $maHSXL)
+                    ->get()
+                    ->groupBy('maGiayTo');
+            }
+        }
+
         return view('pages.submit', [
             'maTTHC' => $maTTHC,
             'tthc' => $tthc,
             'config' => $config,
             'thanhPhanHoSos' => $thanhPhanHoSos,
             'lePhis' => $lePhis,
+            'isSuccess' => $isSuccess,
+            'maHSXL' => $maHSXL,
+            'hoSo' => $hoSo,
+            'dulieu' => $dulieu,
+            'tailieuNop' => $tailieuNop,
+            'lePhiChiTiet' => $lePhiChiTiet,
         ]);
     }
 
@@ -55,6 +85,32 @@ class SubmitController extends Controller
         $maForm = $form->maForm ?? null;
 
         $payload = $request->except(['_token']);
+
+        // Xử lý file tài liệu nộp kèm
+        $taiLieuFiles = [];
+        if ($request->hasFile('taiLieu')) {
+            foreach ($request->file('taiLieu') as $maGiayTo => $files) {
+                if (is_array($files)) {
+                    foreach ($files as $fileArray) {
+                        if (is_array($fileArray)) {
+                            foreach ($fileArray as $file) {
+                                if ($file && $file->isValid()) {
+                                    $taiLieuFiles[] = [
+                                        'maGiayTo' => (int) $maGiayTo,
+                                        'file' => $file,
+                                    ];
+                                }
+                            }
+                        } elseif ($fileArray && $fileArray->isValid()) {
+                            $taiLieuFiles[] = [
+                                'maGiayTo' => (int) $maGiayTo,
+                                'file' => $fileArray,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
 
         if ($request->hasFile('tep_dinh_kem')) {
             $storedFiles = [];
@@ -66,7 +122,7 @@ class SubmitController extends Controller
                         'mime' => $file->getClientMimeType(),
                         'size' => $file->getSize(),
                         'path' => $path,
-                        'url' => Storage::disk('public')->url($path),
+                        'url' => asset('storage/' . $path),
                     ];
                 }
             }
@@ -82,7 +138,7 @@ class SubmitController extends Controller
                         'mime' => $file->getClientMimeType(),
                         'size' => $file->getSize(),
                         'path' => $path,
-                        'url' => Storage::disk('public')->url($path),
+                        'url' => asset('storage/' . $path),
                     ];
                 }
             }
@@ -126,7 +182,26 @@ class SubmitController extends Controller
         }
         $donViXuLy = DB::table('tthc')->where('maTTHC', $maTTHC)->value('coQuanThucHien') ?? 'Bộ phận Một cửa';
 
+        // Tạo mã hồ sơ xử lý (maHSXL) duy nhất
+        do {
+            $rand = random_int(1000, 9999);
+            $maHSXL = 'HSXL_' . $IDCD . '_' . now()->format('Ymd') . '_' . $rand;
+        } while (DB::table('hosoxuly')->where('maHSXL', $maHSXL)->exists());
+
+        // Tính tổng lệ phí từ dữ liệu form
+        $tongLePhi = 0;
+        if (isset($payload['tong_tien'])) {
+            $tongLePhi = (float) $payload['tong_tien'];
+        } elseif (isset($payload['le_phi_so_luong']) && isset($payload['muc_le_phi'])) {
+            // Tính từ số lượng và mức lệ phí
+            foreach ($payload['le_phi_so_luong'] as $maLePhi => $soLuong) {
+                $mucLePhi = (float) ($payload['muc_le_phi'][$maLePhi] ?? 0);
+                $tongLePhi += $soLuong * $mucLePhi;
+            }
+        }
+
         DB::table('hosoxuly')->insert([
+            'maHSXL' => $maHSXL,
             'maTTHC' => $maTTHC,
             'IDCD' => $IDCD,
             'maForm' => $maForm,
@@ -141,17 +216,87 @@ class SubmitController extends Controller
             'ngayTra' => null,
             'hanBoSung' => null,
             'thongTinTra' => null,
-            'lePhi' => (float) ($payload['le_phi_so_tien'] ?? 0),
-            'hinhThuc' => 'Nhận trực tuyến',
+            'lePhi' => $tongLePhi,
+            'hinhThuc' => $payload['hinh_thuc_nhan_ket_qua'] ?? 'Nhận trực tuyến',
             'ngayKetThucXuLy' => null,
             'donViXuLy' => $donViXuLy,
             'ghiChu' => null,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Nộp hồ sơ thành công',
-        ]);
+        // Lưu các file tài liệu vào bảng tailieunop
+        foreach ($taiLieuFiles as $taiLieu) {
+            $file = $taiLieu['file'];
+            $maGiayTo = $taiLieu['maGiayTo'];
+
+            $path = $file->store('hoso_uploads', 'public');
+            $tenTep = $file->getClientOriginalName();
+            $duongDan = $path;
+            $dinhDang = $file->getClientMimeType();
+            $kichThuoc = $file->getSize();
+
+            DB::table('tailieunop')->insert([
+                'maHSXL' => $maHSXL,
+                'maGiayTo' => $maGiayTo,
+                'tenTep' => $tenTep,
+                'duongDan' => $duongDan,
+                'dinhDang' => $dinhDang,
+                'kichThuoc' => $kichThuoc,
+                'ngayTai' => now(),
+            ]);
+        }
+
+        // Lấy lại dữ liệu hồ sơ vừa tạo để hiển thị
+        $hoSo = DB::table('hosoxuly')->where('maHSXL', $maHSXL)->first();
+        $dulieu = json_decode($hoSo->dulieu ?? '{}', true);
+
+        // Lấy danh sách tài liệu đã nộp
+        $tailieuNop = DB::table('tailieunop')
+            ->where('maHSXL', $maHSXL)
+            ->get()
+            ->groupBy('maGiayTo');
+
+        // Lấy lại thành phần hồ sơ để hiển thị
+        $thanhPhanHoSos = DB::table('thanhphanhoso as tph')
+            ->leftJoin('thanhphangiayto as tpg', 'tpg.maThanhPhan', '=', 'tph.maThanhPhan')
+            ->leftJoin('giayto as gt', 'gt.maGiayTo', '=', 'tpg.maGiayTo')
+            ->where('tph.maTTHC', $maTTHC)
+            ->select(
+                'tph.maThanhPhan',
+                'tph.tenThanhPhan',
+                'gt.maGiayTo',
+                'gt.tenGiayTo',
+                'tpg.soLuongBanChinh',
+                'tpg.soLuongBanSao'
+            )
+            ->get()
+            ->groupBy('tenThanhPhan');
+
+        // Tính toán chi tiết lệ phí
+        $lePhiChiTiet = [];
+        if (isset($payload['le_phi_so_luong']) && isset($payload['muc_le_phi'])) {
+            foreach ($payload['le_phi_so_luong'] as $maLePhi => $soLuong) {
+                $lePhi = DB::table('lephi')->where('maLePhi', $maLePhi)->first();
+                if ($lePhi) {
+                    $mucLePhi = (float) ($payload['muc_le_phi'][$maLePhi] ?? $lePhi->soTien);
+                    $lePhiChiTiet[] = [
+                        'loaiLePhi' => $lePhi->loaiLePhi,
+                        'soLuong' => $soLuong,
+                        'mucLePhi' => $mucLePhi,
+                        'thanhTien' => $soLuong * $mucLePhi,
+                        'moTa' => $lePhi->moTa ?? '',
+                    ];
+                }
+            }
+        }
+
+        return redirect()->route('nop-ho-so.show', ['maTTHC' => $maTTHC])
+            ->with('success', true)
+            ->with('maHSXL', $maHSXL)
+            ->with('hoSo', $hoSo)
+            ->with('dulieu', $dulieu)
+            ->with('tailieuNop', $tailieuNop)
+            ->with('thanhPhanHoSos', $thanhPhanHoSos)
+            ->with('lePhiChiTiet', $lePhiChiTiet);
     }
 }
 

@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('hosoxuly', function (Blueprint $table) {
-            $table->increments('maHSXL');
+            $table->string('maHSXL')->primary();
             $table->integer('maTTHC')->unsigned();
             $table->integer('IDCD')->unsigned();
             $table->unsignedInteger('maForm')->nullable();

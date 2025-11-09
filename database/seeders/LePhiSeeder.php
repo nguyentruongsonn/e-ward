@@ -26,7 +26,7 @@ class LePhiSeeder extends Seeder
                 'maLePhi'=>2,
                 'loaiLePhi'=>'Phí số lượng bản',
                 'maTTHC'=>2,
-                'soTien'=>8000,
+                'soTien'=>2000,
                 'batBuoc'=>'Không',
                 'moTa'=>'8000/ bản sao'
             ],

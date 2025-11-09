@@ -270,15 +270,12 @@
 
 .custom-modal-content {
     background-color: #fff;
-    border-radius: 8px; /* Bạn có thể đổi thành 0px nếu muốn bỏ bo góc khi modal toàn màn hình */
+    border-radius: 8px;
     width: 70%;
     max-width: 95vw;
-    height: 100%; /* Thay đổi: đặt chiều cao là 100% */
-    max-height: 100vh; /* Thay đổi: đặt chiều cao tối đa là 100% chiều cao màn hình */
+    max-height: 90vh;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex; /* Thêm: sử dụng flexbox */
-    flex-direction: column; /* Thêm: sắp xếp các phần tử con theo chiều dọc */
 }
 
 .custom-modal-header {
@@ -288,7 +285,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-shrink: 0; /* Thêm: không cho header co lại */
 }
 
 .custom-modal-title {
@@ -311,10 +307,12 @@
     line-height: 1;
 }
 
+
+
 .custom-modal-body {
     padding: 1.5rem;
+    max-height: calc(90vh - 120px);
     overflow-y: auto;
-    flex-grow: 1; /* Thêm: cho phép body phát triển để lấp đầy không gian còn lại */
 }
 
 .modalmap {
