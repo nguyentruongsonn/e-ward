@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('soTien', 14, 2)->nullable();
             $table->string('trangThai')->nullable();
             $table->unsignedInteger('IDCD');
-            $table->string('maHSXL')->nullable();
+            $table->unsignedInteger('maHSXL')->nullable();
             $table->text('moTa')->nullable();
 
             $table->foreign('IDCD')->references('IDCD')->on('congdan');
