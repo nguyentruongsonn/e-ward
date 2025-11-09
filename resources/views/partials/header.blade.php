@@ -67,17 +67,74 @@
         </div>
 
         @auth
+            @php
+                $authUser = Auth::user();
+                // Kiểm tra xem Auth::user() trả về Nguoi hay User
+                if ($authUser instanceof \App\Models\Nguoi) {
+                    $nguoi = $authUser;
+                    $user = $authUser->user ?? $authUser;
+                } else {
+                    $user = $authUser;
+                    $nguoi = $user->nguoi;
+                }
+                $hoTen = $nguoi?->hoTen ?? ($user->email ?? 'Người dùng');
+            @endphp
             {{-- Nếu đã đăng nhập --}}
-            <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                @csrf
-                <button type="submit" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block text-white">
-                    ĐĂNG XUẤT
-                </button>
-            </form>
+            <div class="nav-item dropdown d-none d-lg-block">
+                <a href="#" class="nav-link dropdown-toggle d-flex align-items-center text-primary fw-bold"
+                    data-bs-toggle="dropdown" style="padding: 1rem 1.25rem !important;">
+                    <img src="{{ asset('img/header/user-avatar.png') }}" alt="Avatar" class="rounded-circle me-2"
+                        style="width: 32px; height: 32px; object-fit: cover;">
+                    <span
+                        style="overflow: hidden;max-width: 250px;white-space: nowrap;text-overflow: ellipsis; color: black">{{ $hoTen }}</span>
+                    <i class="fas fa-chevron-down ms-2" style="font-size: 0.75rem;"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end bg-light m-0" style="min-width: 200px;">
+                    <a href="{{ route('profile') }}" class="dropdown-item">
+                        <i class="fas fa-user me-2"></i>
+                        Thông tin cá nhân
+                    </a>
+                    <hr class="dropdown-divider">
+                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="dropdown-item text-danger"
+                            style="border: none; background: none; width: 100%; text-align: left; padding: 0.5rem 1rem;">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Đăng xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {{-- Mobile version --}}
+            <div class="d-lg-none">
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle d-flex align-items-center text-primary fw-bold"
+                        data-bs-toggle="dropdown">
+                        <img src="{{ asset('img/header/user-avatar.png') }}" alt="Avatar" class="rounded-circle me-2"
+                            style="width: 32px; height: 32px; object-fit: cover;">
+                        <span>{{ $hoTen }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end bg-light m-0" style="min-width: 200px;">
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-user me-2"></i>
+                            Thông tin cá nhân
+                        </a>
+                        <hr class="dropdown-divider">
+                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="dropdown-item text-danger"
+                                style="border: none; background: none; width: 100%; text-align: left; padding: 0.5rem 1rem;">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Đăng xuất
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         @else
             {{-- Chưa đăng nhập --}}
-            <button type="button" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block " data-bs-toggle="modal"
-                data-bs-target="#loginModal">
+            <button type="button" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block "
+                data-bs-toggle="modal" data-bs-target="#loginModal">
                 ĐĂNG NHẬP
             </button>
 

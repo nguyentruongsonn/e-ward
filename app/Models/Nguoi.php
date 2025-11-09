@@ -44,4 +44,9 @@ class Nguoi extends Authenticatable
     {
         return $this->hasOne(User::class, 'IDnguoiDung', 'IDnguoiDung');
     }
+
+    public function congDan()
+    {
+        return $this->hasOne(CongDan::class, 'IDnguoiDung', 'IDnguoiDung');
+    }
 }
