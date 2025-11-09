@@ -37,7 +37,7 @@ class TTHCSeeder extends Seeder
             Nếu người có yêu cấp bản sao Trích lục hộ tịch, bản sao Giấy khai sinh đã thống nhất, đầy đủ hoặc không có phản hồi sau thời hạn một ngày thì công chức tư pháp - hộ tịch/công chức làm công tác hộ tịch in bản sao Trích lục hộ tịch, trình Thủ trưởng Cơ quan quản lý Cơ sở dữ liệu hộ tịch điện tử ký, chuyển tới Trung tâm Phục vụ hành chính công để trả kết quả cho người yêu cầu.
 
             ',
-
+            'doiTuongThucHien'=>'Công dân Việt Nam',
             'coQuanThucHien'=>'Cơ quan quản lý cơ sở dữ liệu hộ tịch điện tử',
             'trangThai'=>'Công khai',
             'yeuCauDieuKien'=>'Không',
@@ -47,31 +47,6 @@ class TTHCSeeder extends Seeder
 
             [
             'maTTHC'=>2,
-            'tenTTHC'=>'Đăng ký tạm trú',
-            'maLinhVuc'=>'3',
-            'maQuayLamViec'=>'2',
-            'trinhTuThucHien'=>'
-                Bước 1: Cá nhân chuẩn bị hồ sơ theo quy định của pháp luật.
-                Bước 2: Cá nhân nộp hồ sơ đến Công an cấp xã.
-                Bước 3: Khi tiếp nhận hồ sơ đăng ký tạm trú, cơ quan đăng ký cư trú kiểm tra tính pháp lý và nội dung hồ sơ; thực hiện khai thác chứng minh về chỗ ở hợp pháp do công dân cung cấp trong trong căn cước điện tử, tài khoản định danh điện tử trên hệ thống định danh và xác thực điện tử qua Ứng dụng định danh quốc gia hoặc trong Cơ sở dữ liệu quốc gia về dân cư, Cơ sở dữ liệu về cư trú, Kho quản lý dữ liệu điện tử tổ chức, cá nhân trên Cổng dịch vụ công quốc gia, Hệ thống thông tin giải quyết thủ tục hành chính cấp bộ, cấp tỉnh hoặc cơ sở dữ liệu quốc gia, cơ sở dữ liệu chuyên ngành khác. Trường hợp không khai thác được thông tin thì cơ quan đăng ký cư trú có trách nhiệm kiểm tra, xác minh để giải quyết thủ tục về cư trú; công dân có trách nhiệm cung cấp bản sao, bản chụp, bản điện tử một trong các giấy tờ, tài liệu chứng minh về chỗ ở hợp pháp khi cơ quan đăng ký cư trú có yêu cầu.
-                - Trường hợp hồ sơ đã đầy đủ, hợp lệ thì tiếp nhận hồ sơ và cấp Phiếu tiếp nhận hồ sơ và hẹn trả kết quả (mẫu CT04 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký;
-                + Chuyển hồ sơ đề nghị xác nhận nơi thường xuyên đậu, đỗ; sử dụng phương tiện vào mục đích để ở hoặc hồ sơ đề nghị xác nhận tình trạng chỗ ở hợp pháp, diện tích nhà ở tối thiểu để đăng ký thường trú, đăng ký tạm trú đến Ủy ban nhân dân cấp xã để xem xét, giải quyết theo quy định (nếu có).
-                - Trường hợp hồ sơ đủ điều kiện nhưng chưa đầy đủ thành phần hồ sơ theo quy định của pháp luật thì hướng dẫn bổ sung, hoàn thiện và cấp Phiếu hướng dẫn bổ sung, hoàn thiện hồ sơ (mẫu CT05 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký;
-                - Trường hợp hồ sơ không đủ điều kiện thì từ chối và cấp Phiếu từ chối tiếp nhận, giải quyết hồ sơ (mẫu CT06 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký.
-                Bước 4: Cá nhân, tổ chức nộp lệ phí đăng ký tạm trú theo quy định.
-                Bước 5: Căn cứ theo ngày hẹn trên Phiếu tiếp nhận hồ sơ và hẹn trả kết quả để nhận thông báo kết quả giải quyết thủ tục đăng ký cư trú (nếu có).
-
-            ',
-
-            'coQuanThucHien'=>'Công an Xã',
-            'trangThai'=>'Công khai',
-            'yeuCauDieuKien'=>'Không',
-            'canCuPhapLy'=>'Luật 60/2014/QH13',
-            'ketQuaThucHien'=>'Cập nhật thông tin trong Cơ sở dữ liệu quốc gia về dân cư, Thông báo kết quả giải quyết thủ tục về cư trú, hủy bỏ thủ tục về cư trú, Cập nhật thông tin trong Cơ sở dữ liệu về cư trú, Phiếu từ chối tiếp nhận, giải quyết hồ sơ (lĩnh vực cư trú)',
-            ],
-
-            [
-            'maTTHC'=>3,
             'tenTTHC'=>'Thủ tục đăng ký kết hôn',
             'maLinhVuc'=>'1',
             'maQuayLamViec'=>'3',
@@ -96,7 +71,7 @@ class TTHCSeeder extends Seeder
                 - Công chức tư pháp - hộ tịch in Giấy chứng nhận kết hôn, trình Lãnh đạo Ủy ban nhân dân cấp xã ký, chuyển tới Trung tâm Phục vụ hành chính công để trả kết quả cho người yêu cầu.
                 - Người có yêu cầu đăng ký kết hôn (hai bên nam, nữ phải có mặt, xuất trình giấy tờ tuỳ thân để đối chiếu) kiểm tra thông tin trên Giấy chứng nhận kết hôn, trong Sổ đăng ký kết hôn, khẳng định sự tự nguyện kết hôn và ký tên vào Sổ đăng ký kết hôn, ký tên vào Giấy chứng nhận kết hôn, mỗi bên nam, nữ nhận 01 bản chính Giấy chứng nhận kết hôn.
             ',
-
+            'doiTuongThucHien'=>'Công dân Việt Nam',
             'coQuanThucHien'=>'Ủy ban Nhân dân xã, phường, thị trấn.',
             'trangThai'=>'Công khai',
             'yeuCauDieuKien'=>'
@@ -115,6 +90,168 @@ class TTHCSeeder extends Seeder
             ],
 
 
+            [
+            'maTTHC'=>3,
+            'tenTTHC'=>'Thủ tục đăng ký khai sinh',
+            'maLinhVuc'=>'1',
+            'maQuayLamViec'=>'3',
+            'trinhTuThucHien'=>'
+                - Nếu lựa chọn hình thức nộp hồ sơ trực tiếp, người yêu cầu đăng ký khai sinh nộp hồ sơ đăng ký khai sinh tại Trung tâm Phục vụ hành chính công có thẩm quyền; nộp lệ phí nếu thuộc trường hợp phải nộp lệ phí đăng ký khai sinh; nộp phí cấp bản sao Giấy khai sinh nếu có yêu cầu cấp bản sao Giấy khai sinh.  bản sao Giấy khai sinh.
+                - Nếu lựa chọn hình thức nộp hồ sơ trực tuyến, người có yêu cầu đăng ký khai sinh truy cập Cổng dịch vụ công quốc gia hoặc Cổng dịch vụ công cấp tỉnh, đăng ký tài khoản (nếu chưa có tài khoản), xác thực người dùng theo hướng dẫn, đăng nhập vào hệ thống, xác định đúng Ủy ban nhân dân cấp xã có thẩm quyền.
+                Người có yêu cầu đăng ký khai sinh trực tuyến cung cấp thông tin theo biểu mẫu điện tử tương tác đăng ký khai sinh (cung cấp trên Cổng dịch vụ công), đính kèm bản chụp hoặc bản sao điện tử các giấy tờ, tài liệu theo quy định; nộp phí, lệ phí thông qua chức năng thanh toán trực tuyến hoặc bằng cách thức khác theo quy định pháp luật, hoàn tất việc nộp hồ sơ.
+                - Cán bộ tiếp nhận hồ sơ tại Trung tâm Phục vụ hành chính công có trách nhiệm kiểm tra tính chính xác, đầy đủ, thống nhất, hợp lệ của hồ sơ.
+                (i) Trường hợp hồ sơ đầy đủ, hợp lệ thì tiếp nhận hồ sơ; nếu tiếp nhận hồ sơ sau 15 giờ thì có Phiếu hẹn, trả kết quả cho người yêu cầu trong ngày làm việc tiếp theo (nếu người yêu cầu nộp hồ sơ trực tiếp) hoặc gửi ngay Phiếu hẹn, trả kết quả qua thư điện tử hoặc gửi tin nhắn hẹn trả kết quả qua điện thoại di động cho người yêu cầu (nếu người yêu cầu nộp hồ sơ trực tuyến); chuyển hồ sơ để công chức tư pháp - hộ tịch xử lý; trường hợp tiếp nhận hồ sơ tại Trung tâm Phục vụ hành chính công cấp tỉnh, cán bộ tiếp nhận hồ sơ chuyển hồ sơ đến Ủy ban nhân dân cấp xã có thẩm quyền xử lý.
+                - Sau khi tiếp nhận hồ sơ theo hình thức nộp trực tiếp, cán bộ tiếp nhận hồ sơ tại Bộ phận một cửa thực hiện số hóa (sao chụp, chuyển thành tài liệu điện tử trên hệ thống thông tin, cơ sở dữ liệu) và ký số vào tài liệu, hồ sơ giải quyết thủ tục hành chính đã được số hóa theo quy định.
+                (ii) Trường hợp hồ sơ chưa đầy đủ, hợp lệ thì có thông báo cho người yêu cầu bổ sung, hoàn thiện hồ sơ, nêu rõ loại giấy tờ, nội dung cần bổ sung để người có yêu cầu bổ sung, hoàn thiện. Sau khi hồ sơ được bổ sung, thực hiện lại bước (i);
+                (iii) Trường hợp người yêu cầu đăng ký khai sinh không bổ sung, hoàn thiện được hồ sơ thì cán bộ tiếp nhận hồ sơ báo cáo Lãnh đạo Trung tâm Phục vụ hành chính công có thông báo từ chối giải quyết yêu cầu đăng ký khai sinh.
+                - Công chức tư pháp - hộ tịch thẩm tra hồ sơ (thẩm tra tính thống nhất, hợp lệ của các thông tin trong hồ sơ, giấy tờ, tài liệu do người yêu cầu nộp, xuất trình hoặc đính kèm).
+                + Đối với yêu cầu đăng ký khai sinh mà cha, mẹ trẻ đã đăng ký kết hôn, trên cơ sở thông tin về Giấy chứng nhận kết hôn cung cấp trong Tờ khai đăng ký khai sinh, cơ quan đăng ký hộ tịch có trách nhiệm tra cứu thông tin về tình trạng hôn nhân của cha, mẹ trẻ trên Hệ thống thông tin giải quyết thủ tục hành chính cấp tỉnh thông qua kết nối với Cơ sở dữ liệu hộ tịch điện tử, Cơ sở dữ liệu quốc gia về dân cư. Kết quả tra cứu được lưu trữ dưới dạng điện tử hoặc bản giấy, phản ánh đầy đủ, chính xác thông tin tại thời điểm tra cứu và đính kèm hồ sơ của người đăng ký. Trường hợp không tra cứu được tình trạng hôn nhân do chưa có thông tin trong Cơ sở dữ liệu hộ tịch điện tử, Cơ sở dữ liệu quốc gia về dân cư, thì cơ quan đăng ký hộ tịch đề nghị Ủy ban nhân dân cấp xã nơi người yêu cầu thường trú/nơi đã đăng ký kết hôn xác minh, cung cấp thông tin. Trong thời hạn 03 ngày làm việc kể từ ngày nhận được yêu cầu xác minh, Ủy ban nhân dân cấp xã nơi nhận được đề nghị xác minh có trách nhiệm kiểm tra, xác minh và gửi kết quả về tình trạng hôn nhân của người đó.
+                + Trường hợp hồ sơ cần bổ sung, hoàn thiện hoặc không đủ điều kiện giải quyết, phải từ chối thì công chức tư pháp - hộ tịch gửi thông báo về tình trạng hồ sơ tới Trung tâm Phục vụ hành chính công để thông báo cho người nộp hồ sơ – thực hiện lại bước (ii) hoặc (iii);
+                + Trường hợp cần phải kiểm tra, xác minh làm rõ hoặc do nguyên nhân khác mà không thể trả kết quả đúng thời gian đã hẹn thì công chức tư pháp - hộ tịch lập Phiếu xin lỗi và hẹn lại ngày trả kết quả, trong đó nêu rõ lý do chậm trả kết quả và thời gian hẹn trả kết quả, chuyển Trung tâm Phục vụ hành chính công để trả cho người yêu cầu (nếu người yêu cầu nộp hồ sơ trực tiếp), hoặc gửi Phiếu xin lỗi và hẹn lại ngày trả kết quả qua thư điện tử hoặc gửi tin nhắn qua điện thoại di động cho người yêu cầu (nếu người yêu cầu nộp hồ sơ trực tuyến).
+                + Nếu thấy hồ sơ đầy đủ, hợp lệ, đúng quy định, trường hợp tiếp nhận hồ sơ đăng ký khai sinh theo hình thức trực tiếp, thì công chức tư pháp - hộ tịch thực hiện việc ghi vào Sổ đăng ký khai sinh, cập nhật thông tin đăng ký khai sinh trên Phần mềm đăng ký, quản lý hộ tịch điện tử dùng chung, lưu chính thức và chuyển thông tin đến CSDLQGVDC để lấy Số định danh cá nhân.
+                Trường hợp tiếp nhận hồ sơ đăng ký khai sinh theo hình thức trực tuyến, công chức tư pháp - hộ tịch gửi lại biểu mẫu Giấy khai sinh điện tử với thông tin đầy đủ cho người yêu cầu qua thư điện tử hoặc thiết bị số.
+                Người yêu cầu có trách nhiệm kiểm tra tính chính xác, đầy đủ của các thông tin trên biểu mẫu Giấy khai sinh điện tử và xác nhận (tối đa một ngày).
+                Nếu người có yêu cầu xác nhận thông tin đã thống nhất, đầy đủ hoặc không có phản hồi sau thời hạn yêu cầu thì công chức tư pháp - hộ tịch thực hiện việc ghi nội dung vào Sổ đăng ký khai sinh, cập nhật thông tin đăng ký khai sinh trên Phần mềm đăng ký, quản lý hộ tịch điện tử dùng chung, lưu chính thức và chuyển thông tin đến CSDLQGVDC để lấy Số định danh cá nhân.
+                - Sau khi CSDLQGVDC trả về Số định danh cá nhân, công chức tư pháp - hộ tịch in Giấy khai sinh, bản sao Giấy khai sinh trình Lãnh đạo Ủy ban nhân dân cấp xã ký, chuyển tới Trung tâm Phục vụ hành chính công để trả kết quả cho người yêu cầu.
+
+                * Lưu ý:
+                - Trường hợp cha, mẹ trẻ đã đăng ký kết hôn, trên cơ sở thông tin về Giấy chứng nhận kết hôn cung cấp trong hồ sơ đăng ký khai sinh, cơ quan đăng ký hộ tịch có trách nhiệm tra cứu, xác thực thông tin trên Hệ thống thông tin giải quyết thủ tục hành chính cấp tỉnh thông qua kết nối với Cơ sở dữ liệu hộ tịch điện tử, CSDLQGVDC. Kết quả tra cứu được lưu trữ dưới dạng điện tử hoặc bản giấy, phản ánh đầy đủ, chính xác thông tin tại thời điểm tra cứu và đính kèm trong hồ sơ của người đăng ký.
+                Trường hợp không tra cứu được tình trạng hôn nhân do chưa có thông tin trong Cơ sở dữ liệu hộ tịch điện tử, CSDLQGVDC, thì cơ quan đăng ký hộ tịch đề nghị Ủy ban nhân dân cấp xã nơi người yêu cầu thường trú/nơi đã đăng ký kết hôn xác minh, cung cấp thông tin. Trong thời hạn 03 ngày làm việc kể từ ngày nhận được yêu cầu xác minh, Ủy ban nhân dân cấp xã nơi nhận được đề nghị xác minh có trách nhiệm kiểm tra, xác minh và gửi kết quả về tình trạng hôn nhân của người đó.
+                - Trong thời hạn 60 ngày kể từ ngày sinh con, cha hoặc mẹ có trách nhiệm đăng ký khai sinh cho con; trường hợp cha, mẹ không thể đăng ký khai sinh cho con thì ông hoặc bà hoặc người thân thích khác hoặc cá nhân, tổ chức đang nuôi dưỡng trẻ em có trách nhiệm đăng ký khai sinh cho trẻ em.
+                - Trường hợp đăng ký khai sinh cho trẻ bị bỏ rơi thì sau khi nhận được thông báo, Lãnh đạo Ủy ban nhân dân hoặc Trưởng công an cấp xã có trách nhiệm tổ chức lập biên bản về việc trẻ bị bỏ rơi.
+                Sau khi lập biên bản, Ủy ban nhân dân cấp xã tiến hành niêm yết tại trụ sở Ủy ban nhân dân trong 07 ngày liên tục về việc trẻ bị bỏ rơi. Hết thời hạn niêm yết, nếu không có thông tin về cha, mẹ đẻ của trẻ, Ủy ban nhân dân cấp xã thông báo cho cá nhân hoặc tổ chức đang tạm thời nuôi dưỡng trẻ để tiến hành đăng ký khai sinh cho trẻ.
+                - Trường hợp trẻ chưa xác định được cha thì họ, dân tộc, quê quán, quốc tịch của con được xác định theo họ, dân tộc, quê quán, quốc tịch của mẹ; phần ghi về cha của trẻ để trống. Nếu vào thời điểm đăng ký khai sinh người cha yêu cầu làm thủ tục nhận con thì kết hợp giải quyết việc nhận con và đăng ký khai sinh.
+                - Trường hợp trẻ chưa xác định được mẹ mà khi đăng ký khai sinh cha yêu cầu làm thủ tục nhận con thì kết hợp giải quyết việc nhận con và đăng ký khai sinh; phần khai về mẹ của trẻ để trống.
+                - Trường hợp trẻ chưa xác định được cả cha và mẹ nhưng không thuộc diện bị bỏ rơi, thì thực hiện tương tự như đăng ký khai sinh cho trẻ bị bỏ rơi, trong Sổ hộ tịch ghi rõ “Trẻ chưa xác định được cha, mẹ”.            ',
+
+            'doiTuongThucHien'=>'Công dân Việt Nam, Người Việt Nam định cư ở nước ngoài',
+            'coQuanThucHien'=>'Ủy ban nhân dân cấp xã',
+            'trangThai'=>'Công khai',
+            'yeuCauDieuKien'=>'Không',
+            'canCuPhapLy'=>'Luật 60/2014/QH13',
+            'ketQuaThucHien'=>'Giấy khai sinh',
+            ],
+
+            [
+            'maTTHC'=>4,
+            'tenTTHC'=>'Thủ tục chứng thực chữ ký trong các giấy tờ, văn bản (áp dụng cho cả trường hợp chứng thực điểm chỉ và trường hợp người yêu cầu chứng thực không thể ký, không thể điểm chỉ được)',
+            'maLinhVuc'=>'2',
+            'maQuayLamViec'=>'1',
+            'trinhTuThucHien'=>'
+                + Người yêu cầu chứng thực chữ ký/điểm chỉ/không thể ký, không thể điểm chỉ được phải xuất trình các giấy tờ phục vụ việc chứng thực chữ ký.
+                + Trong trường hợp người yêu cầu chứng thực không thông thạo tiếng Việt thì phải có người phiên dịch. Người phiên dịch phải là người có năng lực hành vi dân sự đầy đủ theo quy định của pháp luật, thông thạo tiếng Việt và ngôn ngữ mà người yêu cầu chứng thực sử dụng. Người phiên dịch do người yêu cầu chứng thực mời hoặc do cơ quan thực hiện chứng thực chỉ định. Thù lao phiên dịch do người yêu cầu chứng thực trả.
+                + Người thực hiện chứng thực (hoặc người tiếp nhận hồ sơ trong trường hợp tiếp nhận tại Bộ phận Một cửa) kiểm tra giấy tờ yêu cầu chứng thực, nếu thấy đủ giấy tờ theo quy định, tại thời điểm chứng thực, người yêu cầu chứng thực minh mẫn, nhận thức và làm chủ được hành vi của mình và việc chứng thực không thuộc các trường hợp không được chứng thực chữ ký thì yêu cầu người yêu cầu chứng thực ký/điểm chỉ trước mặt và thực hiện chứng thực như sau:
+                * Ghi đầy đủ lời chứng chứng thực chữ ký theo mẫu quy định phía dưới chữ ký được chứng thực hoặc trang liền sau của trang giấy tờ, văn bản có chữ ký được chứng thực; nếu hồ sơ tiếp nhận tại Bộ phận Một cửa thì người tiếp nhận hồ sơ ký vào dưới lời chứng theo mẫu quy định và chuyển hồ sơ cho người thực hiện chứng thực.
+                * Người thực hiện chứng thực ký, ghi rõ họ tên, đóng dấu của cơ quan, tổ chức thực hiện chứng thực và ghi vào sổ chứng thực.
+                Đối với giấy tờ, văn bản có từ 02 (hai) tờ trở lên thì phải đóng dấu giáp lai. Trường hợp lời chứng được ghi tại tờ liền sau của trang có chữ ký thì phải đóng dấu giáp lai giữa giấy tờ, văn bản chứng thực chữ ký và trang ghi lời chứng.                ',
+
+            'doiTuongThucHien'=>'Công dân Việt Nam, Người Việt Nam định cư ở nước ngoài, Cán bộ, công chức, viên chức, Doanh nghiệp, Doanh nghiệp có vốn đầu tư nước ngoài, Tổ chức (không bao gồm doanh nghiệp, HTX), Hợp tác xã',
+            'coQuanThucHien'=>'Tổ chức hành nghề công chứng, Cơ quan đại diện có thẩm quyền, Ủy ban nhân dân cấp xã',
+
+            'trangThai'=>'Công khai',
+            'yeuCauDieuKien'=>'Trường hợp không được chứng thực chữ ký:
+                + Tại thời điểm chứng thực, người yêu cầu chứng thực chữ ký không nhận thức và làm chủ được hành vi của mình.
+                + Người yêu cầu chứng thực chữ ký xuất trình Giấy chứng minh nhân dân hoặc Hộ chiếu không còn giá trị sử dụng hoặc giả mạo.
+                + Giấy tờ, văn bản mà người yêu cầu chứng thực ký vào có nội dung quy định tại Khoản 4 Điều 22 của Nghị định số 23/2015/NĐ-CP.
+                + Giấy tờ, văn bản có nội dung là hợp đồng, giao dịch; trừ Giấy ủy quyền trong các trường hợp Giấy ủy quyền: (1) ủy quyền về việc nộp hộ, nhận hộ hồ sơ, giấy tờ, trừ trường hợp pháp luật quy định không được ủy quyền; (2) ủy quyền nhận hộ lương hưu, bưu phẩm, trợ cấp, phụ cấp; (3) ủy quyền nhờ trông nom nhà cửa; (4) ủy quyền của thành viên hộ gia đình để vay vốn tại Ngân hàng chính sách xã hội;  hoặc trừ trường hợp pháp luật có quy định khác.',
+            'canCuPhapLy'=>'Luật 60/2014/QH13',
+            'ketQuaThucHien'=>'Giấy tờ, văn bản được chứng thực chữ ký/điểm chỉ',
+            ],
+
+            [
+            'maTTHC'=>5,
+            'tenTTHC'=>'Chứng thực bản sao từ bản chính giấy tờ, văn bản do cơ quan, tổ chức có thẩm quyền của Việt Nam; cơ quan, tổ chức có thẩm quyền của nước ngoài; cơ quan, tổ chức có thẩm quyền của Việt Nam liên kết với cơ quan, tổ chức có thẩm quyền của nước ngoài cấp hoặc chứng nhận',
+            'maLinhVuc'=>'11',
+            'maQuayLamViec'=>'2',
+            'trinhTuThucHien'=>'
+                + Người yêu cầu chứng thực phải xuất trình bản chính giấy tờ, văn bản làm cơ sở để chứng thực bản sao và bản sao cần chứng thực.
+                + Trường hợp người yêu cầu chứng thực chỉ xuất trình bản chính thì cơ quan, tổ chức tiến hành chụp từ bản chính để thực hiện chứng thực, trừ trường hợp cơ quan, tổ chức không có phương tiện để chụp.
+                + Người thực hiện chứng thực kiểm tra bản chính, đối chiếu với bản sao, nếu nội dung bản sao đúng với bản chính. Bản chính giấy tờ, văn bản không thuộc các trường hợp bản chính giấy tờ, văn bản không được dùng làm cơ sở để chứng thực bản sao thì thực hiện chứng thực như sau:
+                * Ghi đầy đủ lời chứng chứng thực bản sao từ bản chính theo mẫu quy định;
+                * Ký, ghi rõ họ tên, đóng dấu của cơ quan, tổ chức thực hiện chứng thực và ghi vào sổ chứng thực.
+                Đối với bản sao có từ 02 (hai) trang trở lên thì ghi lời chứng vào trang cuối, nếu bản sao có từ 02 (hai) tờ trở lên thì phải đóng dấu giáp lai.
+                Mỗi bản sao được chứng thực từ một bản chính giấy tờ, văn bản hoặc nhiều bản sao được chứng thực từ một bản chính giấy tờ, văn bản trong cùng một thời điểm được ghi một số chứng thực.
+                + Người yêu cầu chứng thực nhận kết quả tại nơi nộp hồ sơ.                 ',
+
+            'doiTuongThucHien'=>'Công dân Việt Nam, Cán bộ, công chức, viên chức, Doanh nghiệp, Doanh nghiệp có vốn đầu tư nước ngoài, Tổ chức (không bao gồm doanh nghiệp, HTX), Hợp tác xã',
+            'coQuanThucHien'=>'Ủy ban Nhân dân xã, phường, thị trấn., Tổ chức hành nghề công chứng, Cơ quan đại diện có thẩm quyền',
+
+            'trangThai'=>'Công khai',
+            'yeuCauDieuKien'=>'Bản chính giấy tờ, văn bản cần chứng thực.
+                Bản chính giấy tờ, văn bản không được dùng làm cơ sở để chứng thực bản sao:
+                + Bản chính bị tẩy xóa, sửa chữa, thêm, bớt nội dung không hợp lệ.
+                + Bản chính bị hư hỏng, cũ nát, không xác định được nội dung.
+                + Bản chính đóng dấu mật của cơ quan, tổ chức có thẩm quyền hoặc không đóng dấu mật nhưng ghi rõ không được sao chụp.
+                + Bản chính có nội dung trái pháp luật, đạo đức xã hội; tuyên truyền, kích động chiến tranh, chống chế độ xã hội chủ nghĩa Việt Nam; xuyên tạc lịch sử của dân tộc Việt Nam; xúc phạm danh dự, nhân phẩm, uy tín của cá nhân, tổ chức; vi phạm quyền công dân.
+                + Giấy tờ, văn bản do cá nhân tự lập nhưng không có xác nhận và đóng dấu của cơ quan, tổ chức có thẩm quyền.',
+            'canCuPhapLy'=>'Luật 60/2014/QH13',
+            'ketQuaThucHien'=>'Bản sao được chứng thực từ bản chính',
+            ],
+
+                        [
+            'maTTHC'=>6,
+            'tenTTHC'=>'Xác nhận thông tin về cư trú',
+            'maLinhVuc'=>'3',
+            'maQuayLamViec'=>'4',
+            'trinhTuThucHien'=>'
+                - Bước 1: Cá nhân, tổ chức chuẩn bị hồ sơ theo quy định của pháp luật.
+                - Bước 2: Cá nhân, tổ chức nộp hồ sơ tại Công an cấp xã.
+                - Bước 3: Khi tiếp nhận hồ sơ xác nhận thông tin về cư trú, cơ quan đăng ký cư trú kiểm tra tính pháp lý và nội dung hồ sơ:
+                + Trường hợp hồ sơ đã đầy đủ, hợp lệ thì tiếp nhận hồ sơ và cấp Phiếu tiếp nhận hồ sơ và hẹn trả kết quả (mẫu CT04 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký;
+                + Trường hợp hồ sơ đủ điều kiện nhưng chưa đủ hồ sơ thì hướng dẫn bổ sung, hoàn thiện và cấp Phiếu hướng dẫn bổ sung, hoàn thiện hồ sơ (mẫu CT05 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký;
+                + Trường hợp hồ sơ không đủ điều kiện thì từ chối và cấp Phiếu từ chối tiếp nhận, giải quyết hồ sơ (mẫu CT06 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký.
+                - Bước 4: Căn cứ theo ngày hẹn trên Phiếu tiếp nhận hồ sơ và hẹn trả kết quả để nhận thông báo kết quả giải quyết thủ tục đăng ký cư trú (nếu có).
+                ',
+            'doiTuongThucHien'=>'Công dân Việt Nam, Cán bộ, công chức, viên chức, Doanh nghiệp, Tổ chức (không bao gồm doanh nghiệp, HTX), Hợp tác xã',
+            'coQuanThucHien'=>'Công an Xã',
+            'trangThai'=>'Công khai',
+            'yeuCauDieuKien'=>'Không',
+            'canCuPhapLy'=>'Luật 60/2014/QH13',
+            'ketQuaThucHien'=>'Xác nhận thông tin về cư trú (CT07), Phiếu từ chối tiếp nhận, giải quyết hồ sơ (lĩnh vực cư trú)',
+            ],
+
+                        [
+            'maTTHC'=>7,
+            'tenTTHC'=>'Xóa đăng ký tạm trú',
+            'maLinhVuc'=>'3',
+            'maQuayLamViec'=>'5',
+            'trinhTuThucHien'=>'
+                - Bước 1: Cá nhân, tổ chức chuẩn bị hồ sơ theo quy định của pháp luật.
+                - Bước 2: Cá nhân, tổ chức nộp hồ sơ tại Công an cấp xã.
+                - Bước 3: Khi tiếp nhận hồ sơ xóa đăng ký tạm trú, cơ quan đăng ký cư trú kiểm tra tính pháp lý và nội dung hồ sơ:
+                + Trường hợp hồ sơ đã đầy đủ, hợp lệ thì tiếp nhận hồ sơ và cấp Phiếu tiếp nhận hồ sơ và hẹn trả kết quả (mẫu CT04 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký;
+                + Trường hợp hồ sơ đủ điều kiện nhưng chưa đủ hồ sơ thì hướng dẫn bổ sung, hoàn thiện và cấp Phiếu hướng dẫn bổ sung, hoàn thiện hồ sơ (mẫu CT05 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký;
+                + Trường hợp hồ sơ không đủ điều kiện thì từ chối và cấp Phiếu từ chối tiếp nhận, giải quyết hồ sơ (mẫu CT06 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký.
+                - Bước 4: Căn cứ theo ngày hẹn trên Phiếu tiếp nhận hồ sơ và hẹn trả kết quả để nhận thông báo kết quả giải quyết thủ tục đăng ký cư trú (nếu có).
+                ',
+            'doiTuongThucHien'=>'Công dân Việt Nam, Cán bộ, công chức, viên chức, Doanh nghiệp, Tổ chức (không bao gồm doanh nghiệp, HTX), Hợp tác xã',
+            'coQuanThucHien'=>'Công an Xã',
+            'trangThai'=>'Công khai',
+            'yeuCauDieuKien'=>'- Trong thời hạn 07 ngày kể từ ngày hộ gia đình có người thuộc diện xóa đăng ký tạm trú thì người thuộc diện xóa đăng ký tạm trú hoặc đại diện hộ gia đình có trách nhiệm nộp hồ sơ làm thủ tục xóa đăng ký tạm trú đến cơ quan đăng ký cư trú.
+                - Trường hợp hộ gia đình chỉ có 01 người hoặc người thuộc diện xóa đăng ký tạm trú hoặc đại diện hộ gia đình không thực hiện thủ tục xóa đăng ký tạm trú thì cơ quan đăng ký cư trú có trách nhiệm kiểm tra, xác minh, lập biên bản về việc công dân, đại diện hộ gia đình không thực hiện thủ tục xóa đăng ký tạm trú và thực hiện xóa đăng ký tạm trú đối với công dân.',
+            'canCuPhapLy'=>'Luật 60/2014/QH13',
+            'ketQuaThucHien'=>'Cập nhật thông tin trong Cơ sở dữ liệu quốc gia về dân cư, Thông báo kết quả giải quyết thủ tục về cư trú, hủy bỏ thủ tục về cư trú, Cập nhật thông tin trong Cơ sở dữ liệu về cư trú',
+            ],
+                        [
+            'maTTHC'=>8,
+            'tenTTHC'=>'Cấp Phiếu lý lịch tư pháp cho công dân Việt Nam, người nước ngoài đang cư trú tại Việt Nam',
+            'maLinhVuc'=>'3',
+            'maQuayLamViec'=>'5',
+            'trinhTuThucHien'=>'Nộp hồ sơ tại Sở Tư pháp:
+                Công dân Việt Nam nộp tại Sở Tư pháp nơi người đó thường trú; trường hợp không có nơi thường trú thì nộp tại Sở Tư pháp nơi người đó tạm trú; trường hợp cư trú ở nước ngoài thì nộp tại Sở Tư pháp nơi cư trú trước khi xuất cảnh.
+                Người nước ngoài cư trú tại Việt Nam thì nộp tại Sở Tư pháp nơi người đó cư trú.
+                Hồ sơ yêu cầu cấp Phiếu lý lịch tư pháp nộp về Sở Tư pháp bằng hình thức trực tiếp, gửi bưu chính hoặc trực tuyến.
+
+                Người có yêu cầu cấp Phiếu lý lịch tư pháp đăng ký nhận kết quả tại nơi nộp hồ sơ hoặc nhận kết quả qua dịch vụ bưu chính hoặc nhận kết quả bản điện tử qua Hệ thống thông tin giải quyết thủ tục hành chính cấp tỉnh (đối với trường hợp người dân nộp hồ sơ yêu cầu cấp Phiếu qua Cổng dịch vụ công quốc gia hoặc Hệ thống thông tin giải quyết thủ tục hành chính cấp tỉnh).
+
+                ',
+            'doiTuongThucHien'=>'Công dân Việt Nam, Người nước ngoài',
+            'coQuanThucHien'=>'Sở Tư pháp',
+            'trangThai'=>'Công khai',
+            'yeuCauDieuKien'=>'Không',
+            'canCuPhapLy'=>'Luật 60/2014/QH13',
+            'ketQuaThucHien'=>'Phiếu lý lịch tư pháp số 1, Phiếu lý lịch tư pháp số 2',
+            ],
         ]);
     }
 }

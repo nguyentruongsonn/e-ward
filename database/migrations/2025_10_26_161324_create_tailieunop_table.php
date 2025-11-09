@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tailieunop', function (Blueprint $table) {
             $table->increments('taiLieuID');
-            $table->integer('maHSXL')->unsigned();
+            $table->string('maHSXL');
             $table->integer('maGiayTo')->unsigned();
             $table->string('tenTep');
             $table->string('duongDan');

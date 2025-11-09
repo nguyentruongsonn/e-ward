@@ -38,125 +38,338 @@ class ThanhPhanGiayToSeeder extends Seeder
                 'soLuongBanChinh'=>0,
                 'soLuongBanSao'=>0
             ],
-                        [
+            [
                 'maThanhPhan'=>2,
                 'maGiayTo'=>5,
                 'soLuongBanChinh'=>0,
                 'soLuongBanSao'=>0
             ],
-            //             [
+            //=================Thủ tục đăng ký kết hôn
+            [
+                'maThanhPhan'=>3,
+                'maGiayTo'=>6,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>3,
+                'maGiayTo'=>7,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>8,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>9,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>10,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>11,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>12,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>13,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>14,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>15,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>16,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>17,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>18,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>19,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>20,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>4,
+                'maGiayTo'=>21,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>5,
+                'maGiayTo'=>22,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>1
+            ],
+                        [
+                'maThanhPhan'=>5,
+                'maGiayTo'=>23,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>1
+            ],
+                        [
+                'maThanhPhan'=>5,
+                'maGiayTo'=>24,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+    //=================Cấp bản sao Trích lục hộ tịch, bản sao Giấy khai sinh
+                        [
+                'maThanhPhan'=>6,
+                'maGiayTo'=>25,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>6,
+                'maGiayTo'=>26,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>27,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>28,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>29,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>30,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>31,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>32,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>33,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>34,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+                        [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>35,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],            [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>36,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>37,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+
+            [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>38,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>39,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>40,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>8,
+                'maGiayTo'=>41,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>9,
+                'maGiayTo'=>42,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>9,
+                'maGiayTo'=>43,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>1
+            ],
+            [
+                'maThanhPhan'=>9,
+                'maGiayTo'=>44,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+
+            //================Thủ tục chứng thực chữ ký trong các giấy tờ, văn bản (áp dụng cho cả trường hợp chứng thực điểm chỉ và trường hợp người yêu cầu chứng thực không thể ký, không thể điểm chỉ được)
+            [
+                'maThanhPhan'=>10,
+                'maGiayTo'=>45,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>1
+            ],
+            [
+                'maThanhPhan'=>10,
+                'maGiayTo'=>46,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>1
+            ],
+            //==================Chứng thực bản sao từ bản chính giấy tờ, văn bản do cơ quan, tổ chức có thẩm quyền của Việt Nam; cơ quan, tổ chức có thẩm quyền của nước ngoài; cơ quan, tổ chức có thẩm quyền của Việt Nam liên kết với cơ quan, tổ chức có thẩm quyền của nước ngoài cấp hoặc chứng nhận
+            [
+                'maThanhPhan'=>11,
+                'maGiayTo'=>47,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+
+    //===============Xác nhận thông tin về cư trú
+            [
+                'maThanhPhan'=>12,
+                'maGiayTo'=>48,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+
+            [
+                'maThanhPhan'=>12,
+                'maGiayTo'=>49,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+
+    //==============Xóa đăng ký tạm trú
+            [
+                'maThanhPhan'=>13,
+                'maGiayTo'=>50,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>13,
+                'maGiayTo'=>51,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>1
+            ],
+            [
+                'maThanhPhan'=>13,
+                'maGiayTo'=>52,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+
+    //============Cấp Phiếu lý lịch tư pháp cho công dân Việt Nam, người nước ngoài đang cư trú tại Việt Nam
+            [
+                'maThanhPhan'=>14,
+                'maGiayTo'=>53,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>14,
+                'maGiayTo'=>54,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>1
+            ],
+            [
+                'maThanhPhan'=>14,
+                'maGiayTo'=>55,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+            [
+                'maThanhPhan'=>14,
+                'maGiayTo'=>56,
+                'soLuongBanChinh'=>0,
+                'soLuongBanSao'=>0
+            ],
+
+            // [
             //     'maThanhPhan'=>,
             //     'maGiayTo'=>,
             //     'soLuongBanChinh'=>,
             //     'soLuongBanSao'=>
             // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],            [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
-            //             [
-            //     'maThanhPhan'=>,
-            //     'maGiayTo'=>,
-            //     'soLuongBanChinh'=>,
-            //     'soLuongBanSao'=>
-            // ],
+
         ]);
     }
 }
