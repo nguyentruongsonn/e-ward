@@ -11,7 +11,7 @@ class CauHinhForm extends Model
 
     protected $table = 'formtructuyen';
     protected $primaryKey = 'maForm';       // hoặc 'maCauHinh' nếu bạn dùng khóa khác       // tắt timestamps nếu bảng không có created_at, updated_at
-
+    public $incrementing = true;
     protected $fillable = [
         'maForm',
         'maTTHC',

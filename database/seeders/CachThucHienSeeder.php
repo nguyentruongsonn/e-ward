@@ -84,6 +84,126 @@ class CachThucHienSeeder extends Seeder
                 'moTaPhiLePhi'=>'Lệ phí : Đồng Miễn lệ phí. Phí cấp bản sao Trích lục kết hôn (nếu có yêu cầu) thực hiện theo quy định tại Thông tư số 281/2016/TT-BTC ngày 14/11/2016 của Bộ Tài chính.',
                 'moTa'=>'Người có yêu cầu đăng ký kết hôn thực hiện nộp hồ sơ trực tiếp tại Bộ phận một cửa của UBND cấp xã hoặc nộp hồ sơ trực tuyến trên Cổng dịch vụ công quốc gia (https://dichvucong.gov.vn) hoặc Cổng dịch vụ công cấp tỉnh (https://dichvucong.---.gov.vn) (bên nam hoặc bên nữ có thể nộp hồ sơ mà không cần có văn bản ủy quyền của bên còn lại).',
             ],
+
+            [
+                'maCTH'=> 9,
+                'maTTHC'=>'8',
+                'kenh'=> 'Trực tiếp',
+                'thoiHanGiaiQuyet'=>'10 Ngày',
+                'moTaPhiLePhi'=>'Phí : 100.000 Đồng Phí cung cấp thông tin lý lịch tư pháp của sinh viên, người có công với cách mạng, thân nhân liệt sỹ (gồm cha đẻ, mẹ đẻ, vợ (hoặc chồng), con (con đẻ, con nuôi), người có công nuôi dưỡng liệt sỹ): 100.000 đồng/lần/người. Các trường hợp miễn phí cung cấp thông tin lý lịch tư pháp gồm: Trẻ em theo quy định tại Luật bảo vệ, chăm sóc và giáo dục trẻ em; Người cao tuổi theo quy định tại Luật người cao tuổi; Người khuyết tật theo quy định tại Luật người khuyết tật; Người thuộc hộ nghèo và Người cư trú tại các xã đặc biệt khó khăn, đồng bào dân tộc thiểu số ở các xã có điều kiện kinh tế - xã hội đặc biệt khó khăn, xã biên giới, xã an toàn khu theo quy định của pháp luật. Phí : 200.000 Đồng Phí cung cấp thông tin lý lịch tư pháp: 200.000 đồng/lần/người.',
+                'moTa'=>'Trong thời hạn 10 ngày, kể từ ngày nhận được yêu cầu hợp lệ.',
+            ],
+
+            [
+                'maCTH'=> 10,
+                'maTTHC'=>'8',
+                'kenh'=> 'Trực tiếp',
+                'thoiHanGiaiQuyet'=>'15 Ngày',
+                'moTaPhiLePhi'=>'Phí : 100.000 Đồng Phí cung cấp thông tin lý lịch tư pháp của sinh viên, người có công với cách mạng, thân nhân liệt sỹ (gồm cha đẻ, mẹ đẻ, vợ (hoặc chồng), con (con đẻ, con nuôi), người có công nuôi dưỡng liệt sỹ): 100.000 đồng/lần/người. Các trường hợp miễn phí cung cấp thông tin lý lịch tư pháp gồm: Trẻ em theo quy định tại Luật bảo vệ, chăm sóc và giáo dục trẻ em; Người cao tuổi theo quy định tại Luật người cao tuổi; Người khuyết tật theo quy định tại Luật người khuyết tật; Người thuộc hộ nghèo và Người cư trú tại các xã đặc biệt khó khăn, đồng bào dân tộc thiểu số ở các xã có điều kiện kinh tế - xã hội đặc biệt khó khăn, xã biên giới, xã an toàn khu theo quy định của pháp luật. Phí : 200.000 Đồng Phí cung cấp thông tin lý lịch tư pháp: 200.000 đồng/lần/người.',
+                'moTa'=>'Trường hợp người được yêu cầu cấp Phiếu lý lịch tư pháp là công dân Việt Nam đã cư trú ở nhiều nơi hoặc có thời gian cư trú ở nước ngoài, người nước ngoài, trường hợp phải xác minh về điều kiện đương nhiên được xóa án tích thì thời hạn không quá 15 ngày.',
+            ],
+
+            [
+                'maCTH'=> 11,
+                'maTTHC'=>'8',
+                'kenh'=> 'Trực tuyến',
+                'thoiHanGiaiQuyet'=>'10 Ngày',
+                'moTaPhiLePhi'=>'Phí : 200.000 Đồng Phí cung cấp thông tin lý lịch tư pháp: 200.000 đồng/lần/người. Phí : 100.000 Đồng Phí cung cấp thông tin lý lịch tư pháp của sinh viên, người có công với cách mạng, thân nhân liệt sỹ (gồm cha đẻ, mẹ đẻ, vợ (hoặc chồng), con (con đẻ, con nuôi), người có công nuôi dưỡng liệt sỹ): 100.000 đồng/lần/người. Các trường hợp miễn phí cung cấp thông tin lý lịch tư pháp gồm: Trẻ em theo quy định tại Luật bảo vệ, chăm sóc và giáo dục trẻ em; Người cao tuổi theo quy định tại Luật người cao tuổi; Người khuyết tật theo quy định tại Luật người khuyết tật; Người thuộc hộ nghèo và Người cư trú tại các xã đặc biệt khó khăn, đồng bào dân tộc thiểu số ở các xã có điều kiện kinh tế - xã hội đặc biệt khó khăn, xã biên giới, xã an toàn khu theo quy định của pháp luật.',
+                'moTa'=>'Trong thời hạn 10 ngày , kể từ ngày nhận được yêu cầu hợp lệ.',
+            ],
+
+                                    [
+                'maCTH'=> 12,
+                'maTTHC'=>'8',
+                'kenh'=> 'Trực tuyến',
+                'thoiHanGiaiQuyet'=>'15 Ngày',
+                'moTaPhiLePhi'=>'Phí : 100.000 Đồng Phí cung cấp thông tin lý lịch tư pháp của sinh viên, người có công với cách mạng, thân nhân liệt sỹ (gồm cha đẻ, mẹ đẻ, vợ (hoặc chồng), con (con đẻ, con nuôi), người có công nuôi dưỡng liệt sỹ): 100.000 đồng/lần/người. Các trường hợp miễn phí cung cấp thông tin lý lịch tư pháp gồm: Trẻ em theo quy định tại Luật bảo vệ, chăm sóc và giáo dục trẻ em; Người cao tuổi theo quy định tại Luật người cao tuổi; Người khuyết tật theo quy định tại Luật người khuyết tật; Người thuộc hộ nghèo và Người cư trú tại các xã đặc biệt khó khăn, đồng bào dân tộc thiểu số ở các xã có điều kiện kinh tế - xã hội đặc biệt khó khăn, xã biên giới, xã an toàn khu theo quy định của pháp luật. Phí : 200.000 Đồng Phí cung cấp thông tin lý lịch tư pháp: 200.000 đồng/lần/người.',
+                'moTa'=>'Trường hợp người được yêu cầu cấp Phiếu lý lịch tư pháp là công dân Việt Nam đã cư trú ở nhiều nơi hoặc có thời gian cư trú ở nước ngoài, người nước ngoài, trường hợp phải xác minh về điều kiện đương nhiên được xóa án tích thì thời hạn không quá 15 ngày.',
+            ],
+
+
+                        [
+                'maCTH'=> 13,
+                'maTTHC'=>'7',
+                'kenh'=> 'Dịch vu bưu chính',
+                'thoiHanGiaiQuyet'=>'10 Ngày làm việc	',
+                'moTaPhiLePhi'=>'Phí : 100.000 Đồng Phí cung cấp thông tin lý lịch tư pháp của sinh viên, người có công với cách mạng, thân nhân liệt sỹ (gồm cha đẻ, mẹ đẻ, vợ (hoặc chồng), con (con đẻ, con nuôi), người có công nuôi dưỡng liệt sỹ): 100.000 đồng/lần/người. Các trường hợp miễn phí cung cấp thông tin lý lịch tư pháp gồm: Trẻ em theo quy định tại Luật bảo vệ, chăm sóc và giáo dục trẻ em; Người cao tuổi theo quy định tại Luật người cao tuổi; Người khuyết tật theo quy định tại Luật người khuyết tật; Người thuộc hộ nghèo và Người cư trú tại các xã đặc biệt khó khăn, đồng bào dân tộc thiểu số ở các xã có điều kiện kinh tế - xã hội đặc biệt khó khăn, xã biên giới, xã an toàn khu theo quy định của pháp luật.
+Phí : 200.000 Đồng Phí cung cấp thông tin lý lịch tư pháp: 200.000 đồng/lần/người.',
+                'moTa'=>'Trong thời hạn 10 ngày, kể từ ngày nhận được yêu cầu hợp lệ.',
+            ],
+
+                        [
+                'maCTH'=> 14,
+                'maTTHC'=>'7',
+                'kenh'=> 'Trực tuyến',
+                'thoiHanGiaiQuyet'=>'10 Ngày làm việc',
+                'moTaPhiLePhi'=>'Phí : 100.000 Đồng Phí cung cấp thông tin lý lịch tư pháp của sinh viên, người có công với cách mạng, thân nhân liệt sỹ (gồm cha đẻ, mẹ đẻ, vợ (hoặc chồng), con (con đẻ, con nuôi), người có công nuôi dưỡng liệt sỹ): 100.000 đồng/lần/người. Các trường hợp miễn phí cung cấp thông tin lý lịch tư pháp gồm: Trẻ em theo quy định tại Luật bảo vệ, chăm sóc và giáo dục trẻ em; Người cao tuổi theo quy định tại Luật người cao tuổi; Người khuyết tật theo quy định tại Luật người khuyết tật; Người thuộc hộ nghèo và Người cư trú tại các xã đặc biệt khó khăn, đồng bào dân tộc thiểu số ở các xã có điều kiện kinh tế - xã hội đặc biệt khó khăn, xã biên giới, xã an toàn khu theo quy định của pháp luật.
+Phí : 200.000 Đồng Phí cung cấp thông tin lý lịch tư pháp: 200.000 đồng/lần/người.',
+                'moTa'=>'Trường hợp người được yêu cầu cấp Phiếu lý lịch tư pháp là công dân Việt Nam đã cư trú ở nhiều nơi hoặc có thời gian cư trú ở nước ngoài, người nước ngoài, trường hợp phải xác minh về điều kiện đương nhiên được xóa án tích thì thời hạn không quá 15 ngày.',
+            ],
+
+
+
+//Xác nhận thông tin về cư trú
+                                    [
+                'maCTH'=> 15,
+                'maTTHC'=>'6',
+                'kenh'=> 'Trực tiếp',
+                'thoiHanGiaiQuyet'=>'05 Ngày làm việc	',
+                'moTaPhiLePhi'=>'Phí : 0 Đồng',
+                'moTa'=>'- Nộp hồ sơ trực tiếp tại Công an cấp xã nơi thuận lợi, phù hợp không phụ thuộc vào nơi cư trú của công dân. Thời gian tiếp nhận hồ sơ: Giờ hành chính các ngày làm việc từ thứ 2 đến thứ 6 và sáng thứ 7 hàng tuần (trừ các ngày nghỉ lễ, tết theo quy định của pháp luật). Kể từ ngày nhận được hồ sơ hợp lệ, cơ quan đăng ký cư trú có trách nhiệm cấp xác nhận thông tin về cư trú cho công dân trong thời hạn 01 ngày làm việc với trường hợp thông tin có trong Cơ sở dữ liệu quốc gia về dân cư.',
+            ],
+
+                        [
+                'maCTH'=> 16,
+                'maTTHC'=>'6',
+                'kenh'=> 'Trực tiếp',
+                'thoiHanGiaiQuyet'=>'03 Ngày làm việc',
+                'moTaPhiLePhi'=>'Phí : 0 Đồng',
+                'moTa'=>'Kể từ ngày nhận được hồ sơ hợp lệ, cơ quan đăng ký cư trú có trách nhiệm cấp xác nhận thông tin về cư trú cho công dân trong thời hạn 03 ngày làm việc với trường hợp cần xác minh; trường hợp từ chối giải quyết thì phải trả lời bằng văn bản và nêu rõ lý do',
+            ],
+
+                                    [
+                'maCTH'=> 17,
+                'maTTHC'=>'6',
+                'kenh'=> 'Trực tuyến',
+                'thoiHanGiaiQuyet'=>'05 Ngày làm việc',
+                'moTaPhiLePhi'=>'Phí : 0 Đồng',
+                'moTa'=>'- Nộp hồ sơ trực tuyến qua các cổng cung cấp dịch vụ công trực tuyến như: Trực tuyến qua Cổng dịch vụ công quốc gia, Cổng dịch vụ công Bộ Công an, ứng dụng VNeID hoặc dịch vụ công trực tuyến khác theo quy định của pháp luật. Thời gian tiếp nhận hồ sơ: Giờ hành chính các ngày làm việc từ thứ 2 đến thứ 6 và sáng thứ 7 hàng tuần (trừ các ngày nghỉ lễ, tết theo quy định của pháp luật). Kể từ ngày nhận được hồ sơ hợp lệ, cơ quan đăng ký cư trú có trách nhiệm cấp xác nhận thông tin về cư trú cho công dân trong thời hạn 01 ngày làm việc với trường hợp thông tin có trong Cơ sở dữ liệu quốc gia về dân cư.',
+            ],
+
+
+
+            [
+                'maCTH'=> 18,
+                'maTTHC'=>'6',
+                'kenh'=> 'Trực tuyến',
+                'thoiHanGiaiQuyet'=>'03 Ngày làm việc',
+                'moTaPhiLePhi'=>'Phí : 0 Đồng',
+                'moTa'=>'Kể từ ngày nhận được hồ sơ hợp lệ, cơ quan đăng ký cư trú có trách nhiệm cấp xác nhận thông tin về cư trú cho công dân trong thời hạn 03 ngày làm việc với trường hợp cần xác minh; trường hợp từ chối giải quyết xác nhận thông tin về cư trú thì phải trả lời bằng văn bản và nêu rõ lý do.',
+            ],
+//Chứng thực
+                        [
+                'maCTH'=> 19,
+                'maTTHC'=>'5',
+                'kenh'=> 'Trực tiếp',
+                'thoiHanGiaiQuyet'=>'Trong ngày cơ quan, tổ chức tiếp nhận yêu cầu hoặc trong ngày làm việc tiếp theo, nếu tiếp nhận yêu cầu sau 15 giờ. Đối với trường hợp cùng một lúc yêu cầu chứng thực bản sao từ nhiều loại bản chính giấy tờ, văn bản; bản chính có nhiều trang; yêu cầu số lượng nhiều bản sao; nội dung giấy tờ, văn bản phức tạp khó kiểm tra, đối chiếu mà cơ quan, tổ chức thực hiện chứng thực không thể đáp ứng được thời hạn quy định nêu trên thì thời hạn chứng thực được kéo dài thêm không quá 02 (hai) ngày làm việc hoặc có thể dài hơn theo thỏa thuận bằng văn bản với người yêu cầu chứng thực.',
+                'moTaPhiLePhi'=>'Phí : Đồng Tại UBND cấp xã, Phòng Tư pháp, Tổ chức hành nghề công chứng: 2.000 đồng/trang; từ trang thứ 3 trở lên thu 1.000 đồng/trang, tối đa thu không quá 200.000 đồng/bản. Trang là căn cứ để thu phí được tính theo trang của bản chính. Phí : Đồng Tại cơ quan đại diện: 10 USD/bản;',
+                'moTa'=>'',
+            ],
+
+            //Thủ tục chứng thực chữ ký
+            [
+                'maCTH'=> 20,
+                'maTTHC'=>'4',
+                'kenh'=> 'Trực tiếp',
+                'thoiHanGiaiQuyet'=>'Thời hạn thực hiện yêu cầu chứng thực là ngay trong ngày cơ quan, tổ chức tiếp nhận yêu cầu hoặc trong ngày làm việc tiếp theo nếu tiếp nhận yêu cầu sau 15 giờ. Trường hợp trả kết quả trong ngày làm việc tiếp theo hoặc phải kéo dài thời gian theo thỏa thuận thì người tiếp nhận hồ sơ phải có phiếu hẹn ghi rõ thời gian (giờ, ngày) trả kết quả cho người yêu cầu chứng thực.c',
+                'moTaPhiLePhi'=>'Phí : Đồng ',
+                'moTa'=>'Nộp hồ sơ trực tiếp tại Ủy ban nhân dân cấp xã, Tổ chức hành nghề công chứng, Cơ quan đại diện hoặc ngoài trụ sở của cơ quan thực hiện chứng thực nếu người yêu cầu chứng thực thuộc diện già yếu, không thể đi lại được, đang bị tạm giữ, tạm giam, thi hành án phạt tù hoặc có lý do chính đáng khác.',
+            ],
+
+
+
         ]);
     }
 }

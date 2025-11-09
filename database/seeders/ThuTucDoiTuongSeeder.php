@@ -22,6 +22,10 @@ class ThuTucDoiTuongSeeder extends Seeder
                 'maTTHC'=>1,
                 'maDoiTuong'=>2
             ],
+                        [
+                'maTTHC'=>3,
+                'maDoiTuong'=>1
+            ],
         ]);
     }
 }
