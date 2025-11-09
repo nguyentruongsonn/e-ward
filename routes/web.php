@@ -7,6 +7,7 @@ use App\Http\Controllers\OutstandingServiceController;
 use App\Http\Controllers\LichHenController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\ProfileController;
 // ...existing code...
 
 
@@ -28,6 +29,40 @@ Route::post('/resend-otp', [RegisterController::class, 'resendOtp'])->name('regi
 // Login routes
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Profile routes (requires authentication)
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::get('/profile/services/load-more', [ProfileController::class, 'loadMoreServices'])
+        ->name('profile.services.load-more');
+    Route::get('/profile/identity', [ProfileController::class, 'identityInfo'])->name('profile.identity');
+    // Ho so (hoso xuly) detail API for modal
+    Route::get('/profile/hoso/{maHSXL}', [ProfileController::class, 'showHoSo'])
+        ->name('profile.hoso.show');
+    // Payment history
+    Route::get('/profile/payments', [ProfileController::class, 'payments'])
+        ->name('profile.payments');
+    // Notifications
+    Route::get('/profile/notifications', [ProfileController::class, 'notifications'])
+        ->name('profile.notifications');
+    Route::get('/profile/notifications/load-more', [ProfileController::class, 'loadMoreNotifications'])
+        ->name('profile.notifications.load-more');
+    Route::post('/profile/notifications/{id}/mark-read', [ProfileController::class, 'markNotificationAsRead'])
+        ->name('profile.notifications.mark-read');
+    Route::post('/profile/notifications/{id}/detail', [ProfileController::class, 'getNotificationDetail'])
+        ->name('profile.notifications.detail');
+    // Password change
+    Route::get('/profile/password-change', [ProfileController::class, 'showPasswordChangeForm'])
+        ->name('profile.password-change');
+    Route::post('/profile/password-change', [ProfileController::class, 'requestPasswordChange'])
+        ->name('profile.password-change.request');
+    Route::get('/profile/password-change/verify', [ProfileController::class, 'showVerifyOtpForm'])
+        ->name('profile.password-change.verify');
+    Route::post('/profile/password-change/verify', [ProfileController::class, 'verifyPasswordChangeOtp'])
+        ->name('profile.password-change.verify.submit');
+    Route::post('/profile/password-change/resend-otp', [ProfileController::class, 'resendPasswordChangeOtp'])
+        ->name('profile.password-change.resend-otp');
+});
 
 // Dev-only: quick mail test endpoint
 if (app()->environment('local')) {
