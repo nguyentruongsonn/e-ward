@@ -44,14 +44,11 @@
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">THÔNG TIN & DỊCH VỤ</a>
                 <div class="dropdown-menu bg-light m-0">
-                    <a href="{{ route('admin.login') }}" class="dropdown-item">THỦ TỤC HÀNH CHÍNH</a>
-                    <a href="{{ route('history') }}" class="dropdown-item">DỊCH VỤ CÔNG TRỰC TUYẾN</a>
                     <a href="{{ route('outstanding-service') }}" class="dropdown-item">DỊCH VỤ CÔNG NỔI BẬT</a>
                     <a href="{{ route('404') }}" class="dropdown-item">TRA CỨU HỒ SƠ</a>
                     <a href="{{ route('404') }}" class="dropdown-item">CÂU HỎI THƯỜNG GẶP</a>
                 </div>
             </div>
-            <a href="" class="nav-item nav-link">THANH TOÁN TRỰC TUYẾN</a>
             <a href="{{ route('contact') }}" class="nav-item nav-link">ĐÁNH GIÁ DỊCH VỤ</a>
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">HỖ TRỢ</a>

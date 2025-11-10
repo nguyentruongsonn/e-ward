@@ -101,9 +101,12 @@ Route::post('/appointment/checkin/{token}', [LichHenController::class, 'processC
 
 Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 
-// Nộp hồ sơ trực tuyến (API)
-Route::get('/nop-ho-so/{maTTHC}', [SubmitController::class, 'showByTTHC'])->name('nop-ho-so.show');
-Route::post('/nop-ho-so/{maTTHC}', [SubmitController::class, 'submitApi'])->name('nop-ho-so.submit');
+// Nộp hồ sơ trực tuyến (yêu cầu đăng nhập)
+Route::middleware('auth')->group(function () {
+    Route::get('/nop-ho-so/{maTTHC}', [SubmitController::class, 'showByTTHC'])->name('nop-ho-so.show');
+    Route::post('/nop-ho-so/{maTTHC}', [SubmitController::class, 'submitApi'])->name('nop-ho-so.submit');
+    Route::post('/nop-ho-so/payment/save', [SubmitController::class, 'savePaymentHistory'])->name('nop-ho-so.payment.save');
+});
 // // Auth routes (giả sử đã cài Laravel Breeze hoặc Auth)
 // Route::post('/login', [LoginController::class, 'login'])->name('login');
 // Route::post('/register', [RegisterController::class, 'register'])->name('register');
