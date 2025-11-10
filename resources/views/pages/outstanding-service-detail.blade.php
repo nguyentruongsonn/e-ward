@@ -174,9 +174,15 @@
                                         <i class="fa-regular fa-calendar-check me-1"></i> Đặt lịch nộp hồ sơ
                                     </button>
                                 @endauth
-                                <button type="button" class="btn btn-primary">
-                                    <i class="fa-solid fa-paper-plane me-1"></i><a href="{{ route('nop-ho-so.submit',['maTTHC'=>$tthc->maTTHC]) }}">Nộp hò sơ</a>
-                                </button>
+                                @auth
+                                    <a href="{{ route('nop-ho-so.show', ['maTTHC' => $tthc->maTTHC]) }}" class="btn btn-primary">
+                                        <i class="fa-solid fa-paper-plane me-1"></i> Nộp hồ sơ trực tuyến
+                                    </a>
+                                @else
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                        <i class="fa-solid fa-paper-plane me-1"></i> Nộp hồ sơ trực tuyến
+                                    </button>
+                                @endauth
                             </div>
                         </div>
                     </div>
