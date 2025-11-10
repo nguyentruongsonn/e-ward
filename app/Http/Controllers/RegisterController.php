@@ -131,7 +131,9 @@ class RegisterController extends Controller
                 'soDienThoai' => $phone,
                 'vaiTro' => 'Công dân/ Tổ chức', // Sửa lại theo enum trong DB
             ]);
-
+            DB::table('congdan')->insert([
+            'IDnguoiDung' => $nguoi->IDnguoiDung,
+            ]);
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();

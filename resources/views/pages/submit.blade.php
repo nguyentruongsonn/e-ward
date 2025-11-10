@@ -3,11 +3,7 @@
 @section('content')
 <style>
     /* ====== BREADCRUMB ====== */
-    .breadcrumb {
-        font-size: 14px;
-        margin-bottom: 15px;
-        color: #666;
-    }
+
     .breadcrumb a {
         color: #32C36C;
         text-decoration: none;
@@ -105,9 +101,8 @@
 
     {{-- BREADCRUMB --}}
     <div class="breadcrumb">
-        <a href="/">Trang chủ</a> →
-        <a href="#">Dịch vụ công trực tuyến</a> →
-        <strong>{{ $tthc->tenTTHC ?? 'Đăng ký kết hôn' }}</strong>
+        <a href="/">Trang chủ</a>
+        <strong> / {{ $tthc->tenTTHC}}</strong>
     </div>
 
     {{-- STEP WIZARD --}}
@@ -486,7 +481,8 @@
                     <h5>Hình thức thanh toán</h5>
                     <div class="col-8">
                         <select name="hinh_thuc_thanh_toan" id="hinhThucThanhToan" class="form-select mt-2" required>
-                            <option value="Thanh toán QR" selected>Thanh toán QR</option>
+                            <option value="" selected>Chọn phương thức thanh toán</option>
+                            <option value="Thanh toán QR" >Thanh toán QR</option>
                         </select>
                     </div>
                 </div>
@@ -588,19 +584,30 @@
                                 <strong>Ngày sinh:</strong> {{ $dulieu['ngay_sinh'] ?? '—' }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <strong>CMND/CCCD:</strong> {{ $dulieu['so_cmnd'] ?? $dulieu['so_cccd'] ?? '—' }}
+                                <strong>Số điện thoại:</strong> {{ $hoSo->soDienThoai ?? ($dulieu['so_dien_thoai'] ?? '—') }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <strong>Nơi cấp:</strong> {{ $dulieu['noi_cap'] ?? '—' }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Số điện thoại:</strong> {{ $hoSo->soDienThoai ?? '—' }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Email:</strong> {{ $hoSo->email ?? '—' }}
+                                <strong>Email:</strong> {{ $hoSo->email ?? ($dulieu['email'] ?? '—') }}
                             </div>
                             <div class="col-md-12 mb-3">
-                                <strong>Địa chỉ:</strong> {{ $dulieu['dia_chi'] ?? '—' }}
+                                <strong>Địa chỉ:</strong>
+                                @php
+                                    $diaChiParts = [];
+                                    if (!empty($dulieu['dia_chi_chi_tiet'])) {
+                                        $diaChiParts[] = $dulieu['dia_chi_chi_tiet'];
+                                    }
+                                    if (!empty($dulieu['phuong_xa'])) {
+                                        $diaChiParts[] = $dulieu['phuong_xa'];
+                                    }
+                                    if (!empty($dulieu['tinh_thanh'])) {
+                                        $diaChiParts[] = $dulieu['tinh_thanh'];
+                                    }
+                                    if (!empty($dulieu['quoc_gia'])) {
+                                        $diaChiParts[] = $dulieu['quoc_gia'];
+                                    }
+                                    $diaChi = !empty($diaChiParts) ? implode(', ', $diaChiParts) : ($dulieu['dia_chi'] ?? '—');
+                                @endphp
+                                {{ $diaChi }}
                             </div>
                         </div>
                     </div>
@@ -643,9 +650,8 @@
                                         <table class="table table-sm table-bordered table-hover">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th style="width: 30%;">Tên giấy tờ</th>
-                                                    <th style="width: 20%;" class="text-center">Số lượng</th>
-                                                    <th style="width: 50%;">Tệp tin đã nộp</th>
+                                                    <th style="width: 40%;">Tên giấy tờ</th>
+                                                    <th style="width: 60%;">Tệp tin đã nộp</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -653,14 +659,6 @@
                                                     <tr>
                                                         <td>
                                                             <strong>{{ $giayTo->tenGiayTo }}</strong>
-                                                        </td>
-                                                        <td class="text-center">
-                                                            @if($giayTo->soLuongBanChinh)
-                                                                <span class="badge bg-success me-1">Bản chính: {{ $giayTo->soLuongBanChinh }}</span>
-                                                            @endif
-                                                            @if($giayTo->soLuongBanSao)
-                                                                <span class="badge bg-info">Bản sao: {{ $giayTo->soLuongBanSao }}</span>
-                                                            @endif
                                                         </td>
                                                         <td>
                                                             @foreach($giayTo->files as $file)
@@ -996,6 +994,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 e.target.value = 1;
             }
             tinhThanhTien();
+            // Nếu đang chọn thanh toán QR, cập nhật lại QR code
+            if (hinhThucThanhToan && hinhThucThanhToan.value === 'Thanh toán QR') {
+                generateQRCode();
+            }
         }
     });
 
@@ -1256,6 +1258,13 @@ document.addEventListener("DOMContentLoaded", function () {
     let isPaymentChecked = false;
 
     function generateQRCode() {
+        // Kiểm tra xem có chọn "Thanh toán QR" không
+        if (!hinhThucThanhToan || hinhThucThanhToan.value !== 'Thanh toán QR') {
+            qrPaymentSection.style.display = 'none';
+            stopPaymentCheck();
+            return;
+        }
+
         const tongLePhiEl = document.getElementById('tongLePhi');
         let tongTien = 0;
         if (tongLePhiEl) {
@@ -1303,9 +1312,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Tự động hiển thị QR code khi có số tiền
+    // Xử lý khi thay đổi hình thức thanh toán
     if (hinhThucThanhToan) {
-        // Kiểm tra và hiển thị QR code ngay khi trang load
+        hinhThucThanhToan.addEventListener('change', function() {
+            generateQRCode();
+        });
+
+        // Kiểm tra và hiển thị QR code khi trang load (nếu đã chọn "Thanh toán QR")
         setTimeout(function() {
             generateQRCode();
         }, 500);
@@ -1339,10 +1352,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             // Kiểm tra nếu có tiền nhưng chưa thanh toán
-            if (tongTien > 0 && !isPaymentChecked) {
-                alert('Vui lòng quét mã QR và thanh toán trước khi nộp hồ sơ. Hệ thống đang tự động kiểm tra thanh toán của bạn.');
-                return;
-            }
+            // if (tongTien > 0 && !isPaymentChecked) {
+            //     alert('Vui lòng quét mã QR và thanh toán trước khi nộp hồ sơ. Hệ thống đang tự động kiểm tra thanh toán của bạn.');
+            //     return;
+            // }
 
             // Luôn submit về route nop-ho-so.submit
             form.action = '{{ route("nop-ho-so.submit", ["maTTHC" => $tthc->maTTHC ?? ""]) }}';
@@ -1351,7 +1364,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ========== TỰ ĐỘNG HIỂN THỊ STEP 4 NẾU THÀNH CÔNG ==========
-    if(isset($isSuccess) && $isSuccess)
+    @if(isset($isSuccess) && $isSuccess)
         currentStep = 4;
         showStep(4);
         // Đánh dấu tất cả các step trước đó là completed
@@ -1361,6 +1374,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 s.querySelector('.circle').innerHTML = '<i class="fa fa-check"></i>';
             }
         });
+    @endif
 });
 </script>
 @endsection

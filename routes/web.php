@@ -85,7 +85,17 @@ if (app()->environment('local')) {
 }
 Route::view('/404', 'pages.404')->name('404');
 Route::view('/admin/login', 'admin.login')->name('admin.login');
-Route::view('/appointment/{id}', 'pages.appointment')->name('appointment');
+
+// Đặt lịch nộp hồ sơ
+Route::middleware('auth')->group(function () {
+    Route::get('/appointment/{id}', [LichHenController::class, 'show'])->name('appointment');
+    Route::post('/appointment/{id}', [LichHenController::class, 'store'])->name('appointment.store');
+    Route::get('/appointment/{id}/available-slots', [LichHenController::class, 'getAvailableSlots'])->name('appointment.available-slots');
+});
+
+// Check-in lịch hẹn (không cần auth vì dùng token)
+Route::get('/appointment/checkin/{token}', [LichHenController::class, 'checkin'])->name('appointment.checkin');
+Route::post('/appointment/checkin/{token}', [LichHenController::class, 'processCheckin'])->name('appointment.checkin.process');
 
 
 
