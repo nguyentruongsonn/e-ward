@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('lichhen', function (Blueprint $table) {
-            $table->increments('id'); // Dùng id tự tăng chuẩn Laravel
+            $table->string('id')->primary(); // Dùng id tự tăng chuẩn Laravel
             $table->string('maLichHen')->unique(); // Mã định danh dạng LH_IDCD_yyyymmdd_rand
             $table->unsignedInteger('IDCD'); // Khóa ngoại công dân
             $table->unsignedInteger('maTTHC'); // Khóa ngoại thủ tục

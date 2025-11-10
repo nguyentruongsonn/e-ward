@@ -165,9 +165,15 @@
                         <div class="card-body">
                             <h6 class="card-title text-uppercase mb-3">Thực hiện thủ tục</h6>
                             <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-outline-primary">
-                                    <i class="fa-regular fa-calendar-check me-1"></i> <a href="{{ route('appointment',['id'=>$tthc->maTTHC]) }}">Đặt lịch nộp hồ sơ</a>
-                                </button>
+                                @auth
+                                    <a href="{{ route('appointment', $tthc->maTTHC) }}" class="btn btn-outline-primary">
+                                        <i class="fa-regular fa-calendar-check me-1"></i> Đặt lịch nộp hồ sơ
+                                    </a>
+                                @else
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                        <i class="fa-regular fa-calendar-check me-1"></i> Đặt lịch nộp hồ sơ
+                                    </button>
+                                @endauth
                                 <button type="button" class="btn btn-primary">
                                     <i class="fa-solid fa-paper-plane me-1"></i><a href="{{ route('nop-ho-so.submit',['maTTHC'=>$tthc->maTTHC]) }}">Nộp hò sơ</a>
                                 </button>
@@ -385,6 +391,14 @@ document.addEventListener('keydown', function(e) {
         closeCustomModal();
     }
 });
+
+// Mở modal đăng nhập nếu có flag
+@if(session('open_login_modal'))
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+    });
+@endif
 </script>
 @endsection
 
