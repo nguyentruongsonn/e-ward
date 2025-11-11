@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -214,19 +215,38 @@ class SubmitController extends Controller
             'soDienThoai' => ['required', 'string', 'max:10'],
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first(),
-            ], 422);
-        }
-
-        $IDCD = DB::table('congdan')->value('IDCD') ?? 1;
-        $maTrangThai = DB::table('trangthaihoso')->value('maTrangThai');
-        if (!$maTrangThai) {
-            $maTrangThai = DB::table('trangthaihoso')->insertGetId(['tenTrangThai' => 'Mới nộp']);
-        }
-        $donViXuLy = DB::table('tthc')->where('maTTHC', $maTTHC)->value('coQuanThucHien') ?? 'Bộ phận Một cửa';
+            // 3. CHUẨN BỊ DỮ LIỆU ĐỂ LƯU VÀO DATABASE
+            $form = DB::table('formtructuyen')->where('maTTHC', $maTTHC)->first();
+            $donViXuLy = DB::table('tthc')->where('maTTHC', $maTTHC)->value('coQuanThucHien') ?? 'Bộ phận Một cửa';
+            
+            // Lấy IDCD từ người dùng đang đăng nhập
+            $authUser = Auth::user();
+            $nguoi = null;
+            
+            if ($authUser instanceof \App\Models\Nguoi) {
+                $nguoi = $authUser;
+            } else {
+                $nguoi = $authUser->nguoi ?? null;
+            }
+            
+            if (!$nguoi) {
+                return redirect()->back()
+                    ->with('error', 'Vui lòng đăng nhập để nộp hồ sơ.')
+                    ->withInput();
+            }
+            
+            $congDan = DB::table('congdan')
+                ->where('IDnguoiDung', $nguoi->IDnguoiDung)
+                ->first();
+            
+            // Nếu chưa có bản ghi công dân, tự động tạo
+            if (!$congDan) {
+                $IDCD = DB::table('congdan')->insertGetId([
+                    'IDnguoiDung' => $nguoi->IDnguoiDung,
+                ]);
+            } else {
+                $IDCD = $congDan->IDCD;
+            }
 
         // Tạo mã hồ sơ xử lý (maHSXL) duy nhất
         do {
