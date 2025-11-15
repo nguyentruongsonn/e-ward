@@ -75,16 +75,6 @@
                     $nguoi = $user->nguoi;
                 }
                 $hoTen = $nguoi?->hoTen ?? ($user->email ?? 'Người dùng');
-                
-                // Kiểm tra quyền admin
-                $isAdmin = false;
-                if ($nguoi && $nguoi->vaiTro === 'Quản trị viên') {
-                    $isAdmin = true;
-                } else {
-                    $isAdmin = DB::table('quantrivien')
-                        ->where('IDnguoiDung', $nguoi->IDnguoiDung ?? 0)
-                        ->exists();
-                }
             @endphp
             {{-- Nếu đã đăng nhập --}}
             <div class="nav-item dropdown d-none d-lg-block">
@@ -101,12 +91,6 @@
                         <i class="fas fa-user me-2"></i>
                         Thông tin cá nhân
                     </a>
-                    @if($isAdmin)
-                        <a href="{{ route('admin.dashboard') }}" class="dropdown-item" style="color: #d9534f;">
-                            <i class="fas fa-tachometer-alt me-2"></i>
-                            Vào trang quản trị
-                        </a>
-                    @endif
                     <hr class="dropdown-divider">
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                         @csrf
@@ -128,16 +112,10 @@
                         <span>{{ $hoTen }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end bg-light m-0" style="min-width: 200px;">
-                        <a href="{{ route('profile') }}" class="dropdown-item">
+                        <a href="#" class="dropdown-item">
                             <i class="fas fa-user me-2"></i>
                             Thông tin cá nhân
                         </a>
-                        @if($isAdmin)
-                            <a href="{{ route('admin.dashboard') }}" class="dropdown-item" style="color: #d9534f;">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Vào trang quản trị
-                            </a>
-                        @endif
                         <hr class="dropdown-divider">
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">
                             @csrf

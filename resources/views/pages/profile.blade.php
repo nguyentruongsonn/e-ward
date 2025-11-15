@@ -182,14 +182,6 @@
                                         id="notificationBadge" style="display: none;">0</span>
                                 @endif
                             </a>
-                            @if(isset($isAdmin) && $isAdmin)
-                                <hr class="dropdown-divider">
-                                <a href="{{ route('admin.dashboard') }}" 
-                                   class="list-group-item profile-menu-item" 
-                                   style="color: #d9534f; font-weight: bold;">
-                                    <i class="fas fa-tachometer-alt me-2"></i> Vào trang quản trị
-                                </a>
-                            @endif
                         </div>
                     </div>
                 </div>

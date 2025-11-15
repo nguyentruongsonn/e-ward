@@ -9,7 +9,6 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SubmitController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\PaymentController;
 
@@ -85,22 +84,7 @@ if (app()->environment('local')) {
     });
 }
 Route::view('/404', 'pages.404')->name('404');
-
-// Admin routes
-Route::prefix('admin')->group(function () {
-    Route::get('/login', [AdminController::class, 'showLogin'])->name('admin.login');
-    Route::post('/login', [AdminController::class, 'login'])->name('admin.login.submit');
-    
-    // Admin routes cần authentication và middleware admin
-    Route::middleware(['auth', 'admin'])->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-        Route::post('/logout', [AdminController::class, 'logout'])->name('admin.logout');
-        
-        // Quản lý hồ sơ
-        Route::get('/hosoxuly', [AdminController::class, 'indexHoSo'])->name('admin.hosoxuly.index');
-        Route::post('/hosoxuly/{maHSXL}/trangthai', [AdminController::class, 'updateTrangThai'])->name('admin.hosoxuly.updateTrangThai');
-    });
-});
+Route::view('/admin/login', 'admin.login')->name('admin.login');
 
 // Đặt lịch nộp hồ sơ
 Route::middleware('auth')->group(function () {
