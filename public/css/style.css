@@ -228,6 +228,7 @@
 .breadcrumb-item + .breadcrumb-item::before {
     color: var(--light);
 }
+
 .table-service-cth th{
     padding: 12px 16px !important; /* tăng khoảng cách trong ô tiêu đề */
     vertical-align: middle;
