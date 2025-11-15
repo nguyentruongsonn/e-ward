@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
-use App\Models\LichHen;
-use App\Models\HoSoXuLy;
 
 class LichHenController extends Controller
 {
@@ -168,8 +166,9 @@ class LichHenController extends Controller
         // Tạo checkin token
         $checkinToken = \Illuminate\Support\Str::uuid();
 
-        // Lưu lịch hẹn - sử dụng Model để tự động tạo UUID cho id
-        LichHen::create([
+        // Lưu lịch hẹn
+        DB::table('lichhen')->insert([
+            'id' => \Illuminate\Support\Str::uuid(),
             'maLichHen' => $maLichHen,
             'IDCD' => $IDCD,
             'maTTHC' => $maTTHC,
@@ -177,49 +176,9 @@ class LichHenController extends Controller
             'thoiGianHen' => $thoiGianHen,
             'trangThai' => 'Đã đặt lịch',
             'checkin_token' => $checkinToken,
+            'created_at' => now('Asia/Ho_Chi_Minh'),
+            'updated_at' => now('Asia/Ho_Chi_Minh'),
         ]);
-
-        // Tự động tạo HoSoXuLy nếu chưa có (để đảm bảo dữ liệu nhất quán)
-        $hoSoXuLy = HoSoXuLy::where('IDCD', $IDCD)
-            ->where('maTTHC', $maTTHC)
-            ->first();
-        
-        if (!$hoSoXuLy) {
-            $maTrangThai = DB::table('trangthaihoso')->where('tenTrangThai', 'Mới nộp')->value('maTrangThai');
-            if (!$maTrangThai) {
-                $maTrangThai = DB::table('trangthaihoso')->insertGetId(['tenTrangThai' => 'Mới nộp']);
-            }
-            
-            $tthc = DB::table('tthc')->where('maTTHC', $maTTHC)->first();
-            $donViXuLy = $tthc && $tthc->coQuanThucHien ? $tthc->coQuanThucHien : 'Bộ phận Một cửa';
-            
-            $tenChuHoSo = $nguoi->hoTen ? $nguoi->hoTen : 'Công dân';
-            $email = $nguoi->email ? $nguoi->email : '';
-            $soDienThoai = $nguoi->soDienThoai ? $nguoi->soDienThoai : '';
-            
-            // Model sẽ tự động tạo maHSXL trong boot method
-            HoSoXuLy::create([
-                'maTTHC' => $maTTHC,
-                'IDCD' => $IDCD,
-                'maForm' => null,
-                'tenChuHoSo' => $tenChuHoSo,
-                'doiTuongThucHien' => null,
-                'email' => $email ? $email : '',
-                'soDienThoai' => $soDienThoai ? $soDienThoai : '',
-                'dulieu' => [],
-                'ngayTiepNhan' => now('Asia/Ho_Chi_Minh')->toDateString(),
-                'ngayHenTra' => null,
-                'maTrangThai' => $maTrangThai,
-                'ngayTra' => null,
-                'hanBoSung' => null,
-                'thongTinTra' => null,
-                'lePhi' => 0,
-                'hinhThuc' => 'Nhận trực tiếp',
-                'ngayKetThucXuLy' => null,
-                'donViXuLy' => $donViXuLy,
-                'ghiChu' => 'Hồ sơ được tạo tự động khi đặt lịch hẹn',
-            ]);
-        }
 
         // Tạo QR code URL cho check-in
         $qrCodeUrl = route('appointment.checkin', ['token' => $checkinToken]);
