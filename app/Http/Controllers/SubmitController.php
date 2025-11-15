@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class SubmitController extends Controller
 {
@@ -146,17 +147,6 @@ class SubmitController extends Controller
             }
         }
 
-        Log::info('=== FILE UPLOAD DEBUG ===', [
-            'has_taiLieu' => $request->hasFile('taiLieu'),
-            'total_files_collected' => count($taiLieuFiles),
-            'files_details' => array_map(function($item) {
-                return [
-                    'maGiayTo' => $item['maGiayTo'],
-                    'filename' => $item['file']->getClientOriginalName(),
-                    'size' => $item['file']->getSize()
-                ];
-            }, $taiLieuFiles),
-        ]);
 
         if ($request->hasFile('tep_dinh_kem')) {
             $storedFiles = [];
@@ -221,7 +211,35 @@ class SubmitController extends Controller
             ], 422);
         }
 
-        $IDCD = DB::table('congdan')->value('IDCD') ?? 1;
+        // Lấy IDCD từ người dùng hiện tại đang đăng nhập
+        $authUser = Auth::user();
+        $nguoi = null;
+        
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+        } else {
+            $nguoi = $authUser->nguoi ?? null;
+        }
+        
+        if (!$nguoi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.',
+            ], 422);
+        }
+        
+        // Lấy hoặc tạo công dân
+        $congDan = DB::table('congdan')
+            ->where('IDnguoiDung', $nguoi->IDnguoiDung)
+            ->first();
+        
+        if (!$congDan) {
+            $IDCD = DB::table('congdan')->insertGetId([
+                'IDnguoiDung' => $nguoi->IDnguoiDung,
+            ]);
+        } else {
+            $IDCD = $congDan->IDCD;
+        }
         $maTrangThai = DB::table('trangthaihoso')->value('maTrangThai');
         if (!$maTrangThai) {
             $maTrangThai = DB::table('trangthaihoso')->insertGetId(['tenTrangThai' => 'Mới nộp']);
@@ -290,21 +308,12 @@ class SubmitController extends Controller
         $filesSaved = 0;
         $filesErrors = 0;
 
-        Log::info('=== STARTING FILE SAVE PROCESS ===', [
-            'maHSXL' => $maHSXL,
-            'total_files_to_save' => count($taiLieuFiles),
-        ]);
-
         foreach ($taiLieuFiles as $taiLieu) {
             try {
                 $file = $taiLieu['file'];
                 $maGiayTo = $taiLieu['maGiayTo'];
 
                 if (!$file || !$file->isValid()) {
-                    Log::warning('File không hợp lệ', [
-                        'maGiayTo' => $maGiayTo,
-                        'isValid' => $file ? $file->isValid() : false,
-                    ]);
                     $filesErrors++;
                     continue;
                 }
@@ -327,13 +336,6 @@ class SubmitController extends Controller
                 ]);
 
                 $filesSaved++;
-                Log::info('File saved successfully', [
-                    'maHSXL' => $maHSXL,
-                    'maGiayTo' => $maGiayTo,
-                    'filename' => $tenTep,
-                    'path' => $path,
-                    'size' => $kichThuoc,
-                ]);
             } catch (\Exception $e) {
                 $filesErrors++;
                 Log::error('Lỗi khi lưu file cho maGiayTo ' . $maGiayTo . ': ' . $e->getMessage(), [
@@ -346,12 +348,6 @@ class SubmitController extends Controller
             }
         }
 
-        Log::info('=== FILE SAVE SUMMARY ===', [
-            'maHSXL' => $maHSXL,
-            'total_files' => count($taiLieuFiles),
-            'files_saved' => $filesSaved,
-            'files_errors' => $filesErrors,
-        ]);
 
         // Lấy lại dữ liệu hồ sơ vừa tạo để hiển thị
         $hoSo = DB::table('hosoxuly')->where('maHSXL', $maHSXL)->first();
@@ -427,17 +423,6 @@ class SubmitController extends Controller
                         'moTa' => 'Thanh toán lệ phí nộp hồ sơ trực tuyến - Mã hồ sơ: ' . $maHSXL,
                     ]);
 
-                    Log::info('Lịch sử thanh toán đã được lưu thành công', [
-                        'maGD' => $maGiaoDich,
-                        'maHSXL' => $maHSXL,
-                        'soTien' => $tongTien,
-                        'IDCD' => $IDCDForPayment,
-                    ]);
-                } else {
-                    Log::info('Lịch sử thanh toán đã tồn tại, bỏ qua', [
-                        'maGD' => $maGiaoDich,
-                        'maHSXL' => $maHSXL,
-                    ]);
                 }
             } catch (\Exception $e) {
                 Log::error('Lỗi khi lưu lịch sử thanh toán: ' . $e->getMessage(), [
