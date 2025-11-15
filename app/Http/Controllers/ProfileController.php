@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use App\Models\HoSoXuLy;
 use App\Models\CongDan;
 use App\Models\TTHC;
@@ -68,7 +69,7 @@ class ProfileController extends Controller
             ->count();
         
         // Xử lý tìm kiếm
-        $query = HoSoXuLy::where('IDCD', $IDCD)->with('tthc');
+        $query = HoSoXuLy::where('IDCD', $IDCD)->with(['tthc', 'trangThai']);
         
         if ($request->filled('ten_dich_vu')) {
             $query->whereHas('tthc', function($q) use ($request) {
@@ -94,6 +95,16 @@ class ProfileController extends Controller
         $hoSoList = $query->orderBy('ngayTiepNhan', 'desc')->paginate(5)->withQueryString();
         $unreadCount = $this->getUnreadCount($IDCD);
         
+        // Kiểm tra quyền admin
+        $isAdmin = false;
+        if ($nguoi->vaiTro === 'Quản trị viên') {
+            $isAdmin = true;
+        } else {
+            $isAdmin = DB::table('quantrivien')
+                ->where('IDnguoiDung', $nguoi->IDnguoiDung)
+                ->exists();
+        }
+        
         return view('pages.profile', [
             'user' => $user,
             'nguoi' => $nguoi,
@@ -102,6 +113,7 @@ class ProfileController extends Controller
             'hoSoList' => $hoSoList,
             'unreadCount' => $unreadCount,
             'activePage' => 'services',
+            'isAdmin' => $isAdmin,
         ]);
     }
 
@@ -430,7 +442,7 @@ class ProfileController extends Controller
         $page = $request->get('page', 2);
 
         // Xử lý tìm kiếm giống như method index
-        $query = HoSoXuLy::where('IDCD', $IDCD)->with('tthc');
+        $query = HoSoXuLy::where('IDCD', $IDCD)->with(['tthc', 'trangThai']);
 
         if ($request->filled('ten_dich_vu')) {
             $query->whereHas('tthc', function($q) use ($request) {
