@@ -63,10 +63,10 @@
 									@forelse($hosos as $hoso)
 									<tr>
 										<td>{{ $hoso->maHSXL }}</td>
-										<td>{{ $hoso->tenChuHoSo }}</td>
+										<td>{{ is_array($hoso->tenChuHoSo) ? json_encode($hoso->tenChuHoSo, JSON_UNESCAPED_UNICODE) : ($hoso->tenChuHoSo ?? '-') }}</td>
 										<td>{{ $hoso->tthc->tenTTHC ?? '-' }}</td>
-										<td>{{ $hoso->email }}</td>
-										<td>{{ $hoso->soDienThoai }}</td>
+										<td>{{ is_array($hoso->email) ? json_encode($hoso->email, JSON_UNESCAPED_UNICODE) : ($hoso->email ?? '-') }}</td>
+										<td>{{ is_array($hoso->soDienThoai) ? json_encode($hoso->soDienThoai, JSON_UNESCAPED_UNICODE) : ($hoso->soDienThoai ?? '-') }}</td>
 										<td>{{ $hoso->ngayTiepNhan ? $hoso->ngayTiepNhan->format('d/m/Y') : '-' }}</td>
 										<td>
 											<select class="form-control trangthai-select" data-mahoso="{{ $hoso->maHSXL }}" style="min-width: 200px; font-size: 0.9em;">
@@ -78,7 +78,7 @@
 											</select>
 										</td>
 										<td>
-											<a href="#" class="btn btn-info btn-sm">Xem chi tiết</a>
+											<a href="{{ route('admin.hosoxuly.show', $hoso->maHSXL) }}" class="btn btn-info btn-sm">Xem chi tiết</a>
 										</td>
 									</tr>
 									@empty

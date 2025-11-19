@@ -119,13 +119,14 @@
                 </li>
                 
                 <li class="sub-menu">
-                    <a href="javascript:;">
+                    <a href="javascript:;" class="{{ request()->routeIs('admin.appointment.*') ? 'active' : '' }}">
                         <i class="fa fa-calendar"></i>
                         <span>Lịch hẹn</span>
                     </a>
                     <ul class="sub">
-                        <li><a href="#">Danh sách lịch hẹn</a></li>
-                        <li><a href="#">Lịch hẹn hôm nay</a></li>
+                        <li><a href="{{ route('admin.appointment.scan') }}" class="{{ request()->routeIs('admin.appointment.scan') ? 'active' : '' }}">Quét QR Code</a></li>
+                        <li><a href="{{ route('admin.appointment.index') }}" class="{{ request()->routeIs('admin.appointment.index') ? 'active' : '' }}">Danh sách lịch hẹn</a></li>
+                        <li><a href="{{ route('admin.appointment.today') }}" class="{{ request()->routeIs('admin.appointment.today') ? 'active' : '' }}">Lịch hẹn hôm nay</a></li>
                     </ul>
                 </li>
                 
