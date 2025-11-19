@@ -35,6 +35,7 @@ class HoSoXuLy extends Model
         'ngayKetThucXuLy',
         'donViXuLy',
         'ghiChu',
+        'last_mail_sent_at',
     ];
 
     protected $casts = [
@@ -44,6 +45,7 @@ class HoSoXuLy extends Model
         'ngayTra' => 'date',
         'ngayKetThucXuLy' => 'date',
         'lePhi' => 'float',
+        'last_mail_sent_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -108,6 +110,11 @@ class HoSoXuLy extends Model
     public function trangThai()
     {
         return $this->belongsTo(TrangThaiHoSo::class, 'maTrangThai', 'maTrangThai');
+    }
+
+    public function mailHistory()
+    {
+        return $this->hasMany(HoSoXuLyMailHistory::class, 'maHSXL', 'maHSXL');
     }
 
 }

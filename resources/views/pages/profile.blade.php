@@ -143,18 +143,22 @@
                             </div>
 
                             <a href="javascript:void(0)"
-                                class="list-group-item profile-menu-item {{ ($activePage ?? 'services') == 'services' ? 'active-parent' : '' }}"
+                                class="list-group-item profile-menu-item {{ ($activePage ?? 'services') == 'services' || ($activePage ?? 'services') == 'appointments' ? 'active-parent' : '' }}"
                                 data-bs-toggle="collapse" data-bs-target="#serviceManageCollapse"
                                 aria-controls="serviceManageCollapse"
-                                aria-expanded="{{ ($activePage ?? 'services') == 'services' ? 'true' : 'false' }}">
+                                aria-expanded="{{ ($activePage ?? 'services') == 'services' || ($activePage ?? 'services') == 'appointments' ? 'true' : 'false' }}">
                                 <span class="float-end"><i class="fas fa-chevron-down fa-sm"></i></span>
                                 <i class="fas fa-cog me-2"></i> Quản lý dịch vụ công
                             </a>
-                            <div class="collapse {{ ($activePage ?? 'services') == 'services' ? 'show' : '' }}"
+                            <div class="collapse {{ ($activePage ?? 'services') == 'services' || ($activePage ?? 'services') == 'appointments' ? 'show' : '' }}"
                                 id="serviceManageCollapse">
                                 <a href="{{ route('profile') }}"
                                     class="list-group-item profile-menu-item ps-5 {{ ($activePage ?? 'services') == 'services' ? 'active' : '' }}">
-                                    <i class="fas fa-folder me-2"></i> Dịch vụ công của tôi
+                                    <i class="fas fa-folder me-2"></i> Hồ sơ trực tuyến
+                                </a>
+                                <a href="{{ route('profile.appointments') }}"
+                                    class="list-group-item profile-menu-item ps-5 {{ ($activePage ?? 'services') == 'appointments' ? 'active' : '' }}">
+                                    <i class="fas fa-calendar-alt me-2"></i> Lịch hẹn
                                 </a>
                             </div>
                             <a href="{{ route('profile.password-change') }}"
@@ -365,7 +369,7 @@
                         <div class="profile-header">
                             <h4 class="mb-0" style="color: #333;">
                                 <i class="fas fa-folder profile-header-icon me-2"></i>
-                                Dịch vụ công của tôi
+                                Hồ sơ trực tuyến
                             </h4>
                         </div>
                         <div class="card-body">
@@ -546,6 +550,119 @@
                             @else
                                 <div class="profile-no-results">
                                     Không tìm thấy lịch sử thanh toán theo điều kiện tìm kiếm
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                @if (($activePage ?? 'services') == 'appointments')
+                    <!-- Lịch hẹn -->
+                    <div class="card shadow-sm" style="border: 1px solid #dee2e6;">
+                        <div class="profile-header">
+                            <h4 class="mb-0" style="color: #333;">
+                                <i class="fas fa-calendar-alt profile-header-icon me-2"></i>
+                                Lịch hẹn
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Search Form -->
+                            <form method="GET" action="{{ route('profile.appointments') }}" class="mb-4">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Trạng thái</label>
+                                        <select name="trang_thai" class="form-select profile-form-control">
+                                            <option value="">-- Chọn trạng thái --</option>
+                                            <option value="Đã đặt lịch" {{ request('trang_thai') == 'Đã đặt lịch' ? 'selected' : '' }}>Đã đặt lịch</option>
+                                            <option value="Chờ đến" {{ request('trang_thai') == 'Chờ đến' ? 'selected' : '' }}>Chờ đến</option>
+                                            <option value="Đang xử lý" {{ request('trang_thai') == 'Đang xử lý' ? 'selected' : '' }}>Đang xử lý</option>
+                                            <option value="Hoàn thành" {{ request('trang_thai') == 'Hoàn thành' ? 'selected' : '' }}>Hoàn thành</option>
+                                            <option value="Đã hủy" {{ request('trang_thai') == 'Đã hủy' ? 'selected' : '' }}>Đã hủy</option>
+                                            <option value="Không đến" {{ request('trang_thai') == 'Không đến' ? 'selected' : '' }}>Không đến</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Từ ngày</label>
+                                        <input type="date" name="from_date" value="{{ request('from_date') }}"
+                                            class="form-control profile-form-control">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Đến ngày</label>
+                                        <input type="date" name="to_date" value="{{ request('to_date') }}"
+                                            class="form-control profile-form-control">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn profile-search-btn w-100"><i
+                                                class="fas fa-search me-2"></i>Tìm</button>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <a href="{{ route('profile.appointments') }}" class="btn btn-secondary">
+                                            <i class="fas fa-redo me-2"></i>Làm mới
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+
+                            @if (isset($appointments) && $appointments->total() > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Mã lịch hẹn</th>
+                                                <th>Thủ tục hành chính</th>
+                                                <th>Thời gian hẹn</th>
+                                                <th>Quầy làm việc</th>
+                                                <th>Số thứ tự</th>
+                                                <th>Trạng thái</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="appointmentsList">
+                                            @if($appointments->count() > 0)
+                                                @include('partials.appointment-items', ['appointments' => $appointments])
+                                            @else
+                                                <tr>
+                                                    <td colspan="7" class="text-center">Không có lịch hẹn nào</td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Load More Button & Pagination -->
+                                <div class="mt-4">
+                                    @if ($appointments->hasMorePages())
+                                        <!-- Load More Button (AJAX) -->
+                                        <div class="text-center mb-3">
+                                            <button type="button" class="btn profile-search-btn px-4 py-2"
+                                                id="loadMoreAppointmentsBtn" data-page="2"
+                                                data-trang-thai="{{ request('trang_thai') ?? '' }}"
+                                                data-from-date="{{ request('from_date') ?? '' }}"
+                                                data-to-date="{{ request('to_date') ?? '' }}">
+                                                <i class="fas fa-chevron-down me-2"></i>
+                                                Xem thêm lịch hẹn ({{ $appointments->total() - $appointments->count() }} còn lại)
+                                            </button>
+                                        </div>
+                                    @endif
+
+                                    <!-- Pagination Info -->
+                                    <div class="text-center text-muted mb-2">
+                                        <small id="appointmentsPaginationInfo">
+                                            Hiển thị {{ $appointments->firstItem() ?? 0 }}-{{ $appointments->lastItem() ?? 0 }}
+                                            trong tổng số {{ $appointments->total() }} lịch hẹn
+                                        </small>
+                                    </div>
+
+                                    <!-- Traditional Pagination (Fallback) -->
+                                    <div class="d-flex justify-content-center">
+                                        {{ $appointments->appends(request()->query())->links('pagination::bootstrap-4') }}
+                                    </div>
+                                </div>
+                            @else
+                                <div class="profile-no-results">
+                                    Không tìm thấy lịch hẹn nào theo điều kiện tìm kiếm
                                 </div>
                             @endif
                         </div>
@@ -1098,6 +1215,87 @@
                         btn.disabled = false;
                         btn.innerHTML = originalText;
                         alert('Không thể tải thêm hồ sơ. Vui lòng thử lại.');
+                    }
+                });
+            }
+
+            // Load More Appointments
+            const loadMoreAppointmentsBtn = document.getElementById('loadMoreAppointmentsBtn');
+            if (loadMoreAppointmentsBtn) {
+                loadMoreAppointmentsBtn.addEventListener('click', async function() {
+                    const btn = this;
+                    const currentPage = parseInt(btn.getAttribute('data-page')) || 2;
+                    const trangThai = btn.getAttribute('data-trang-thai') || '';
+                    const fromDate = btn.getAttribute('data-from-date') || '';
+                    const toDate = btn.getAttribute('data-to-date') || '';
+                    const appointmentsList = document.getElementById('appointmentsList');
+
+                    // Disable button and show loading
+                    btn.disabled = true;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang tải...';
+
+                    try {
+                        const url = new URL('{{ route('profile.appointments.load-more') }}', window.location.origin);
+                        url.searchParams.append('page', currentPage);
+                        if (trangThai) {
+                            url.searchParams.append('trang_thai', trangThai);
+                        }
+                        if (fromDate) {
+                            url.searchParams.append('from_date', fromDate);
+                        }
+                        if (toDate) {
+                            url.searchParams.append('to_date', toDate);
+                        }
+
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Network error');
+                        }
+
+                        const data = await response.json();
+
+                        if (data.html) {
+                            // Append new rows to table
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = data.html;
+                            const rows = tempDiv.querySelectorAll('tr');
+                            rows.forEach(row => {
+                                appointmentsList.appendChild(row);
+                            });
+
+                            // Update button state
+                            if (data.hasMore && data.nextPage) {
+                                btn.setAttribute('data-page', data.nextPage);
+                                btn.disabled = false;
+                                btn.innerHTML =
+                                    `<i class="fas fa-chevron-down me-2"></i>Xem thêm lịch hẹn`;
+                            } else {
+                                btn.style.display = 'none';
+                            }
+
+                            // Update pagination info if exists
+                            const paginationInfo = document.getElementById('appointmentsPaginationInfo');
+                            if (paginationInfo) {
+                                const totalItems = appointmentsList.querySelectorAll('tr').length;
+                                paginationInfo.textContent =
+                                    `Hiển thị 1-${totalItems} trong tổng số ${totalItems} lịch hẹn`;
+                            }
+                        } else {
+                            throw new Error('No data received');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                        alert('Không thể tải thêm lịch hẹn. Vui lòng thử lại.');
                     }
                 });
             }

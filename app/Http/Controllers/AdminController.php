@@ -6,12 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Nguoi;
 use App\Models\HoSoXuLy;
 use App\Models\CongDan;
 use App\Models\LichHen;
 use App\Models\TTHC;
 use App\Models\TrangThaiHoSo;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -384,6 +386,267 @@ class AdminController extends Controller
     }
 
     /**
+     * Hiển thị chi tiết hồ sơ
+     */
+    public function showHoSo($maHSXL)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        // Lấy hồ sơ với các relationship
+        $hoSo = HoSoXuLy::with(['tthc', 'trangThai', 'congdan.nguoi', 'mailHistory'])
+            ->where('maHSXL', $maHSXL)
+            ->firstOrFail();
+
+        // Lấy tài liệu đã nộp (nếu có)
+        $taiLieu = DB::table('tailieunop')
+            ->where('maHSXL', $maHSXL)
+            ->get();
+
+        // Lấy lịch sử thanh toán (nếu có)
+        $lichSuThanhToan = DB::table('lichsuthanhtoan')
+            ->where('maHSXL', $maHSXL)
+            ->orderBy('ngayGD', 'desc')
+            ->get();
+
+        // Lấy lịch sử mail - sắp xếp theo thời gian gửi giảm dần (mới nhất trước), xen kẽ nhau không phân biệt admin hay công dân
+        $mailHistory = $hoSo->mailHistory()
+            ->orderBy('sent_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return view('admin.hosoxuly.show', compact('hoSo', 'taiLieu', 'lichSuThanhToan', 'mailHistory'));
+    }
+
+    /**
+     * Gửi mail cho chủ hồ sơ
+     */
+    public function sendMailHoSo(Request $request, $maHSXL)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $request->validate([
+            'loai_mail' => 'required|in:lien_lac,bo_sung',
+            'subject' => 'required|string|max:255',
+            'content' => 'required|string',
+        ]);
+
+        try {
+            $hoSo = HoSoXuLy::with('tthc')->where('maHSXL', $maHSXL)->firstOrFail();
+            
+            if (!$hoSo->email) {
+                return response()->json(['success' => false, 'message' => 'Hồ sơ không có email.']);
+            }
+
+            // Gửi email
+            Mail::to($hoSo->email)->send(new \App\Mail\HoSoMail(
+                $hoSo,
+                $request->subject,
+                $request->content,
+                $request->loai_mail
+            ));
+
+            // Lưu thời gian gửi mail
+            $hoSo->last_mail_sent_at = now();
+            $hoSo->save();
+
+            // Lưu lịch sử gửi mail
+            \App\Models\HoSoXuLyMailHistory::create([
+                'maHSXL' => $hoSo->maHSXL,
+                'direction' => 'outgoing',
+                'sender_type' => 'admin',
+                'loai_mail' => $request->loai_mail,
+                'subject' => $request->subject,
+                'content' => $request->content,
+                'email' => $hoSo->email,
+                'sent_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã gửi mail thành công',
+                'email' => $hoSo->email,
+                'last_mail_sent_at' => $hoSo->last_mail_sent_at->format('d/m/Y H:i')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi gửi mail: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Thêm email reply từ công dân
+     */
+    public function addMailReply(Request $request, $maHSXL)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'content' => 'required|string',
+            'email' => 'required|email',
+        ]);
+
+        try {
+            $hoSo = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+
+            // Lưu email reply từ công dân
+            \App\Models\HoSoXuLyMailHistory::create([
+                'maHSXL' => $hoSo->maHSXL,
+                'direction' => 'incoming',
+                'sender_type' => 'citizen',
+                'loai_mail' => 'lien_lac', // Mặc định là liên lạc
+                'subject' => $request->subject,
+                'content' => $request->content,
+                'email' => $request->email,
+                'sent_at' => $request->filled('sent_at') ? \Carbon\Carbon::parse($request->sent_at) : now(), // Cho phép nhập thời gian hoặc dùng hiện tại
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã thêm email reply từ công dân',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi thêm email reply: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Webhook để nhận email reply từ công dân
+     * Có thể được gọi từ email service provider (Mailgun, SendGrid, etc.) hoặc IMAP parser
+     */
+    public function receiveMailReply(Request $request)
+    {
+        try {
+            // Lấy thông tin từ webhook
+            // Format có thể khác nhau tùy email service provider
+            $fromEmail = $request->input('from') ?? $request->input('sender') ?? $request->input('email');
+            $subject = $this->decodeMimeHeader($request->input('subject') ?? '');
+            $content = $request->input('text') ?? $request->input('body') ?? $request->input('content') ?? '';
+            $timestamp = $request->input('timestamp') ?? $request->input('date') ?? now();
+            
+            // Decode content nếu là base64 hoặc quoted-printable
+            $content = $this->decodeEmailContent($content);
+            
+            // Tìm hồ sơ theo email người gửi
+            $hoSo = HoSoXuLy::where('email', $fromEmail)->first();
+            
+            if (!$hoSo) {
+                // Nếu không tìm thấy, log và return
+                \Log::info('Email reply từ email không có trong hệ thống: ' . $fromEmail);
+                return response()->json(['success' => false, 'message' => 'Email không tìm thấy hồ sơ'], 404);
+            }
+            
+            // Lưu email reply vào lịch sử
+            \App\Models\HoSoXuLyMailHistory::create([
+                'maHSXL' => $hoSo->maHSXL,
+                'direction' => 'incoming',
+                'sender_type' => 'citizen',
+                'loai_mail' => 'lien_lac',
+                'subject' => $subject ?: 'Re: ' . ($hoSo->tthc->tenTTHC ?? 'Hồ sơ'),
+                'content' => $content,
+                'email' => $fromEmail,
+                'sent_at' => is_numeric($timestamp) ? \Carbon\Carbon::createFromTimestamp($timestamp) : \Carbon\Carbon::parse($timestamp),
+            ]);
+            
+            return response()->json(['success' => true, 'message' => 'Đã nhận email reply']);
+        } catch (\Exception $e) {
+            \Log::error('Lỗi khi nhận email reply: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+    
+    /**
+     * Decode MIME encoded-word header (RFC 2047)
+     */
+    private function decodeMimeHeader($header)
+    {
+        if (empty($header)) {
+            return '';
+        }
+        
+        // Sử dụng imap_mime_header_decode nếu có
+        if (function_exists('imap_mime_header_decode')) {
+            $decoded = imap_mime_header_decode($header);
+            $result = '';
+            foreach ($decoded as $part) {
+                $result .= $part->text;
+            }
+            return $result;
+        }
+        
+        // Fallback: decode thủ công
+        $pattern = '/=\?([^?]+)\?([QB])\?([^?]+)\?=/i';
+        
+        return preg_replace_callback($pattern, function($matches) {
+            $charset = $matches[1];
+            $encoding = strtoupper($matches[2]);
+            $text = $matches[3];
+            
+            if ($encoding == 'Q') {
+                $text = str_replace('_', ' ', $text);
+                $text = quoted_printable_decode($text);
+            } elseif ($encoding == 'B') {
+                $text = base64_decode($text);
+            }
+            
+            if (function_exists('mb_convert_encoding') && strtoupper($charset) != 'UTF-8') {
+                $text = mb_convert_encoding($text, 'UTF-8', $charset);
+            }
+            
+            return $text;
+        }, $header);
+    }
+    
+    /**
+     * Decode email content
+     */
+    private function decodeEmailContent($content)
+    {
+        if (empty($content)) {
+            return '';
+        }
+        
+        // Thử decode base64
+        $decoded = @base64_decode($content, true);
+        if ($decoded !== false && base64_encode($decoded) === $content) {
+            $content = $decoded;
+        }
+        
+        // Decode quoted-printable
+        if (function_exists('quoted_printable_decode')) {
+            $content = quoted_printable_decode($content);
+        }
+        
+        // Loại bỏ HTML tags
+        $content = strip_tags($content);
+        
+        // Decode HTML entities
+        $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        // Normalize whitespace
+        $content = preg_replace('/\s+/', ' ', $content);
+        $content = preg_replace('/=\r?\n/', '', $content);
+        $content = preg_replace('/\n\s*\n/', "\n\n", $content);
+        
+        return trim($content);
+    }
+
+    /**
      * Cập nhật trạng thái hồ sơ
      */
     public function updateTrangThai(Request $request, $maHSXL)
@@ -454,6 +717,356 @@ class AdminController extends Controller
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Hiển thị trang quét QR code lịch hẹn
+     */
+    public function showScanQR(Request $request)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $token = $request->get('token');
+        $lichHen = null;
+        $tthc = null;
+        $quay = null;
+        $congDan = null;
+        $nguoi = null;
+
+        if ($token) {
+            $lichHen = DB::table('lichhen')
+                ->where('checkin_token', $token)
+                ->first();
+
+            if ($lichHen) {
+                $tthc = DB::table('tthc')->where('maTTHC', $lichHen->maTTHC)->first();
+                
+                if ($lichHen->maQuayLamViec) {
+                    $quay = DB::table('quaylamviec')->where('maQuayLamViec', $lichHen->maQuayLamViec)->first();
+                }
+
+                $congDan = DB::table('congdan')->where('IDCD', $lichHen->IDCD)->first();
+                if ($congDan) {
+                    $nguoi = DB::table('nguoi')->where('IDnguoiDung', $congDan->IDnguoiDung)->first();
+                }
+            }
+        }
+
+        return view('admin.appointment.scan', compact('token', 'lichHen', 'tthc', 'quay', 'congDan', 'nguoi'));
+    }
+
+    /**
+     * Hiển thị danh sách lịch hẹn
+     */
+    public function indexAppointments(Request $request)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        // Query lịch hẹn với filter
+        $query = LichHen::with(['congdan.nguoi', 'tthc']);
+
+        // Tự động gửi mail nhắc cho lịch hẹn < 24h (chỉ gửi 1 lần)
+        $this->autoSendReminders();
+
+        // Chỉ hiển thị lịch hẹn có ngày SAU ngày hiện tại (tương lai)
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
+        $query->whereDate('thoiGianHen', '>', $now->toDateString());
+
+        // Filter theo tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('maLichHen', 'LIKE', "%{$search}%")
+                  ->orWhereHas('congdan.nguoi', function($q2) use ($search) {
+                      $q2->where('hoTen', 'LIKE', "%{$search}%")
+                         ->orWhere('email', 'LIKE', "%{$search}%")
+                         ->orWhere('soDienThoai', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter theo trạng thái
+        if ($request->filled('trangThai')) {
+            $query->where('trangThai', $request->trangThai);
+        }
+
+        // Filter theo ngày hẹn
+        if ($request->filled('from_date')) {
+            $query->whereDate('thoiGianHen', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('thoiGianHen', '<=', $request->to_date);
+        }
+
+        // Sắp xếp: lịch hẹn gần nhất lên đầu (tăng dần theo thời gian)
+        $query->orderBy('thoiGianHen', 'asc');
+
+        // Phân trang
+        $appointments = $query->paginate(20)->withQueryString();
+
+        return view('admin.appointment.index', compact('appointments'));
+    }
+
+    /**
+     * Hiển thị lịch hẹn hôm nay
+     */
+    public function todayAppointments(Request $request)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        // Tự động gửi mail nhắc cho lịch hẹn < 24h (chỉ gửi 1 lần)
+        $this->autoSendReminders();
+
+        // Query lịch hẹn hôm nay
+        $today = Carbon::now('Asia/Ho_Chi_Minh')->toDateString();
+        $query = LichHen::with(['congdan.nguoi', 'tthc'])
+            ->whereDate('thoiGianHen', $today);
+
+        // Filter theo tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('maLichHen', 'LIKE', "%{$search}%")
+                  ->orWhereHas('congdan.nguoi', function($q2) use ($search) {
+                      $q2->where('hoTen', 'LIKE', "%{$search}%")
+                         ->orWhere('email', 'LIKE', "%{$search}%")
+                         ->orWhere('soDienThoai', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter theo trạng thái
+        if ($request->filled('trangThai')) {
+            $query->where('trangThai', $request->trangThai);
+        }
+
+        // Sắp xếp: lịch hẹn gần nhất lên đầu (càng gần càng hiện đầu)
+        // Sắp xếp tăng dần theo thoiGianHen (gần nhất trước)
+        $query->orderBy('thoiGianHen', 'asc');
+
+        // Phân trang
+        $appointments = $query->paginate(20)->withQueryString();
+
+        return view('admin.appointment.today', compact('appointments', 'today'));
+    }
+
+    /**
+     * Tự động gửi mail nhắc cho lịch hẹn < 24h
+     */
+    private function autoSendReminders()
+    {
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
+        $in24Hours = $now->copy()->addHours(24);
+        
+        // Lấy các lịch hẹn trong vòng 24 giờ tới, chưa gửi mail, và trạng thái hợp lệ
+        $appointments = LichHen::with(['congdan.nguoi', 'tthc'])
+            ->whereBetween('thoiGianHen', [$now, $in24Hours])
+            ->whereNull('reminder_sent_at')
+            ->whereNotIn('trangThai', ['Hoàn thành', 'Đã hủy', 'Không đến'])
+            ->get();
+        
+        foreach ($appointments as $appointment) {
+            try {
+                $congDan = $appointment->congdan;
+                if (!$congDan) continue;
+                
+                $nguoi = $congDan->nguoi;
+                if (!$nguoi || !$nguoi->email) continue;
+                
+                $tthc = $appointment->tthc;
+                
+                // Gửi email
+                Mail::to($nguoi->email)->send(new \App\Mail\AppointmentReminderMail($appointment, $tthc, $nguoi));
+                
+                // Đánh dấu đã gửi
+                $appointment->reminder_sent_at = $now;
+                $appointment->save();
+            } catch (\Exception $e) {
+                // Log lỗi nhưng không dừng quá trình
+                Log::error('Lỗi gửi mail nhắc hẹn: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Gửi mail nhắc hẹn thủ công
+     */
+    public function sendReminder(Request $request)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $lichHenId = $request->input('lichhen_id');
+        
+        if (!$lichHenId) {
+            return response()->json(['success' => false, 'message' => 'Thiếu thông tin lịch hẹn.']);
+        }
+
+        try {
+            $appointment = LichHen::find($lichHenId);
+            
+            if (!$appointment) {
+                return response()->json(['success' => false, 'message' => 'Không tìm thấy lịch hẹn.']);
+            }
+
+            // Kiểm tra thời gian (chỉ gửi nếu < 24h)
+            $now = Carbon::now('Asia/Ho_Chi_Minh');
+            $thoiGianHen = Carbon::parse($appointment->thoiGianHen)->setTimezone('Asia/Ho_Chi_Minh');
+            $hoursUntil = $now->diffInHours($thoiGianHen, false);
+            
+            if ($hoursUntil < 0 || $hoursUntil > 24) {
+                return response()->json(['success' => false, 'message' => 'Chỉ có thể gửi mail nhắc cho lịch hẹn trong vòng 24 giờ tới.']);
+            }
+
+            // Kiểm tra đã gửi chưa
+            if ($appointment->reminder_sent_at) {
+                return response()->json(['success' => false, 'message' => 'Mail nhắc đã được gửi trước đó.']);
+            }
+
+            // Lấy thông tin công dân và người dùng
+            $congDan = $appointment->congdan;
+            if (!$congDan) {
+                return response()->json(['success' => false, 'message' => 'Không tìm thấy thông tin công dân.']);
+            }
+
+            $nguoi = $congDan->nguoi;
+            if (!$nguoi || !$nguoi->email) {
+                return response()->json(['success' => false, 'message' => 'Không tìm thấy email người dùng.']);
+            }
+
+            $tthc = $appointment->tthc;
+
+            // Gửi email
+            Mail::to($nguoi->email)->send(new \App\Mail\AppointmentReminderMail($appointment, $tthc, $nguoi));
+
+            // Đánh dấu đã gửi
+            $appointment->reminder_sent_at = $now;
+            $appointment->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã gửi mail nhắc hẹn thành công đến ' . $nguoi->email
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi gửi mail: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Xử lý check-in lịch hẹn (chỉ admin mới được check-in)
+     */
+    public function processCheckin(Request $request, $token)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền thực hiện thao tác này.',
+            ], 403);
+        }
+
+        $lichHen = DB::table('lichhen')
+            ->where('checkin_token', $token)
+            ->first();
+
+        if (!$lichHen) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy lịch hẹn.',
+            ], 404);
+        }
+
+        // Kiểm tra xem đã check-in chưa
+        if (!empty($lichHen->checkin_time)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lịch hẹn này đã được check-in rồi.',
+                'soThuTu' => $lichHen->soThuTu,
+                'maQuayLamViec' => $lichHen->maQuayLamViec,
+            ], 422);
+        }
+
+        // Tự động chọn quầy còn trống trong giờ đó
+        $thoiGianHen = Carbon::parse($lichHen->thoiGianHen)->setTimezone('Asia/Ho_Chi_Minh');
+        $startTime = $thoiGianHen->copy()->startOfHour();
+        $endTime = $thoiGianHen->copy()->endOfHour();
+
+        $allQuays = DB::table('quaylamviec')->pluck('maQuayLamViec')->toArray();
+        $quayTrong = null;
+
+        // Tìm quầy còn trống (chưa đầy 2 lịch trong giờ đó)
+        foreach ($allQuays as $quay) {
+            $soLuongLichHen = DB::table('lichhen')
+                ->where('maTTHC', $lichHen->maTTHC)
+                ->where('maQuayLamViec', $quay)
+                ->whereBetween('thoiGianHen', [$startTime, $endTime])
+                ->whereIn('trangThai', ['Đã đặt lịch', 'Chờ đến', 'Đang xử lý'])
+                ->count();
+
+            if ($soLuongLichHen < 2) {
+                $quayTrong = $quay;
+                break;
+            }
+        }
+
+        // Nếu tất cả quầy đều đầy, random chọn một quầy
+        if (!$quayTrong) {
+            $quayTrong = $allQuays[array_rand($allQuays)];
+        }
+
+        // Lấy số thứ tự tiếp theo trong ngày cho quầy đã chọn
+        $ngayHen = $thoiGianHen->copy()->startOfDay();
+        $endOfDay = $thoiGianHen->copy()->endOfDay();
+
+        // Đếm số người đã check-in trong ngày ở quầy này
+        $soLuongDaCheckIn = DB::table('lichhen')
+            ->where('maQuayLamViec', $quayTrong)
+            ->whereBetween('thoiGianHen', [$ngayHen, $endOfDay])
+            ->whereNotNull('checkin_time')
+            ->whereNotNull('soThuTu')
+            ->count();
+
+        $soThuTu = $soLuongDaCheckIn + 1;
+
+        // Cập nhật check-in với quầy đã chọn
+        DB::table('lichhen')
+            ->where('checkin_token', $token)
+            ->update([
+                'maQuayLamViec' => $quayTrong,
+                'checkin_time' => now('Asia/Ho_Chi_Minh'),
+                'soThuTu' => $soThuTu,
+                'trangThai' => 'Chờ đến',
+                'updated_at' => now('Asia/Ho_Chi_Minh'),
+            ]);
+
+        // Lấy thông tin quầy đã chọn
+        $quay = DB::table('quaylamviec')->where('maQuayLamViec', $quayTrong)->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Check-in thành công!',
+            'soThuTu' => $soThuTu,
+            'maQuayLamViec' => $quayTrong,
+            'tenQuayLamViec' => $quay->tenQuayLamViec ?? '',
+            'thoiGianCheckIn' => now('Asia/Ho_Chi_Minh')->format('d/m/Y H:i'),
+        ]);
     }
 }
 

@@ -20,6 +20,9 @@ Route::get('/outstanding-service', [OutstandingServiceController::class, 'index'
 Route::get('/outstanding-service/{id}', [OutstandingServiceController::class, 'show'])->name('outstanding-service.show');
 
 Route::view('/', 'pages.home')->name('home');
+
+// Webhook để nhận email reply từ công dân (không cần auth)
+Route::post('/webhook/email-reply', [AdminController::class, 'receiveMailReply'])->name('webhook.email-reply');
 Route::view('/about', 'pages.about')->name('about');
 
 Route::view('/contact', 'pages.contact')->name('contact');
@@ -40,6 +43,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/profile/services/load-more', [ProfileController::class, 'loadMoreServices'])
         ->name('profile.services.load-more');
+    Route::get('/profile/appointments', [ProfileController::class, 'appointments'])->name('profile.appointments');
+    Route::get('/profile/appointments/load-more', [ProfileController::class, 'loadMoreAppointments'])
+        ->name('profile.appointments.load-more');
     Route::get('/profile/identity', [ProfileController::class, 'identityInfo'])->name('profile.identity');
     // Ho so (hoso xuly) detail API for modal
     Route::get('/profile/hoso/{maHSXL}', [ProfileController::class, 'showHoSo'])
@@ -98,7 +104,17 @@ Route::prefix('admin')->group(function () {
         
         // Quản lý hồ sơ
         Route::get('/hosoxuly', [AdminController::class, 'indexHoSo'])->name('admin.hosoxuly.index');
+        Route::get('/hosoxuly/{maHSXL}', [AdminController::class, 'showHoSo'])->name('admin.hosoxuly.show');
         Route::post('/hosoxuly/{maHSXL}/trangthai', [AdminController::class, 'updateTrangThai'])->name('admin.hosoxuly.updateTrangThai');
+        Route::post('/hosoxuly/{maHSXL}/send-mail', [AdminController::class, 'sendMailHoSo'])->name('admin.hosoxuly.send-mail');
+        Route::post('/hosoxuly/{maHSXL}/add-mail-reply', [AdminController::class, 'addMailReply'])->name('admin.hosoxuly.add-mail-reply');
+        
+        // Quản lý lịch hẹn
+        Route::get('/appointment', [AdminController::class, 'indexAppointments'])->name('admin.appointment.index');
+        Route::get('/appointment/today', [AdminController::class, 'todayAppointments'])->name('admin.appointment.today');
+        Route::get('/appointment/scan', [AdminController::class, 'showScanQR'])->name('admin.appointment.scan');
+        Route::post('/appointment/checkin/{token}', [AdminController::class, 'processCheckin'])->name('admin.appointment.checkin');
+        Route::post('/appointment/send-reminder', [AdminController::class, 'sendReminder'])->name('admin.appointment.send-reminder');
     });
 });
 
