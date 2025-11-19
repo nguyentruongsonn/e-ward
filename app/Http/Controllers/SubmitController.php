@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class SubmitController extends Controller
 {
@@ -49,6 +51,7 @@ class SubmitController extends Controller
         $lePhiChiTiet = session('lePhiChiTiet', []);
 
         // Nếu có maHSXL từ session, lấy lại dữ liệu từ database
+        $nguoiInfo = null;
         if ($isSuccess && $maHSXL) {
             if (!$hoSo) {
                 $hoSo = DB::table('hosoxuly')->where('maHSXL', $maHSXL)->first();
@@ -61,6 +64,14 @@ class SubmitController extends Controller
                     ->where('maHSXL', $maHSXL)
                     ->get()
                     ->groupBy('maGiayTo');
+            }
+
+            // Lấy thông tin người dùng từ bảng nguoi
+            if ($hoSo && $hoSo->IDCD) {
+                $congDan = DB::table('congdan')->where('IDCD', $hoSo->IDCD)->first();
+                if ($congDan) {
+                    $nguoiInfo = DB::table('nguoi')->where('IDnguoiDung', $congDan->IDnguoiDung)->first();
+                }
             }
         }
 
@@ -76,6 +87,7 @@ class SubmitController extends Controller
             'dulieu' => $dulieu,
             'tailieuNop' => $tailieuNop,
             'lePhiChiTiet' => $lePhiChiTiet,
+            'nguoiInfo' => $nguoiInfo,
         ]);
     }
 
@@ -86,31 +98,55 @@ class SubmitController extends Controller
 
         $payload = $request->except(['_token']);
 
-        // Xử lý file tài liệu nộp kèm
+        // Xử lý file tài liệu nộp kèm - cấu trúc taiLieu[maGiayTo][]
         $taiLieuFiles = [];
-        if ($request->hasFile('taiLieu')) {
-            foreach ($request->file('taiLieu') as $maGiayTo => $files) {
+
+        // Cách 1: Sử dụng allFiles() - cách này thường hoạt động tốt nhất
+        $allFiles = $request->allFiles();
+        if (!empty($allFiles) && isset($allFiles['taiLieu'])) {
+            foreach ($allFiles['taiLieu'] as $maGiayTo => $files) {
                 if (is_array($files)) {
-                    foreach ($files as $fileArray) {
-                        if (is_array($fileArray)) {
-                            foreach ($fileArray as $file) {
-                                if ($file && $file->isValid()) {
-                                    $taiLieuFiles[] = [
-                                        'maGiayTo' => (int) $maGiayTo,
-                                        'file' => $file,
-                                    ];
-                                }
-                            }
-                        } elseif ($fileArray && $fileArray->isValid()) {
+                    foreach ($files as $file) {
+                        if ($file instanceof \Illuminate\Http\UploadedFile && $file->isValid()) {
                             $taiLieuFiles[] = [
                                 'maGiayTo' => (int) $maGiayTo,
-                                'file' => $fileArray,
+                                'file' => $file,
                             ];
                         }
+                    }
+                } elseif ($files instanceof \Illuminate\Http\UploadedFile && $files->isValid()) {
+                    $taiLieuFiles[] = [
+                        'maGiayTo' => (int) $maGiayTo,
+                        'file' => $files,
+                    ];
+                }
+            }
+        }
+
+        // Cách 2: Fallback - sử dụng file() method
+        if (empty($taiLieuFiles) && $request->hasFile('taiLieu')) {
+            $taiLieuInput = $request->file('taiLieu');
+            if (is_array($taiLieuInput)) {
+                foreach ($taiLieuInput as $key => $value) {
+                    if (is_array($value)) {
+                        foreach ($value as $file) {
+                            if ($file instanceof \Illuminate\Http\UploadedFile && $file->isValid()) {
+                                $taiLieuFiles[] = [
+                                    'maGiayTo' => (int) $key,
+                                    'file' => $file,
+                                ];
+                            }
+                        }
+                    } elseif ($value instanceof \Illuminate\Http\UploadedFile && $value->isValid()) {
+                        $taiLieuFiles[] = [
+                            'maGiayTo' => (int) $key,
+                            'file' => $value,
+                        ];
                     }
                 }
             }
         }
+
 
         if ($request->hasFile('tep_dinh_kem')) {
             $storedFiles = [];
@@ -175,7 +211,35 @@ class SubmitController extends Controller
             ], 422);
         }
 
-        $IDCD = DB::table('congdan')->value('IDCD') ?? 1;
+        // Lấy IDCD từ người dùng hiện tại đang đăng nhập
+        $authUser = Auth::user();
+        $nguoi = null;
+        
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+        } else {
+            $nguoi = $authUser->nguoi ?? null;
+        }
+        
+        if (!$nguoi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.',
+            ], 422);
+        }
+        
+        // Lấy hoặc tạo công dân
+        $congDan = DB::table('congdan')
+            ->where('IDnguoiDung', $nguoi->IDnguoiDung)
+            ->first();
+        
+        if (!$congDan) {
+            $IDCD = DB::table('congdan')->insertGetId([
+                'IDnguoiDung' => $nguoi->IDnguoiDung,
+            ]);
+        } else {
+            $IDCD = $congDan->IDCD;
+        }
         $maTrangThai = DB::table('trangthaihoso')->value('maTrangThai');
         if (!$maTrangThai) {
             $maTrangThai = DB::table('trangthaihoso')->insertGetId(['tenTrangThai' => 'Mới nộp']);
@@ -200,6 +264,23 @@ class SubmitController extends Controller
             }
         }
 
+        // Map giá trị hinhThuc từ form sang giá trị enum hợp lệ
+        $hinhThucNhanKetQua = $payload['hinh_thuc_nhan_ket_qua'] ?? 'Nhận trực tuyến';
+        $hinhThuc = 'Nhận trực tuyến'; // Mặc định
+
+        // Map các giá trị từ form sang enum
+        if (stripos($hinhThucNhanKetQua, 'trực tiếp') !== false ||
+            stripos($hinhThucNhanKetQua, 'truc tiep') !== false) {
+            $hinhThuc = 'Nhận trực tiếp';
+        } elseif (stripos($hinhThucNhanKetQua, 'trực tuyến') !== false ||
+                   stripos($hinhThucNhanKetQua, 'truc tuyen') !== false ||
+                   stripos($hinhThucNhanKetQua, 'bưu chính') !== false ||
+                   stripos($hinhThucNhanKetQua, 'buu chinh') !== false ||
+                   stripos($hinhThucNhanKetQua, 'dịch vụ') !== false ||
+                   stripos($hinhThucNhanKetQua, 'dich vu') !== false) {
+            $hinhThuc = 'Nhận trực tuyến';
+        }
+
         DB::table('hosoxuly')->insert([
             'maHSXL' => $maHSXL,
             'maTTHC' => $maTTHC,
@@ -217,33 +298,56 @@ class SubmitController extends Controller
             'hanBoSung' => null,
             'thongTinTra' => null,
             'lePhi' => $tongLePhi,
-            'hinhThuc' => $payload['hinh_thuc_nhan_ket_qua'] ?? 'Nhận trực tuyến',
+            'hinhThuc' => $hinhThuc,
             'ngayKetThucXuLy' => null,
             'donViXuLy' => $donViXuLy,
             'ghiChu' => null,
         ]);
 
         // Lưu các file tài liệu vào bảng tailieunop
+        $filesSaved = 0;
+        $filesErrors = 0;
+
         foreach ($taiLieuFiles as $taiLieu) {
-            $file = $taiLieu['file'];
-            $maGiayTo = $taiLieu['maGiayTo'];
+            try {
+                $file = $taiLieu['file'];
+                $maGiayTo = $taiLieu['maGiayTo'];
 
-            $path = $file->store('hoso_uploads', 'public');
-            $tenTep = $file->getClientOriginalName();
-            $duongDan = $path;
-            $dinhDang = $file->getClientMimeType();
-            $kichThuoc = $file->getSize();
+                if (!$file || !$file->isValid()) {
+                    $filesErrors++;
+                    continue;
+                }
 
-            DB::table('tailieunop')->insert([
-                'maHSXL' => $maHSXL,
-                'maGiayTo' => $maGiayTo,
-                'tenTep' => $tenTep,
-                'duongDan' => $duongDan,
-                'dinhDang' => $dinhDang,
-                'kichThuoc' => $kichThuoc,
-                'ngayTai' => now(),
-            ]);
+                // Lưu file vào thư mục 'storage/app/public/hoso_uploads'
+                $path = $file->store('hoso_uploads', 'public');
+                $tenTep = $file->getClientOriginalName();
+                $dinhDang = $file->getClientMimeType();
+                $kichThuoc = (string) $file->getSize();
+
+                // Lưu thông tin file vào database
+                DB::table('tailieunop')->insert([
+                    'maHSXL' => $maHSXL,
+                    'maGiayTo' => $maGiayTo,
+                    'tenTep' => $tenTep,
+                    'duongDan' => $path,
+                    'dinhDang' => $dinhDang,
+                    'kichThuoc' => $kichThuoc,
+                    'ngayTai' => now(),
+                ]);
+
+                $filesSaved++;
+            } catch (\Exception $e) {
+                $filesErrors++;
+                Log::error('Lỗi khi lưu file cho maGiayTo ' . $maGiayTo . ': ' . $e->getMessage(), [
+                    'maHSXL' => $maHSXL,
+                    'maGiayTo' => $maGiayTo,
+                    'exception' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Không throw exception ở đây, tiếp tục xử lý các file khác
+            }
         }
+
 
         // Lấy lại dữ liệu hồ sơ vừa tạo để hiển thị
         $hoSo = DB::table('hosoxuly')->where('maHSXL', $maHSXL)->first();
@@ -289,6 +393,49 @@ class SubmitController extends Controller
             }
         }
 
+        // Lưu lịch sử thanh toán nếu đã thanh toán thành công
+        $maGiaoDich = $payload['ma_giao_dich'] ?? null;
+        $tongTien = (float) ($payload['tong_tien'] ?? 0);
+        $hinhThucThanhToan = $payload['hinh_thuc_thanh_toan'] ?? 'Thanh toán QR';
+
+        if ($maGiaoDich && $tongTien > 0) {
+            try {
+                // Kiểm tra xem đã lưu chưa (tránh duplicate)
+                $existing = DB::table('lichsuthanhtoan')
+                    ->where('maGD', $maGiaoDich)
+                    ->where('maHSXL', $maHSXL)
+                    ->first();
+
+                if (!$existing) {
+                    // Lấy IDCD từ hồ sơ
+                    $hoSoForIDCD = DB::table('hosoxuly')->where('maHSXL', $maHSXL)->first();
+                    $IDCDForPayment = $hoSoForIDCD->IDCD ?? $IDCD;
+
+                    DB::table('lichsuthanhtoan')->insert([
+                        'maGD' => $maGiaoDich,
+                        'soGD' => $maGiaoDich,
+                        'loaiGD' => $hinhThucThanhToan,
+                        'ngayGD' => now(),
+                        'soTien' => $tongTien,
+                        'trangThai' => 'Thành công',
+                        'IDCD' => $IDCDForPayment,
+                        'maHSXL' => $maHSXL,
+                        'moTa' => 'Thanh toán lệ phí nộp hồ sơ trực tuyến - Mã hồ sơ: ' . $maHSXL,
+                    ]);
+
+                }
+            } catch (\Exception $e) {
+                Log::error('Lỗi khi lưu lịch sử thanh toán: ' . $e->getMessage(), [
+                    'maGiaoDich' => $maGiaoDich,
+                    'maHSXL' => $maHSXL,
+                    'tongTien' => $tongTien,
+                    'exception' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Không throw exception ở đây, vì hồ sơ đã được lưu thành công
+            }
+        }
+
         return redirect()->route('nop-ho-so.show', ['maTTHC' => $maTTHC])
             ->with('success', true)
             ->with('maHSXL', $maHSXL)
@@ -299,5 +446,4 @@ class SubmitController extends Controller
             ->with('lePhiChiTiet', $lePhiChiTiet);
     }
 }
-
 

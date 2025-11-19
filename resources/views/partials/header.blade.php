@@ -44,14 +44,11 @@
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">THÔNG TIN & DỊCH VỤ</a>
                 <div class="dropdown-menu bg-light m-0">
-                    <a href="{{ route('admin.login') }}" class="dropdown-item">THỦ TỤC HÀNH CHÍNH</a>
-                    <a href="{{ route('history') }}" class="dropdown-item">DỊCH VỤ CÔNG TRỰC TUYẾN</a>
                     <a href="{{ route('outstanding-service') }}" class="dropdown-item">DỊCH VỤ CÔNG NỔI BẬT</a>
                     <a href="{{ route('404') }}" class="dropdown-item">TRA CỨU HỒ SƠ</a>
                     <a href="{{ route('404') }}" class="dropdown-item">CÂU HỎI THƯỜNG GẶP</a>
                 </div>
             </div>
-            <a href="" class="nav-item nav-link">THANH TOÁN TRỰC TUYẾN</a>
             <a href="{{ route('contact') }}" class="nav-item nav-link">ĐÁNH GIÁ DỊCH VỤ</a>
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">HỖ TRỢ</a>
@@ -78,6 +75,16 @@
                     $nguoi = $user->nguoi;
                 }
                 $hoTen = $nguoi?->hoTen ?? ($user->email ?? 'Người dùng');
+                
+                // Kiểm tra quyền admin
+                $isAdmin = false;
+                if ($nguoi && $nguoi->vaiTro === 'Quản trị viên') {
+                    $isAdmin = true;
+                } else {
+                    $isAdmin = DB::table('quantrivien')
+                        ->where('IDnguoiDung', $nguoi->IDnguoiDung ?? 0)
+                        ->exists();
+                }
             @endphp
             {{-- Nếu đã đăng nhập --}}
             <div class="nav-item dropdown d-none d-lg-block">
@@ -94,6 +101,12 @@
                         <i class="fas fa-user me-2"></i>
                         Thông tin cá nhân
                     </a>
+                    @if($isAdmin)
+                        <a href="{{ route('admin.dashboard') }}" class="dropdown-item" style="color: #d9534f;">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Vào trang quản trị
+                        </a>
+                    @endif
                     <hr class="dropdown-divider">
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                         @csrf
@@ -115,10 +128,16 @@
                         <span>{{ $hoTen }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end bg-light m-0" style="min-width: 200px;">
-                        <a href="#" class="dropdown-item">
+                        <a href="{{ route('profile') }}" class="dropdown-item">
                             <i class="fas fa-user me-2"></i>
                             Thông tin cá nhân
                         </a>
+                        @if($isAdmin)
+                            <a href="{{ route('admin.dashboard') }}" class="dropdown-item" style="color: #d9534f;">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Vào trang quản trị
+                            </a>
+                        @endif
                         <hr class="dropdown-divider">
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">
                             @csrf

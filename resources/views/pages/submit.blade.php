@@ -3,11 +3,7 @@
 @section('content')
 <style>
     /* ====== BREADCRUMB ====== */
-    .breadcrumb {
-        font-size: 14px;
-        margin-bottom: 15px;
-        color: #666;
-    }
+
     .breadcrumb a {
         color: #32C36C;
         text-decoration: none;
@@ -105,9 +101,8 @@
 
     {{-- BREADCRUMB --}}
     <div class="breadcrumb">
-        <a href="/">Trang chủ</a> →
-        <a href="#">Dịch vụ công trực tuyến</a> →
-        <strong>{{ $tthc->tenTTHC ?? 'Đăng ký kết hôn' }}</strong>
+        <a href="/">Trang chủ</a>
+        <strong> / {{ $tthc->tenTTHC}}</strong>
     </div>
 
     {{-- STEP WIZARD --}}
@@ -486,7 +481,8 @@
                     <h5>Hình thức thanh toán</h5>
                     <div class="col-8">
                         <select name="hinh_thuc_thanh_toan" id="hinhThucThanhToan" class="form-select mt-2" required>
-                            <option value="Thanh toán QR" selected>Thanh toán QR</option>
+                            <option value="" selected>Chọn phương thức thanh toán</option>
+                            <option value="Thanh toán QR" >Thanh toán QR</option>
                         </select>
                     </div>
                 </div>
@@ -572,35 +568,52 @@
                         <i class="fa fa-check-circle text-success" style="font-size: 64px;"></i>
                     </div>
                     <h3 class="text-success mb-3">Nộp hồ sơ thành công!</h3>
-                    <p class="text-muted">Mã hồ sơ của bạn: <strong class="text-primary">{{ $maHSXL ?? '' }}</strong></p>
+                    <p class="text-muted">Mã hồ sơ của bạn: <strong class="text-dark">{{ $maHSXL ?? '' }}</strong></p>
                 </div>
 
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Thông tin người nộp</h5>
+                        <h5 class="mb-0 text-white">Thông tin người nộp</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <strong>Họ tên:</strong> {{ $hoSo->tenChuHoSo ?? ($dulieu['ho_ten'] ?? '—') }}
+                                <strong>Họ tên:</strong> {{ $hoSo->tenChuHoSo ?? ($dulieu['ho_ten'] ?? ($nguoiInfo->hoTen ?? '—')) }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <strong>Ngày sinh:</strong> {{ $dulieu['ngay_sinh'] ?? '—' }}
+                                <strong>Ngày sinh:</strong> {{ $dulieu['ngay_sinh'] ?? ($nguoiInfo->ngaySinh ? \Carbon\Carbon::parse($nguoiInfo->ngaySinh)->format('d/m/Y') : '—') }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <strong>CMND/CCCD:</strong> {{ $dulieu['so_cmnd'] ?? $dulieu['so_cccd'] ?? '—' }}
+                                <strong>Số CCCD:</strong> {{ $dulieu['so_cccd'] ?? ($dulieu['cccd'] ?? ($nguoiInfo->maCCCD ?? '—')) }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <strong>Nơi cấp:</strong> {{ $dulieu['noi_cap'] ?? '—' }}
+                                <strong>Nơi cấp:</strong> {{ $dulieu['noi_cap'] ?? ($dulieu['noi_cap_cccd'] ?? '—') }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <strong>Số điện thoại:</strong> {{ $hoSo->soDienThoai ?? '—' }}
+                                <strong>Số điện thoại:</strong> {{ $hoSo->soDienThoai ?? ($dulieu['so_dien_thoai'] ?? ($nguoiInfo->soDienThoai ?? '—')) }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <strong>Email:</strong> {{ $hoSo->email ?? '—' }}
+                                <strong>Email:</strong> {{ $hoSo->email ?? ($dulieu['email'] ?? ($nguoiInfo->email ?? '—')) }}
                             </div>
                             <div class="col-md-12 mb-3">
-                                <strong>Địa chỉ:</strong> {{ $dulieu['dia_chi'] ?? '—' }}
+                                <strong>Địa chỉ:</strong>
+                                @php
+                                    $diaChiParts = [];
+                                    if (!empty($dulieu['dia_chi_chi_tiet'])) {
+                                        $diaChiParts[] = $dulieu['dia_chi_chi_tiet'];
+                                    }
+                                    if (!empty($dulieu['phuong_xa'])) {
+                                        $diaChiParts[] = $dulieu['phuong_xa'];
+                                    }
+                                    if (!empty($dulieu['tinh_thanh'])) {
+                                        $diaChiParts[] = $dulieu['tinh_thanh'];
+                                    }
+                                    if (!empty($dulieu['quoc_gia'])) {
+                                        $diaChiParts[] = $dulieu['quoc_gia'];
+                                    }
+                                    $diaChi = !empty($diaChiParts) ? implode(', ', $diaChiParts) : ($dulieu['dia_chi'] ?? ($nguoiInfo->noiThuongTru ?? '—'));
+                                @endphp
+                                {{ $diaChi }}
                             </div>
                         </div>
                     </div>
@@ -608,22 +621,25 @@
 
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Thành phần hồ sơ đã nộp</h5>
+                        <h5 class="mb-0 text-white">Thành phần hồ sơ đã nộp</h5>
                     </div>
                     <div class="card-body">
                         @php
+                            // Tổng hợp tất cả giấy tờ đã nộp từ tất cả thành phần
+                            $allGiayTosCoFile = collect();
+                            $stt = 1;
                             $hasAnyFiles = false;
                         @endphp
-                        @forelse($thanhPhanHoSos ?? [] as $tenThanhPhan => $giayTos)
+                        @foreach($thanhPhanHoSos ?? [] as $tenThanhPhan => $giayTos)
                             @php
                                 // Lọc chỉ những giấy tờ đã có file đã nộp
-                                $giayTosCoFile = collect();
                                 foreach ($giayTos as $giayTo) {
                                     // Đảm bảo maGiayTo được cast về int để so sánh
                                     $maGiayToInt = (int)$giayTo->maGiayTo;
                                     $files = $tailieuNop[$maGiayToInt] ?? collect();
                                     if ($files->isNotEmpty()) {
-                                        $giayTosCoFile->push((object)[
+                                        $allGiayTosCoFile->push((object)[
+                                            'stt' => $stt++,
                                             'maGiayTo' => $giayTo->maGiayTo,
                                             'tenGiayTo' => $giayTo->tenGiayTo,
                                             'soLuongBanChinh' => $giayTo->soLuongBanChinh,
@@ -634,84 +650,70 @@
                                     }
                                 }
                             @endphp
-                            @if($giayTosCoFile->isNotEmpty())
-                                <div class="mb-4">
-                                    <h6 class="text-primary mb-3">
-                                        <i class="fa fa-folder-open"></i> {{ $tenThanhPhan }}
-                                    </h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-bordered table-hover">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th style="width: 30%;">Tên giấy tờ</th>
-                                                    <th style="width: 20%;" class="text-center">Số lượng</th>
-                                                    <th style="width: 50%;">Tệp tin đã nộp</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($giayTosCoFile as $giayTo)
-                                                    <tr>
-                                                        <td>
-                                                            <strong>{{ $giayTo->tenGiayTo }}</strong>
-                                                        </td>
-                                                        <td class="text-center">
-                                                            @if($giayTo->soLuongBanChinh)
-                                                                <span class="badge bg-success me-1">Bản chính: {{ $giayTo->soLuongBanChinh }}</span>
-                                                            @endif
-                                                            @if($giayTo->soLuongBanSao)
-                                                                <span class="badge bg-info">Bản sao: {{ $giayTo->soLuongBanSao }}</span>
-                                                            @endif
-                                                        </td>
-                                                        <td>
-                                                            @foreach($giayTo->files as $file)
-                                                                <div class="mb-2 p-2 bg-light rounded border">
-                                                                    <div class="d-flex align-items-center justify-content-between">
-                                                                        <div class="d-flex align-items-center">
-                                                                            @php
-                                                                                $fileExtension = strtolower(pathinfo($file->tenTep, PATHINFO_EXTENSION));
-                                                                                $fileIcon = 'fa-file';
-                                                                                if (in_array($fileExtension, ['pdf'])) {
-                                                                                    $fileIcon = 'fa-file-pdf text-danger';
-                                                                                } elseif (in_array($fileExtension, ['doc', 'docx'])) {
-                                                                                    $fileIcon = 'fa-file-word text-primary';
-                                                                                } elseif (in_array($fileExtension, ['xls', 'xlsx'])) {
-                                                                                    $fileIcon = 'fa-file-excel text-success';
-                                                                                } elseif (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif'])) {
-                                                                                    $fileIcon = 'fa-file-image text-info';
-                                                                                }
-                                                                                $fileSize = $file->kichThuoc ?? 0;
-                                                                                $fileSizeFormatted = $fileSize > 0 ? number_format($fileSize / 1024, 2) . ' KB' : '—';
-                                                                            @endphp
-                                                                            <i class="fa {{ $fileIcon }} me-2" style="font-size: 18px;"></i>
-                                                                            <div>
-                                                                                <a href="{{ asset('storage/' . $file->duongDan) }}" target="_blank" class="text-decoration-none fw-bold">
-                                                                                    {{ $file->tenTep }}
-                                                                                </a>
-                                                                                <div class="small text-muted">
-                                                                                    <i class="fa fa-calendar"></i> {{ \Carbon\Carbon::parse($file->ngayTai)->format('d/m/Y H:i') }}
-                                                                                    <span class="ms-2">
-                                                                                        <i class="fa fa-hdd-o"></i> {{ $fileSizeFormatted }}
-                                                                                    </span>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <a href="{{ asset('storage/' . $file->duongDan) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                                            <i class="fa fa-download"></i> Tải xuống
+                        @endforeach
+                        @if($allGiayTosCoFile->isNotEmpty())
+                            <div class="table-responsive rounded">
+                                <table class="table table-sm table-bordered table-hover">
+                                    <thead class="table-dark" style="height: 40px;">
+                                        <tr>
+                                            <th style="width: 5%;" class="text-white">STT</th>
+                                            <th style="width: 60%;"class="text-white">Tên giấy tờ</th>
+                                            <th style="width: 35%;"class="text-white">File đã nộp</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($allGiayTosCoFile as $giayTo)
+                                            <tr>
+                                                <td class="text-center">{{ $giayTo->stt }}</td>
+                                                <td>
+                                                    <p style="text-align:justify;">{{ $giayTo->tenGiayTo }}</p>
+                                                </td>
+                                                <td>
+                                                    @foreach($giayTo->files as $file)
+                                                        <div class="mb-2 p-2 bg-light rounded border">
+                                                            <div class="d-flex align-items-center justify-content-between">
+                                                                <div class="d-flex align-items-center">
+                                                                    @php
+                                                                        $fileExtension = strtolower(pathinfo($file->tenTep, PATHINFO_EXTENSION));
+                                                                        $fileIcon = 'fa-file';
+                                                                        if (in_array($fileExtension, ['pdf'])) {
+                                                                            $fileIcon = 'fa-file-pdf text-danger';
+                                                                        } elseif (in_array($fileExtension, ['doc', 'docx'])) {
+                                                                            $fileIcon = 'fa-file-word text-primary';
+                                                                        } elseif (in_array($fileExtension, ['xls', 'xlsx'])) {
+                                                                            $fileIcon = 'fa-file-excel text-success';
+                                                                        } elseif (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                                                                            $fileIcon = 'fa-file-image text-info';
+                                                                        }
+                                                                        $fileSize = $file->kichThuoc ?? 0;
+                                                                        $fileSizeFormatted = $fileSize > 0 ? number_format($fileSize / 1024, 2) . ' KB' : '—';
+                                                                    @endphp
+                                                                    <i class="fa {{ $fileIcon }} me-2" style="font-size: 18px;"></i>
+                                                                    <div>
+                                                                        <a href="{{ asset('storage/' . $file->duongDan) }}" target="_blank" class="text-decoration-none fw-bold">
+                                                                            {{ $file->tenTep }}
                                                                         </a>
+                                                                        <div class="small text-muted">
+                                                                            <i class="fa fa-calendar"></i> {{ \Carbon\Carbon::parse($file->ngayTai)->format('d/m/Y H:i') }}
+                                                                            <span class="ms-2">
+                                                                                <i class="fa fa-hdd-o"></i> {{ $fileSizeFormatted }}
+                                                                            </span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            @endforeach
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            @endif
-                        @empty
-                            <p class="text-muted">Không có thành phần hồ sơ</p>
-                        @endforelse
+                                                                <a href="{{ asset('storage/' . $file->duongDan) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                    <i class="fa fa-download"></i> Tải xuống
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
                         @if(!$hasAnyFiles)
                             <div class="alert alert-info text-center">
                                 <i class="fa fa-info-circle"></i> Chưa có giấy tờ nào được nộp kèm file.
@@ -722,7 +724,7 @@
 
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Thông tin lệ phí</h5>
+                        <h5 class="mb-0 text-white">Thông tin lệ phí</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -837,6 +839,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return isValid;
     }
 
+
+    // Kiểm tra nếu đã nộp thành công, tự động chuyển sang step 4
+    @if(isset($isSuccess) && $isSuccess)
+        currentStep = 4;
+    @endif
 
     showStep(currentStep);
 
@@ -996,6 +1003,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 e.target.value = 1;
             }
             tinhThanhTien();
+            // Nếu đang chọn thanh toán QR, cập nhật lại QR code
+            if (hinhThucThanhToan && hinhThucThanhToan.value === 'Thanh toán QR') {
+                generateQRCode();
+            }
         }
     });
 
@@ -1180,6 +1191,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 showPaymentSuccessNotification(maGiaoDich, amountToFind);
 
                 isPaymentChecked = true;
+
+                // Lưu mã giao dịch vào hidden input để submit cùng form
+                // Lịch sử thanh toán sẽ được lưu khi submit form thành công
+                if (maGiaoDichInput) {
+                    maGiaoDichInput.value = maGiaoDich;
+                }
             } else {
                 const paymentStatusEl = document.getElementById('paymentStatus');
                 if (paymentStatusEl && paymentCheckInterval) {
@@ -1256,6 +1273,13 @@ document.addEventListener("DOMContentLoaded", function () {
     let isPaymentChecked = false;
 
     function generateQRCode() {
+        // Kiểm tra xem có chọn "Thanh toán QR" không
+        if (!hinhThucThanhToan || hinhThucThanhToan.value !== 'Thanh toán QR') {
+            qrPaymentSection.style.display = 'none';
+            stopPaymentCheck();
+            return;
+        }
+
         const tongLePhiEl = document.getElementById('tongLePhi');
         let tongTien = 0;
         if (tongLePhiEl) {
@@ -1303,9 +1327,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Tự động hiển thị QR code khi có số tiền
+    // Xử lý khi thay đổi hình thức thanh toán
     if (hinhThucThanhToan) {
-        // Kiểm tra và hiển thị QR code ngay khi trang load
+        hinhThucThanhToan.addEventListener('change', function() {
+            generateQRCode();
+        });
+
+        // Kiểm tra và hiển thị QR code khi trang load (nếu đã chọn "Thanh toán QR")
         setTimeout(function() {
             generateQRCode();
         }, 500);
@@ -1339,10 +1367,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             // Kiểm tra nếu có tiền nhưng chưa thanh toán
-            if (tongTien > 0 && !isPaymentChecked) {
-                alert('Vui lòng quét mã QR và thanh toán trước khi nộp hồ sơ. Hệ thống đang tự động kiểm tra thanh toán của bạn.');
-                return;
-            }
+            // if (tongTien > 0 && !isPaymentChecked) {
+            //     alert('Vui lòng quét mã QR và thanh toán trước khi nộp hồ sơ. Hệ thống đang tự động kiểm tra thanh toán của bạn.');
+            //     return;
+            // }
 
             // Luôn submit về route nop-ho-so.submit
             form.action = '{{ route("nop-ho-so.submit", ["maTTHC" => $tthc->maTTHC ?? ""]) }}';
@@ -1351,9 +1379,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ========== TỰ ĐỘNG HIỂN THỊ STEP 4 NẾU THÀNH CÔNG ==========
-    if(isset($isSuccess) && $isSuccess)
-        currentStep = 4;
-        showStep(4);
+    @if(isset($isSuccess) && $isSuccess)
         // Đánh dấu tất cả các step trước đó là completed
         document.querySelectorAll('.step').forEach((s, i) => {
             if (i < 3) {
@@ -1361,6 +1387,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 s.querySelector('.circle').innerHTML = '<i class="fa fa-check"></i>';
             }
         });
+    @endif
 });
 </script>
 @endsection

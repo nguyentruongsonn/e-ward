@@ -9,6 +9,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SubmitController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\PaymentController;
 
@@ -84,16 +85,44 @@ if (app()->environment('local')) {
     });
 }
 Route::view('/404', 'pages.404')->name('404');
-Route::view('/admin/login', 'admin.login')->name('admin.login');
-Route::view('/appointment/{id}', 'pages.appointment')->name('appointment');
+
+// Admin routes
+Route::prefix('admin')->group(function () {
+    Route::get('/login', [AdminController::class, 'showLogin'])->name('admin.login');
+    Route::post('/login', [AdminController::class, 'login'])->name('admin.login.submit');
+    
+    // Admin routes cần authentication và middleware admin
+    Route::middleware(['auth', 'admin'])->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::post('/logout', [AdminController::class, 'logout'])->name('admin.logout');
+        
+        // Quản lý hồ sơ
+        Route::get('/hosoxuly', [AdminController::class, 'indexHoSo'])->name('admin.hosoxuly.index');
+        Route::post('/hosoxuly/{maHSXL}/trangthai', [AdminController::class, 'updateTrangThai'])->name('admin.hosoxuly.updateTrangThai');
+    });
+});
+
+// Đặt lịch nộp hồ sơ
+Route::middleware('auth')->group(function () {
+    Route::get('/appointment/{id}', [LichHenController::class, 'show'])->name('appointment');
+    Route::post('/appointment/{id}', [LichHenController::class, 'store'])->name('appointment.store');
+    Route::get('/appointment/{id}/available-slots', [LichHenController::class, 'getAvailableSlots'])->name('appointment.available-slots');
+});
+
+// Check-in lịch hẹn (không cần auth vì dùng token)
+Route::get('/appointment/checkin/{token}', [LichHenController::class, 'checkin'])->name('appointment.checkin');
+Route::post('/appointment/checkin/{token}', [LichHenController::class, 'processCheckin'])->name('appointment.checkin.process');
 
 
 
 Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 
-// Nộp hồ sơ trực tuyến (API)
-Route::get('/nop-ho-so/{maTTHC}', [SubmitController::class, 'showByTTHC'])->name('nop-ho-so.show');
-Route::post('/nop-ho-so/{maTTHC}', [SubmitController::class, 'submitApi'])->name('nop-ho-so.submit');
+// Nộp hồ sơ trực tuyến (yêu cầu đăng nhập)
+Route::middleware('auth')->group(function () {
+    Route::get('/nop-ho-so/{maTTHC}', [SubmitController::class, 'showByTTHC'])->name('nop-ho-so.show');
+    Route::post('/nop-ho-so/{maTTHC}', [SubmitController::class, 'submitApi'])->name('nop-ho-so.submit');
+    Route::post('/nop-ho-so/payment/save', [SubmitController::class, 'savePaymentHistory'])->name('nop-ho-so.payment.save');
+});
 // // Auth routes (giả sử đã cài Laravel Breeze hoặc Auth)
 // Route::post('/login', [LoginController::class, 'login'])->name('login');
 // Route::post('/register', [RegisterController::class, 'register'])->name('register');
