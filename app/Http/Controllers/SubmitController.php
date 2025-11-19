@@ -204,47 +204,38 @@ class SubmitController extends Controller
             'soDienThoai' => ['required', 'string', 'max:10'],
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first(),
-            ], 422);
-        }
+            // 3. CHUẨN BỊ DỮ LIỆU ĐỂ LƯU VÀO DATABASE
+            $form = DB::table('formtructuyen')->where('maTTHC', $maTTHC)->first();
+            $donViXuLy = DB::table('tthc')->where('maTTHC', $maTTHC)->value('coQuanThucHien') ?? 'Bộ phận Một cửa';
 
-        // Lấy IDCD từ người dùng hiện tại đang đăng nhập
-        $authUser = Auth::user();
-        $nguoi = null;
-        
-        if ($authUser instanceof \App\Models\Nguoi) {
-            $nguoi = $authUser;
-        } else {
-            $nguoi = $authUser->nguoi ?? null;
-        }
-        
-        if (!$nguoi) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.',
-            ], 422);
-        }
-        
-        // Lấy hoặc tạo công dân
-        $congDan = DB::table('congdan')
-            ->where('IDnguoiDung', $nguoi->IDnguoiDung)
-            ->first();
-        
-        if (!$congDan) {
-            $IDCD = DB::table('congdan')->insertGetId([
-                'IDnguoiDung' => $nguoi->IDnguoiDung,
-            ]);
-        } else {
-            $IDCD = $congDan->IDCD;
-        }
-        $maTrangThai = DB::table('trangthaihoso')->value('maTrangThai');
-        if (!$maTrangThai) {
-            $maTrangThai = DB::table('trangthaihoso')->insertGetId(['tenTrangThai' => 'Mới nộp']);
-        }
-        $donViXuLy = DB::table('tthc')->where('maTTHC', $maTTHC)->value('coQuanThucHien') ?? 'Bộ phận Một cửa';
+            // Lấy IDCD từ người dùng đang đăng nhập
+            $authUser = Auth::user();
+            $nguoi = null;
+
+            if ($authUser instanceof \App\Models\Nguoi) {
+                $nguoi = $authUser;
+            } else {
+                $nguoi = $authUser->nguoi ?? null;
+            }
+
+            if (!$nguoi) {
+                return redirect()->back()
+                    ->with('error', 'Vui lòng đăng nhập để nộp hồ sơ.')
+                    ->withInput();
+            }
+
+            $congDan = DB::table('congdan')
+                ->where('IDnguoiDung', $nguoi->IDnguoiDung)
+                ->first();
+
+            // Nếu chưa có bản ghi công dân, tự động tạo
+            if (!$congDan) {
+                $IDCD = DB::table('congdan')->insertGetId([
+                    'IDnguoiDung' => $nguoi->IDnguoiDung,
+                ]);
+            } else {
+                $IDCD = $congDan->IDCD;
+            }
 
         // Tạo mã hồ sơ xử lý (maHSXL) duy nhất
         do {
@@ -293,7 +284,7 @@ class SubmitController extends Controller
             'dulieu' => json_encode($payload),
             'ngayTiepNhan' => null,
             'ngayHenTra' => null,
-            'maTrangThai' => $maTrangThai,
+            'maTrangThai' => 1,
             'ngayTra' => null,
             'hanBoSung' => null,
             'thongTinTra' => null,

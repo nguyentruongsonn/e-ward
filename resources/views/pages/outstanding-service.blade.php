@@ -8,12 +8,12 @@
             <input class="form-control me-2" type="search" placeholder="Nhập từ khóa tìm kiếm" aria-label="Search">
             <button class="btn btn-primary" type="submit">TÌM KIẾM</button>
         </form>
-        <nav aria-label="breadcrumb" class="mt-3">
+        <!-- <nav aria-label="breadcrumb" class="mt-3">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a class="text-white" href="{{ route('home') }}">TRANG CHỦ</a></li>
                 <li class="breadcrumb-item"><a class="text-white" href="#">DỊCH VỤ CÔNG NỔI BẬT</a></li>
             </ol>
-        </nav>
+        </nav> -->
     </div>
 </div>
 

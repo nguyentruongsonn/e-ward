@@ -144,84 +144,104 @@
                             </div>
 
                             @foreach($group['fields'] as $field)
-                            @if(isset($field['type']) && $field['type'] === 'row')
-                                <div class="col-12">
-                                    <div class="row g-3 mb-2">
-                                        @foreach(($field['columns'] ?? []) as $column)
-                                            @php
-                                                $c_name = $column['name'] ?? \Illuminate\Support\Str::slug($column['label'] ?? 'field', '_');
-                                                $c_label = $column['label'] ?? '';
-                                                $c_required = isset($column['required']) && $column['required'];
-                                                $c_attributes = $column['attributes'] ?? [];
-                                            @endphp
-                                            <div class="{{ 'col-md-' . ($column['col'] ?? '6') }}">
-                                                {{-- Thêm class 'required' nếu trường là bắt buộc --}}
-                                                <label for="{{ $c_name }}" class="form-label @if($c_required) required @endif">{{ $c_label }}</label>
+                                @if(isset($field['type']) && $field['type'] === 'row')
+                                    <div class="col-12">
+                                        @if(isset($field['title']) && !empty($field['title']))
+                                            <h6 class="mt-3 mb-2 fw-bold" style="color: #0d6efd;">{{ $field['title'] }}</h6>
+                                        @endif
 
-                                                @switch($column['type'] ?? 'text')
-                                                    @case('select')
-                                                        <select
-                                                            class="form-select"
-                                                            name="{{ $c_name }}"
-                                                            id="{{ $c_name }}"
-                                                            @if($c_required) required @endif
-                                                            {{-- Thêm các attributes động như data-* --}}
-                                                            @foreach($c_attributes as $attr => $val) {{ $attr }}="{{ $val }}" @endforeach
-                                                        >
-                                                            <option value="">-- Vui lòng chọn --</option>
-                                                            {{-- Sửa lại để dùng key-value --}}
-                                                            @foreach($column['options'] ?? [] as $key => $value)
-                                                                <option value="{{ $key }}">{{ $value }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                        @break
-                                                    @default
-                                                        <input
-                                                            type="{{ $column['type'] ?? 'text' }}"
-                                                            class="form-control"
-                                                            name="{{ $c_name }}"
-                                                            id="{{ $c_name }}"
-                                                            @if($c_required) required @endif
-                                                            {{-- Thêm các attributes động --}}
-                                                            @foreach($c_attributes as $attr => $val) {{ $attr }}="{{ $val }}" @endforeach
-                                                        >
-                                                @endswitch
-                                            </div>
-                                        @endforeach
+                                        <div class="row g-3 mb-2">
+                                            @foreach(($field['columns'] ?? []) as $column)
+                                                @php
+                                                    $c_name = $column['name'] ?? \Illuminate\Support\Str::slug($column['label'] ?? 'field', '_');
+                                                    $c_label = $column['label'] ?? '';
+                                                    $c_required = isset($column['required']) && $column['required'];
+                                                    $c_attributes = $column['attributes'] ?? [];
+                                                @endphp
+                                                <div class="{{ 'col-md-' . ($column['col'] ?? '6') }}">
+                                                    <label for="{{ $c_name }}" class="form-label @if($c_required) required @endif">{{ $c_label }}</label>
+
+                                                    @switch($column['type'] ?? 'text')
+                                                        @case('select')
+                                                            <select
+                                                                class="form-select"
+                                                                name="{{ $c_name }}"
+                                                                id="{{ $c_name }}"
+                                                                @if($c_required) required @endif
+                                                                @foreach($c_attributes as $attr => $val) {{ $attr }}="{{ $val }}" @endforeach
+                                                            >
+                                                                <option value="">-- Vui lòng chọn --</option>
+                                                                @foreach($column['options'] ?? [] as $key => $value)
+                                                                    <option value="{{ is_int($key) ? $value : $key }}">{{ $value }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            @break
+                                                        @default
+                                                            <input
+                                                                type="{{ $column['type'] ?? 'text' }}"
+                                                                class="form-control"
+                                                                name="{{ $c_name }}"
+                                                                id="{{ $c_name }}"
+                                                                @if($c_required) required @endif
+                                                                {{-- ============================================= --}}
+                                                                {{-- THÊM CÁC DÒNG NÀY --}}
+                                                                {{-- ============================================= --}}
+                                                                @if(isset($column['placeholder'])) placeholder="{{ $column['placeholder'] }}" @endif
+                                                                @if(isset($column['min'])) min="{{ $column['min'] }}" @endif
+                                                                @if(isset($column['max'])) max="{{ $column['max'] }}" @endif
+                                                                {{-- ============================================= --}}
+                                                                @foreach($c_attributes as $attr => $val) {{ $attr }}="{{ $val }}" @endforeach
+                                                            >
+                                                    @endswitch
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
-                                </div>
-                            @else
-                                @php
-                                    $f_name = $field['name'] ?? \Illuminate\Support\Str::slug($field['label'] ?? 'field', '_');
-                                    $f_label = $field['label'] ?? '';
-                                    $f_required = isset($field['required']) && $field['required'];
-                                @endphp
-                                <div class="col-12 mb-3">
-                                    <label class="form-label @if($f_required) required @endif">{{ $f_label }}</label>
-                                    @switch($field['type'] ?? 'text')
-                                        @case('radio')
-                                            <div class="d-flex flex-wrap gap-4 mt-2">
-                                                @foreach($field['options'] ?? [] as $index => $opt)
-                                                    <div class="form-check">
-                                                        <input class="" type="radio" name="{{ $f_name }}" id="{{ $f_name }}_{{ $index }}" value="{{ $opt }}" @if($f_required && $loop->first) required @endif>
-                                                        <label class="" for="{{ $f_name }}_{{ $index }}">{{ $opt }}</label>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                            @break
-                                        @default
-                                            <input type="{{ $field['type'] ?? 'text' }}" class="form-control" name="{{ $f_name }}" id="{{ $f_name }}" @if($f_required) required @endif>
-                                    @endswitch
-                                </div>
-                            @endif
-                        @endforeach
+                                @else
+                                    @php
+                                        $f_name = $field['name'] ?? \Illuminate\Support\Str::slug($field['label'] ?? 'field', '_');
+                                        $f_label = $field['label'] ?? '';
+                                        $f_required = isset($field['required']) && $field['required'];
+                                    @endphp
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label @if($f_required) required @endif">{{ $f_label }}</label>
+                                        @switch($field['type'] ?? 'text')
+                                            @case('radio')
+                                                <div class="d-flex flex-wrap gap-4 mt-2">
+                                                    @foreach($field['options'] ?? [] as $index => $opt)
+                                                        <div class="form-check">
+                                                            <input class="" type="radio" name="{{ $f_name }}" id="{{ $f_name }}_{{ $index }}" value="{{ $opt }}" @if($f_required && $loop->first) required @endif>
+                                                            <label class="" for="{{ $f_name }}_{{ $index }}">{{ $opt }}</label>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                                @break
+                                            @default
+                                                <input
+                                                    type="{{ $field['type'] ?? 'text' }}"
+                                                    class="form-control"
+                                                    name="{{ $f_name }}"
+                                                    id="{{ $f_name }}"
+                                                    @if($f_required) required @endif
+                                                    {{-- ============================================= --}}
+                                                    {{-- THÊM CÁC DÒNG NÀY (CHO TRƯỜNG ĐƠN LẺ) --}}
+                                                    {{-- ============================================= --}}
+                                                    @if(isset($field['placeholder'])) placeholder="{{ $field['placeholder'] }}" @endif
+                                                    @if(isset($field['min'])) min="{{ $field['min'] }}" @endif
+                                                    @if(isset($field['max'])) max="{{ $field['max'] }}" @endif
+                                                    {{-- ============================================= --}}
+                                                >
+                                        @endswitch
+                                    </div>
+                                @endif
+                            @endforeach
+                        @endif
+                    @endforeach
+                    @else
+                        <div class="col-12">
+                            <p class="text-muted">Không có thông tin form để hiển thị.</p>
+                        </div>
                     @endif
-                @endforeach
-                @else
-                    <div class="col-12">
-                        <p class="text-muted">Không có thông tin form để hiển thị.</p>
-                    </div>
-                @endif
             </div>
 
             <div class="d-flex justify-content-between mt-3">
@@ -229,6 +249,8 @@
                 <button type="button" class="btn btn-primary next-step">Tiếp tục</button>
             </div>
         </div>
+
+
 
         {{-- ========================== STEP 2 ========================== --}}
         <div class="form-section hidden" data-step="2">
@@ -674,7 +696,7 @@
                                                             <div class="d-flex align-items-center justify-content-between">
                                                                 <div class="d-flex align-items-center">
                                                                     @php
-                                                                        $fileExtension = strtolower(pathinfo($file->tenTep, PATHINFO_EXTENSION));
+                                #                                        $fileExtension = strtolower(pathinfo($file->tenTep, PATHINFO_EXTENSION));
                                                                         $fileIcon = 'fa-file';
                                                                         if (in_array($fileExtension, ['pdf'])) {
                                                                             $fileIcon = 'fa-file-pdf text-danger';
