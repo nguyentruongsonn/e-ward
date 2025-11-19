@@ -11,13 +11,17 @@ class LichHen extends Model
     use HasFactory;
 
     protected $table = 'lichhen';
-    // PRIMARY KEY mặc định là 'id' (không cần khai báo)
+    protected $primaryKey = 'id';
+    protected $keyType = 'string';
+    public $incrementing = false;
+    
     protected $fillable = [
-        'maLichHen', 'IDCD', 'maTTHC', 'maQuayLamViec',
+        'id', 'maLichHen', 'IDCD', 'maTTHC', 'maQuayLamViec',
         'thoiGianHen', 'trangThai', 'checkin_token', 'checkin_time', 'soThuTu'
     ];
 
     protected $casts = [
+        'id' => 'string',
         'checkin_token' => 'string',
         'thoiGianHen' => 'datetime',
         'checkin_time' => 'datetime',
@@ -28,14 +32,24 @@ class LichHen extends Model
         parent::boot();
 
         static::creating(function ($lichhen) {
+            // Tự động tạo UUID cho id nếu chưa có (lưu dưới dạng VARCHAR(255))
+            if (empty($lichhen->id)) {
+                $lichhen->id = (string) Str::uuid();
+            }
+            
             // đảm bảo maLichHen unique
-            do {
-                $rand = random_int(1000, 9999);
-                $ma = 'LH_' . ($lichhen->IDCD ?? '0') . '_' . now()->format('Ymd') . '_' . $rand;
-            } while (self::where('maLichHen', $ma)->exists());
-
-            $lichhen->maLichHen = $ma;
-            $lichhen->checkin_token = (string) Str::uuid();
+            if (empty($lichhen->maLichHen)) {
+                do {
+                    $rand = random_int(1000, 9999);
+                    $ma = 'LH_' . ($lichhen->IDCD ?? '0') . '_' . now()->format('Ymd') . '_' . $rand;
+                } while (self::where('maLichHen', $ma)->exists());
+                $lichhen->maLichHen = $ma;
+            }
+            
+            // Tự động tạo checkin_token nếu chưa có
+            if (empty($lichhen->checkin_token)) {
+                $lichhen->checkin_token = (string) Str::uuid();
+            }
         });
     }
 
