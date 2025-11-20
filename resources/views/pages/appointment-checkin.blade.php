@@ -48,81 +48,45 @@
             </div>
         </div>
 
+        <!-- Hiển thị QR Code để cán bộ quét -->
+        <div class="qr-code-display">
+            <h5 class="text-center mb-3">Mã QR Code để cán bộ quét</h5>
+            @if(isset($lichHen->checkin_token))
+                <div class="text-center mb-3">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ route('admin.appointment.scan', ['token' => $lichHen->checkin_token]) }}" 
+                         alt="QR Code" 
+                         class="img-fluid"
+                         style="max-width: 300px;">
+                </div>
+                <div class="text-center">
+                    <p class="text-muted mb-2"><strong>Token:</strong></p>
+                    <p class="bg-light p-2 rounded" style="word-break: break-all; font-family: monospace; font-size: 12px;">
+                        {{ $lichHen->checkin_token }}
+                    </p>
+                    <small class="text-muted">Vui lòng đưa QR code này cho cán bộ để được check-in</small>
+                </div>
+            @endif
+        </div>
+
         @if($daCheckIn)
-            <div class="alert alert-success text-center">
+            <div class="alert alert-success text-center mt-3">
                 <h4><i class="fa fa-check-circle"></i> Đã check-in thành công!</h4>
                 <div class="so-thu-tu">
                     Số thứ tự: {{ $soThuTu }}
                 </div>
+                @if($quay)
+                    <p class="mb-0"><strong>Quầy:</strong> {{ $quay->tenQuayLamViec }}</p>
+                @endif
                 <p class="mb-0">Vui lòng chờ đến lượt của bạn</p>
             </div>
         @else
-            <div class="text-center">
-                <button type="button" class="btn btn-primary btn-lg" id="btnCheckIn">
-                    <i class="fa fa-qrcode me-2"></i> Check-in ngay
-                </button>
+            <div class="alert alert-info text-center mt-3">
+                <i class="fa fa-info-circle"></i> 
+                <strong>Lưu ý:</strong> Vui lòng đưa QR code trên cho cán bộ để được check-in và nhận số thứ tự.
             </div>
-            <div id="checkinResult" class="mt-3"></div>
         @endif
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const btnCheckIn = document.getElementById('btnCheckIn');
-    const checkinResult = document.getElementById('checkinResult');
-
-    if (btnCheckIn) {
-        btnCheckIn.addEventListener('click', function() {
-            btnCheckIn.disabled = true;
-            btnCheckIn.textContent = 'Đang xử lý...';
-
-            fetch('{{ route("appointment.checkin.process", $lichHen->checkin_token) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    checkinResult.innerHTML = `
-                        <div class="alert alert-success text-center">
-                            <h4><i class="fa fa-check-circle"></i> Check-in thành công!</h4>
-                            <div class="so-thu-tu">
-                                Số thứ tự: ${data.soThuTu}
-                            </div>
-                            <p class="mb-0">Thời gian check-in: ${data.thoiGianCheckIn}</p>
-                            <p class="mb-0"><strong>Quầy:</strong> ${data.tenQuayLamViec}</p>
-                            <p class="mb-0 mt-2">Vui lòng chờ đến lượt của bạn</p>
-                        </div>
-                    `;
-                    btnCheckIn.style.display = 'none';
-                    // Reload sau 2 giây để cập nhật trạng thái
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
-                } else {
-                    checkinResult.innerHTML = `
-                        <div class="alert alert-danger">
-                            <i class="fa fa-exclamation-circle"></i> ${data.message}
-                            ${data.soThuTu ? '<p class="mb-0 mt-2">Số thứ tự của bạn: <strong>' + data.soThuTu + '</strong></p>' : ''}
-                        </div>
-                    `;
-                    btnCheckIn.disabled = false;
-                    btnCheckIn.textContent = '<i class="fa fa-qrcode me-2"></i> Check-in ngay';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                checkinResult.innerHTML = '<div class="alert alert-danger">Có lỗi xảy ra khi check-in</div>';
-                btnCheckIn.disabled = false;
-                btnCheckIn.textContent = '<i class="fa fa-qrcode me-2"></i> Check-in ngay';
-            });
-        });
-    }
-});
-</script>
 @endsection
 

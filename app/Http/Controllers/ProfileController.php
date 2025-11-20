@@ -12,6 +12,7 @@ use App\Models\CongDan;
 use App\Models\TTHC;
 use App\Models\LichSuThanhToan;
 use App\Models\ThongBao;
+use App\Models\LichHen;
 use App\Models\PasswordChangeOtp;
 use App\Mail\PasswordChangeOtpMail;
 use Carbon\Carbon;
@@ -476,6 +477,125 @@ class ProfileController extends Controller
             'html' => $html,
             'hasMore' => $hoSoList->hasMorePages(),
             'nextPage' => $hoSoList->hasMorePages() ? ($page + 1) : null,
+        ]);
+    }
+
+    public function appointments(Request $request)
+    {
+        $authUser = Auth::user();
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+            $user = $authUser->user;
+        } else {
+            $user = $authUser;
+            $nguoi = $user->nguoi;
+        }
+
+        if (!$nguoi) {
+            abort(404, 'Không tìm thấy thông tin người dùng');
+        }
+
+        $congDan = $nguoi->congDan ?? CongDan::create(['IDnguoiDung' => $nguoi->IDnguoiDung]);
+        $IDCD = $congDan->IDCD;
+
+        // Sidebar counters
+        $hoSoHoanThanh = HoSoXuLy::where('IDCD', $IDCD)->whereNotNull('ngayKetThucXuLy')->count();
+        $hoSoDangXuLy = HoSoXuLy::where('IDCD', $IDCD)->whereNull('ngayKetThucXuLy')->count();
+        $unreadCount = $this->getUnreadCount($IDCD);
+
+        // Query lịch hẹn
+        $query = LichHen::where('IDCD', $IDCD)->with(['tthc']);
+
+        // Filter theo trạng thái nếu có
+        if ($request->filled('trang_thai')) {
+            $query->where('trangThai', $request->trang_thai);
+        }
+
+        // Filter theo ngày nếu có
+        if ($request->filled('from_date')) {
+            $query->whereDate('thoiGianHen', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('thoiGianHen', '<=', $request->to_date);
+        }
+
+        // Sắp xếp: lịch hẹn gần nhất lên đầu (càng gần càng hiện đầu)
+        // Sắp xếp tăng dần theo thoiGianHen (gần nhất trước)
+        $appointments = $query->orderBy('thoiGianHen', 'asc')->paginate(5)->withQueryString();
+
+        // Kiểm tra quyền admin
+        $isAdmin = false;
+        if ($nguoi->vaiTro === 'Quản trị viên') {
+            $isAdmin = true;
+        } else {
+            $isAdmin = DB::table('quantrivien')
+                ->where('IDnguoiDung', $nguoi->IDnguoiDung)
+                ->exists();
+        }
+
+        return view('pages.profile', [
+            'user' => $user,
+            'nguoi' => $nguoi,
+            'hoSoHoanThanh' => $hoSoHoanThanh,
+            'hoSoDangXuLy' => $hoSoDangXuLy,
+            'appointments' => $appointments,
+            'unreadCount' => $unreadCount,
+            'activePage' => 'appointments',
+            'isAdmin' => $isAdmin,
+        ]);
+    }
+
+    public function loadMoreAppointments(Request $request)
+    {
+        $authUser = Auth::user();
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+        } else {
+            $user = $authUser;
+            $nguoi = $user->nguoi;
+        }
+
+        if (!$nguoi) {
+            return response()->json(['error' => 'Không tìm thấy thông tin người dùng'], 404);
+        }
+
+        $congDan = $nguoi->congDan;
+        if (!$congDan) {
+            return response()->json(['error' => 'Không tìm thấy thông tin công dân'], 404);
+        }
+
+        $IDCD = $congDan->IDCD;
+        $page = $request->get('page', 2);
+
+        // Xử lý tìm kiếm giống như method appointments
+        $query = LichHen::where('IDCD', $IDCD)->with(['tthc']);
+
+        // Filter theo trạng thái nếu có
+        if ($request->filled('trang_thai')) {
+            $query->where('trangThai', $request->trang_thai);
+        }
+
+        // Filter theo ngày nếu có
+        if ($request->filled('from_date')) {
+            $query->whereDate('thoiGianHen', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('thoiGianHen', '<=', $request->to_date);
+        }
+
+        // Sắp xếp: lịch hẹn gần nhất lên đầu (càng gần càng hiện đầu)
+        $appointments = $query->orderBy('thoiGianHen', 'asc')
+            ->paginate(5, ['*'], 'page', $page);
+
+        // Trả về HTML để append vào bảng
+        $html = view('partials.appointment-items', [
+            'appointments' => $appointments
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'hasMore' => $appointments->hasMorePages(),
+            'nextPage' => $appointments->hasMorePages() ? ($page + 1) : null,
         ]);
     }
 

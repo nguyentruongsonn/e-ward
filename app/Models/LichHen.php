@@ -14,13 +14,14 @@ class LichHen extends Model
     // PRIMARY KEY mặc định là 'id' (không cần khai báo)
     protected $fillable = [
         'maLichHen', 'IDCD', 'maTTHC', 'maQuayLamViec',
-        'thoiGianHen', 'trangThai', 'checkin_token', 'checkin_time', 'soThuTu'
+        'thoiGianHen', 'trangThai', 'checkin_token', 'checkin_time', 'soThuTu', 'reminder_sent_at'
     ];
 
     protected $casts = [
         'checkin_token' => 'string',
         'thoiGianHen' => 'datetime',
         'checkin_time' => 'datetime',
+        'reminder_sent_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -47,5 +48,10 @@ class LichHen extends Model
     public function tthc()
     {
         return $this->belongsTo(TTHC::class, 'maTTHC');
+    }
+
+    public function quaylamviec()
+    {
+        return $this->belongsTo(QuayLamViec::class, 'maQuayLamViec');
     }
 }
