@@ -182,6 +182,14 @@
                                         id="notificationBadge" style="display: none;">0</span>
                                 @endif
                             </a>
+                            @if(isset($isAdmin) && $isAdmin)
+                                <hr class="dropdown-divider">
+                                <a href="{{ route('admin.dashboard') }}" 
+                                   class="list-group-item profile-menu-item" 
+                                   style="color: #d9534f; font-weight: bold;">
+                                    <i class="fas fa-tachometer-alt me-2"></i> Vào trang quản trị
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -412,7 +420,6 @@
                                                 <th>Tên dịch vụ</th>
                                                 <th>Ngày tiếp nhận</th>
                                                 <th>Ngày hẹn trả</th>
-                                                <th>Ngày hẹn gần nhất</th>
                                                 <th>Trạng thái</th>
                                                 <th>Thao tác</th>
                                             </tr>
@@ -763,326 +770,57 @@
                     }
                     const row = btn.closest('tr');
                     const url = row ? row.getAttribute('data-detail-url') : null;
-                    
-                    // Debug: log URL and check if it contains '0'
-                    console.log('URL from data-detail-url:', url);
-                    console.log('Row element:', row);
-                    console.log('Button element:', btn);
-                    
-                    // Also try to get maHSXL from button data attribute
-                    const maHSXLFromButton = btn.getAttribute('data-ma-hsxl');
-                    console.log('maHSXL from button:', maHSXLFromButton);
-                    
-                    if (!url || url.includes('/0') || url.endsWith('/0')) {
-                        console.error('URL không hợp lệ:', url);
-                        alert('Không tìm thấy thông tin chi tiết hồ sơ. Vui lòng làm mới trang và thử lại.');
-                        return;
-                    }
-                    
-                    // Validate URL doesn't end with /0
-                    if (url.match(/\/0(\?|$)/)) {
-                        console.error('URL có mã hồ sơ = 0:', url);
-                        alert('Mã hồ sơ không hợp lệ. Vui lòng liên hệ bộ phận hỗ trợ.');
-                        return;
-                    }
-                    
-                    // Show loading state in modal
-                    if (!modalEl) {
-                        console.error('Không tìm thấy modal element');
-                        alert('Không thể hiển thị modal. Vui lòng làm mới trang.');
-                        return;
-                    }
-                    
-                    // Set loading content and show modal immediately
-                    modalTitle.textContent = 'Đang tải...';
-                    modalBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div><p class="mt-2 text-muted">Vui lòng chờ...</p></div>';
-                    
-                    // Show modal first with loading state
-                    const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                    bsModal.show();
-                    
+                    if (!url) return;
                     try {
                         const res = await fetch(url, {
                             headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
+                                'Accept': 'application/json'
                             }
                         });
-                        
-                        // Parse JSON response (only once)
-                        let data;
-                        try {
-                            data = await res.json();
-                        } catch (jsonError) {
-                            console.error('Lỗi parse JSON:', jsonError);
-                            throw new Error(`Lỗi ${res.status}: Không thể đọc dữ liệu từ server`);
-                        }
-                        
-                        // Check if response is an error
-                        if (!res.ok || data.error) {
-                            const errorMessage = data.message || data.error || `Lỗi ${res.status}: Không thể tải chi tiết hồ sơ`;
-                            console.error('Lỗi từ server:', res.status, errorMessage);
-                            throw new Error(errorMessage);
-                        }
-                        
-                        console.log('Dữ liệu nhận được:', data);
-                        
-                        if (!data || !data.type) {
-                            console.error('Dữ liệu không hợp lệ:', data);
-                            throw new Error('Dữ liệu không hợp lệ. Vui lòng thử lại.');
-                        }
-                        
-                        // Kiểm tra loại modal: 'appointment' (đặt lịch) hoặc 'service' (nộp hồ sơ)
-                        if (data.type === 'appointment') {
-                            // Modal cho đặt lịch hẹn
-                            modalTitle.textContent = `Chi tiết lịch hẹn - ${data.tenTTHC || ''}`;
-                            
-                            const lichHenHtml = (data.lichHenList && data.lichHenList.length)
-                                ? data.lichHenList.map(item => {
-                                    const statusBadge = item.trangThai === 'Đã đặt lịch' ? 'bg-info' 
-                                        : item.trangThai === 'Chờ đến' ? 'bg-warning' 
-                                        : item.trangThai === 'Đang xử lý' ? 'bg-primary' 
-                                        : item.trangThai === 'Hoàn thành' ? 'bg-success' 
-                                        : 'bg-secondary';
-                                    
-                                    return `
-                                        <div class="card mb-3 border-primary">
-                                            <div class="card-header bg-light">
-                                                <h6 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Lịch hẹn: ${item.maLichHen ?? 'N/A'}</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-clock me-2"></i>Thời gian hẹn:</strong>
-                                                        <div class="mt-1">${item.thoiGianHen ?? 'N/A'}</div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-info-circle me-2"></i>Trạng thái:</strong>
-                                                        <div class="mt-1">
-                                                            <span class="badge ${statusBadge}">${item.trangThai ?? 'N/A'}</span>
-                                                        </div>
-                                                    </div>
-                                                    ${item.soThuTu ? `
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-sort-numeric-up me-2"></i>Số thứ tự:</strong>
-                                                        <div class="mt-1"><span class="badge bg-dark">${item.soThuTu}</span></div>
-                                                    </div>
-                                                    ` : ''}
-                                                    ${item.tenQuayLamViec ? `
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-door-open me-2"></i>Quầy làm việc:</strong>
-                                                        <div class="mt-1">${item.tenQuayLamViec} <small class="text-muted">(Mã: ${item.maQuayLamViec})</small></div>
-                                                    </div>
-                                                    ` : item.maQuayLamViec ? `
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-door-open me-2"></i>Mã quầy:</strong>
-                                                        <div class="mt-1">${item.maQuayLamViec}</div>
-                                                    </div>
-                                                    ` : `
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-door-open me-2"></i>Quầy làm việc:</strong>
-                                                        <div class="mt-1"><span class="text-muted">Chưa được chọn (sẽ chọn khi check-in)</span></div>
-                                                    </div>
-                                                    `}
-                                                    ${item.checkin_time ? `
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-check-circle me-2 text-success"></i>Thời gian check-in:</strong>
-                                                        <div class="mt-1">${item.checkin_time}</div>
-                                                    </div>
-                                                    ` : ''}
-                                                    ${item.checkin_token ? `
-                                                    <div class="col-12">
-                                                        <strong><i class="fas fa-key me-2"></i>Mã check-in:</strong>
-                                                        <div class="mt-1">
-                                                            <code class="small bg-light p-2 rounded d-inline-block">${item.checkin_token}</code>
-                                                        </div>
-                                                    </div>
-                                                    ` : ''}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')
-                                : '<p class="mb-0 text-muted text-center py-3">Chưa có lịch hẹn.</p>';
-                            
-                            modalBody.innerHTML = `
-                                <div>
-                                    <div class="alert alert-info mb-3">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        <strong>Thông tin:</strong> Đây là hồ sơ được tạo tự động khi đặt lịch hẹn.
-                                    </div>
-                                    <h5 class="mb-3"><i class="fas fa-list me-2"></i>Danh sách lịch hẹn</h5>
-                                    ${lichHenHtml}
-                                </div>
-                            `;
-                        } else {
-                            // Modal cho nộp hồ sơ trực tuyến
-                            const lichHenHtml = (data.lichHenList && data.lichHenList.length)
-                                ? data.lichHenList.map(item => {
-                                    const statusBadge = item.trangThai === 'Đã đặt lịch' ? 'bg-info' 
-                                        : item.trangThai === 'Chờ đến' ? 'bg-warning' 
-                                        : item.trangThai === 'Đang xử lý' ? 'bg-primary' 
-                                        : item.trangThai === 'Hoàn thành' ? 'bg-success' 
-                                        : 'bg-secondary';
-                                    
-                                    return `
-                                        <div class="card mb-2 border-secondary">
-                                            <div class="card-body">
-                                                <div class="row g-2">
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-calendar-alt me-2"></i>Mã lịch hẹn:</strong>
-                                                        <div class="mt-1">${item.maLichHen ?? 'N/A'}</div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-clock me-2"></i>Thời gian hẹn:</strong>
-                                                        <div class="mt-1">${item.thoiGianHen ?? 'N/A'}</div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-info-circle me-2"></i>Trạng thái:</strong>
-                                                        <div class="mt-1">
-                                                            <span class="badge ${statusBadge}">${item.trangThai ?? 'N/A'}</span>
-                                                        </div>
-                                                    </div>
-                                                    ${item.soThuTu ? `
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-sort-numeric-up me-2"></i>Số thứ tự:</strong>
-                                                        <div class="mt-1"><span class="badge bg-dark">${item.soThuTu}</span></div>
-                                                    </div>
-                                                    ` : ''}
-                                                    ${item.tenQuayLamViec ? `
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-door-open me-2"></i>Quầy làm việc:</strong>
-                                                        <div class="mt-1">${item.tenQuayLamViec} <small class="text-muted">(Mã: ${item.maQuayLamViec})</small></div>
-                                                    </div>
-                                                    ` : item.maQuayLamViec ? `
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-door-open me-2"></i>Mã quầy:</strong>
-                                                        <div class="mt-1">${item.maQuayLamViec}</div>
-                                                    </div>
-                                                    ` : ''}
-                                                    ${item.checkin_time ? `
-                                                    <div class="col-md-6">
-                                                        <strong><i class="fas fa-check-circle me-2 text-success"></i>Thời gian check-in:</strong>
-                                                        <div class="mt-1">${item.checkin_time}</div>
-                                                    </div>
-                                                    ` : ''}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')
-                                : '<p class="mb-0 text-muted text-center py-3">Chưa có lịch hẹn.</p>';
-                            
-                            modalTitle.textContent = `Hồ sơ ${data.maHSXL} - ${data.tenTTHC || ''}`;
-                            modalBody.innerHTML = `
-                                <div class="row g-3">
-                                    <div class="col-md-6"><strong>Tên chủ hồ sơ:</strong> ${data.tenChuHoSo ?? ''}</div>
-                                    <div class="col-md-6"><strong>SĐT:</strong> ${data.soDienThoai ?? ''}</div>
-                                    <div class="col-md-6"><strong>Email:</strong> ${data.email ?? ''}</div>
-                                    <div class="col-md-6"><strong>Đơn vị xử lý:</strong> ${data.donViXuLy ?? ''}</div>
-                                    <div class="col-md-4"><strong>Ngày tiếp nhận:</strong> ${data.ngayTiepNhan ?? ''}</div>
-                                    <div class="col-md-4"><strong>Ngày hẹn trả:</strong> ${data.ngayHenTra ?? ''}</div>
-                                    <div class="col-md-4"><strong>Ngày kết thúc:</strong> ${data.ngayKetThucXuLy ?? ''}</div>
-                                    <div class="col-md-4"><strong>Trạng thái:</strong> ${data.maTrangThai ?? ''}</div>
-                                    <div class="col-md-4"><strong>Lệ phí:</strong> ${data.lePhi ?? ''}</div>
-                                    <div class="col-md-4"><strong>Hình thức:</strong> ${data.hinhThuc ?? ''}</div>
-                                    ${(() => {
-                                        // Nếu có "Danh sách đã nộp", ẩn 3 trường này ở ngoài (chỉ hiển thị trong danh sách)
-                                        const hasDanhSachNop = data.danhSachNop && data.danhSachNop.length > 0;
-                                        if (hasDanhSachNop) {
-                                            return '';
-                                        }
-                                        // Nếu không có danh sách, hiển thị bình thường
-                                        return `
-                                            ${data.thongTinTra ? `<div class="col-12"><strong>Thông tin trả:</strong><div class="border rounded p-2 bg-light">${(data.thongTinTra ?? '').toString()}</div></div>` : ''}
-                                            ${data.ghiChu ? `<div class="col-12"><strong>Ghi chú:</strong><div class="border rounded p-2 bg-light">${(data.ghiChu ?? '').toString()}</div></div>` : ''}
-                                            ${(Array.isArray(data.dulieu) || (data.dulieu && typeof data.dulieu === 'object')) ? `
-                                                <div class="col-12"><strong>Dữ liệu hồ sơ:</strong>
-                                                    <pre id="dulieu-json" class="bg-light border rounded p-2" style="white-space: pre-wrap;"></pre>
-                                                </div>
-                                            ` : ''}
-                                        `;
-                                    })()}
-                                    ${(data.lichHenList && data.lichHenList.length > 0) ? `
-                                    <div class="col-12"><strong>Lịch hẹn liên quan:</strong>
-                                        <div class="mt-2">
-                                            ${lichHenHtml}
-                                        </div>
-                                    </div>
-                                    ` : ''}
-                                    ${(data.danhSachNop && data.danhSachNop.length > 0) ? `
-                                    <div class="col-12"><strong>Danh sách đã nộp:</strong>
-                                        <div class="mt-2">
-                                            ${data.danhSachNop.map((item, index) => {
-                                                const statusBadge = item.trangThai === 'Đã hoàn thành' ? 'bg-success' : 'bg-warning';
-                                                return `
-                                                    <div class="card mb-3 border-secondary">
-                                                        <div class="card-body">
-                                                            <div class="row g-3">
-                                                                <div class="col-md-6"><strong>Tên chủ hồ sơ:</strong> ${item.tenChuHoSo ?? ''}</div>
-                                                                <div class="col-md-6"><strong>SĐT:</strong> ${item.soDienThoai ?? ''}</div>
-                                                                <div class="col-md-6"><strong>Email:</strong> ${item.email ?? ''}</div>
-                                                                <div class="col-md-6"><strong>Đơn vị xử lý:</strong> ${item.donViXuLy ?? ''}</div>
-                                                                <div class="col-md-4"><strong>Ngày tiếp nhận:</strong> ${item.ngayTiepNhan ?? ''}</div>
-                                                                <div class="col-md-4"><strong>Ngày hẹn trả:</strong> ${item.ngayHenTra ?? ''}</div>
-                                                                <div class="col-md-4"><strong>Ngày kết thúc:</strong> ${item.ngayKetThucXuLy ?? ''}</div>
-                                                                <div class="col-md-4"><strong>Trạng thái:</strong> ${item.maTrangThai ?? ''}</div>
-                                                                <div class="col-md-4"><strong>Lệ phí:</strong> ${item.lePhi ? new Intl.NumberFormat('vi-VN').format(item.lePhi) : '0'}</div>
-                                                                <div class="col-md-4"><strong>Hình thức:</strong> ${item.hinhThuc ?? ''}</div>
-                                                                ${item.thongTinTra ? `
-                                                                <div class="col-12"><strong>Thông tin trả:</strong><div class="border rounded p-2 bg-light">${item.thongTinTra}</div></div>
-                                                                ` : ''}
-                                                                ${item.ghiChu ? `
-                                                                <div class="col-12"><strong>Ghi chú:</strong><div class="border rounded p-2 bg-light">${item.ghiChu}</div></div>
-                                                                ` : ''}
-                                                                ${(Array.isArray(item.dulieu) || (item.dulieu && typeof item.dulieu === 'object')) ? `
-                                                                <div class="col-12"><strong>Dữ liệu hồ sơ:</strong>
-                                                                    <pre class="bg-light border rounded p-2" style="white-space: pre-wrap; max-height: 300px; overflow-y: auto;">${JSON.stringify(item.dulieu, null, 2)}</pre>
-                                                                </div>
-                                                                ` : ''}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                `;
-                                            }).join('')}
-                                        </div>
-                                    </div>
-                                    ` : ''}
-                                </div>
-                            `;
-                            
-                            // Fill JSON safely as text (chỉ cho modal service khi không có danh sách đã nộp)
-                            try {
-                                const hasDanhSachNop = data.danhSachNop && data.danhSachNop.length > 0;
-                                if (!hasDanhSachNop && data.dulieu && (Array.isArray(data.dulieu) || typeof data.dulieu === 'object')) {
-                                    const pre = modalBody.querySelector('#dulieu-json');
-                                    if (pre) pre.textContent = JSON.stringify(data.dulieu, null, 2);
-                                }
-                            } catch (e) {
-                                /* no-op */
-                            }
-                        }
-                        
-                        // Modal is already shown, content is updated
-                    } catch (err) {
-                        console.error('Lỗi chi tiết:', err);
-                        
-                        // Update modal content with error message
-                        modalTitle.textContent = 'Lỗi';
+                        if (!res.ok) throw new Error('Network error');
+                        const data = await res.json();
+                        modalTitle.textContent = `Hồ sơ ${data.maHSXL} - ${data.tenTTHC || ''}`;
                         modalBody.innerHTML = `
-                            <div class="alert alert-danger">
-                                <h6 class="alert-heading">Không thể tải chi tiết hồ sơ</h6>
-                                <p class="mb-0">${err.message || 'Đã xảy ra lỗi không xác định. Vui lòng thử lại sau.'}</p>
-                                <hr>
-                                <small class="text-muted">Nếu lỗi vẫn tiếp tục, vui lòng liên hệ bộ phận hỗ trợ.</small>
-                                <br><br>
-                                <button class="btn btn-sm btn-secondary" onclick="location.reload()">Tải lại trang</button>
-                            </div>
-                        `;
+                <div class="row g-3">
+                    <div class="col-md-6"><strong>Tên chủ hồ sơ:</strong> ${data.tenChuHoSo ?? ''}</div>
+                    <div class="col-md-6"><strong>SĐT:</strong> ${data.soDienThoai ?? ''}</div>
+                    <div class="col-md-6"><strong>Email:</strong> ${data.email ?? ''}</div>
+                    <div class="col-md-6"><strong>Đơn vị xử lý:</strong> ${data.donViXuLy ?? ''}</div>
+                    <div class="col-md-4"><strong>Ngày tiếp nhận:</strong> ${data.ngayTiepNhan ?? ''}</div>
+                    <div class="col-md-4"><strong>Ngày hẹn trả:</strong> ${data.ngayHenTra ?? ''}</div>
+                    <div class="col-md-4"><strong>Ngày kết thúc:</strong> ${data.ngayKetThucXuLy ?? ''}</div>
+                    <div class="col-md-4"><strong>Trạng thái:</strong> ${data.maTrangThai ?? ''}</div>
+                    <div class="col-md-4"><strong>Lệ phí:</strong> ${data.lePhi ?? ''}</div>
+                    <div class="col-md-4"><strong>Hình thức:</strong> ${data.hinhThuc ?? ''}</div>
+                    <div class="col-12"><strong>Thông tin trả:</strong><div class="border rounded p-2 bg-light">${(data.thongTinTra ?? '').toString()}</div></div>
+                    <div class="col-12"><strong>Ghi chú:</strong><div class="border rounded p-2 bg-light">${(data.ghiChu ?? '').toString()}</div></div>
+                    ${(Array.isArray(data.dulieu) || (data.dulieu && typeof data.dulieu === 'object')) ? `
+                                                                                    <div class="col-12"><strong>Dữ liệu hồ sơ:</strong>
+                                                                                        <pre id="dulieu-json" class="bg-light border rounded p-2" style="white-space: pre-wrap;"></pre>
+                                                                                    </div>` : ''}
+                </div>
+            `;
+                        // Fill JSON safely as text
+                        try {
+                            if (data.dulieu && (Array.isArray(data.dulieu) || typeof data.dulieu ===
+                                    'object')) {
+                                const pre = modalBody.querySelector('#dulieu-json');
+                                if (pre) pre.textContent = JSON.stringify(data.dulieu, null, 2);
+                            }
+                        } catch (e) {
+                            /* no-op */
+                        }
+                        // Clean stray backdrops/classes and reuse a single instance
+                        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.removeProperty('overflow');
+                        const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                        bsModal.show();
+                    } catch (err) {
+                        console.error(err);
+                        alert('Không tải được chi tiết hồ sơ.');
                     }
                 });
-            } else {
-                console.error('Không tìm thấy modal element với id hosoDetailModal');
             }
 
             // Function to open notification modal

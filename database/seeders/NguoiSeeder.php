@@ -24,6 +24,7 @@ class NguoiSeeder extends Seeder
                 'noiThuongTru' => 'Đồng Nai',
                 'noiTamTru' => 'TP. Biên Hòa, Đồng Nai',
                 'email' => 'nts594187@gmail.com',
+                'password'=> 'nguyentruongson@123',
                 'soDienThoai' => '0905123456',
                 'vaiTro' => 'Công dân/ Tổ chức'
             ],

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\CauHinhForm;
 use App\Models\TTHC;
+use App\Models\ThanhPhanHoSo;
 
 class FormTrucTuyenController extends Controller
 {
@@ -25,12 +26,12 @@ class FormTrucTuyenController extends Controller
         $cauHinhForm = json_decode($form->cauHinhForm, true);
 
         // Trả về view
-return view('pages.submit', [
-    'tthc' => $tthc,
-    'form' => $form,
-    'maTTHC' => $maTTHC,
-    'config' => json_decode($form->cauHinhForm, true)
-]);
+        return view('pages.submit', [
+            'tthc' => $tthc,
+            'form' => $form,
+            'maTTHC' => $maTTHC,
+            'config' => json_decode($form->cauHinhForm, true)
+        ]);
 
     }
 }

@@ -232,25 +232,31 @@ class TTHCSeeder extends Seeder
             'canCuPhapLy'=>'Luật 60/2014/QH13',
             'ketQuaThucHien'=>'Cập nhật thông tin trong Cơ sở dữ liệu quốc gia về dân cư, Thông báo kết quả giải quyết thủ tục về cư trú, hủy bỏ thủ tục về cư trú, Cập nhật thông tin trong Cơ sở dữ liệu về cư trú',
             ],
-                        [
+
+
+            [
             'maTTHC'=>8,
-            'tenTTHC'=>'Cấp Phiếu lý lịch tư pháp cho công dân Việt Nam, người nước ngoài đang cư trú tại Việt Nam',
-            'maLinhVuc'=>'3',
+            'tenTTHC'=>'Liên thông các thủ tục hành chính về đăng ký khai sinh, cấp Thẻ bảo hiểm y tế cho trẻ em dưới 6 tuổi',
+            'maLinhVuc'=>'1',
             'maQuayLamViec'=>'5',
-            'trinhTuThucHien'=>'Nộp hồ sơ tại Sở Tư pháp:
-                Công dân Việt Nam nộp tại Sở Tư pháp nơi người đó thường trú; trường hợp không có nơi thường trú thì nộp tại Sở Tư pháp nơi người đó tạm trú; trường hợp cư trú ở nước ngoài thì nộp tại Sở Tư pháp nơi cư trú trước khi xuất cảnh.
-                Người nước ngoài cư trú tại Việt Nam thì nộp tại Sở Tư pháp nơi người đó cư trú.
-                Hồ sơ yêu cầu cấp Phiếu lý lịch tư pháp nộp về Sở Tư pháp bằng hình thức trực tiếp, gửi bưu chính hoặc trực tuyến.
-
-                Người có yêu cầu cấp Phiếu lý lịch tư pháp đăng ký nhận kết quả tại nơi nộp hồ sơ hoặc nhận kết quả qua dịch vụ bưu chính hoặc nhận kết quả bản điện tử qua Hệ thống thông tin giải quyết thủ tục hành chính cấp tỉnh (đối với trường hợp người dân nộp hồ sơ yêu cầu cấp Phiếu qua Cổng dịch vụ công quốc gia hoặc Hệ thống thông tin giải quyết thủ tục hành chính cấp tỉnh).
-
-                ',
-            'doiTuongThucHien'=>'Công dân Việt Nam, Người nước ngoài',
-            'coQuanThucHien'=>'Sở Tư pháp',
+            'trinhTuThucHien'=>'
+                Người có yêu cầu nộp hồ sơ tại Bộ phận tiếp nhận và trả kết quả theo cơ chế “Một cửa” của Ủy ban nhân dân cấp xã.
+                Cán bộ, công chức tiếp nhận hồ sơ có trách nhiệm kiểm tra giấy tờ trong hồ sơ, nếu hồ sơ đầy đủ, hợp lệ thì tiếp nhận, viết giấy nhận hồ sơ, hẹn trả kết quả từng loại việc cho người đi đăng ký; nếu hồ sơ thiếu hoặc không hợp lệ thì hướng dẫn người có yêu cầu bổ sung hoàn thiện hồ sơ; văn bản hướng dẫn phải ghi đầy đủ, rõ ràng loại giấy tờ cần bổ sung, hoàn thiện; cán bộ tiếp nhận hồ sơ ký, ghi rõ họ tên và giao cho người nộp hồ sơ.
+                Công chức Tư pháp - hộ tịch cấp xã đăng ký khai sinh cho trẻ em ngay trong ngày tiếp nhận hồ sơ
+                Sau khi công chức Tư pháp – hộ tịch cấp xã thực hiện việc đăng ký khai sinh và cấp Giấy khai sinh cho trẻ em, cán bộ, công chức được giao nhiệm vụ lập lập hồ sơ cấp Thẻ bảo hiểm y tế chuyển cho Bảo hiểm xã hội cấp huyện để cấp Thẻ bảo hiểm y tế cho trẻ em.
+                Cơ quan Bảo hiểm xã hội kiểm tra hồ sơ, nếu thấy đầy đủ, hợp lệ thì thực hiện cấp Thẻ bảo hiểm y tế cho trẻ em (trong thời hạn 10 ngày).
+                Trường hợp hồ sơ chưa đầy đủ thì thông báo cho Ủy ban nhân dân cấp xã biết, hoàn thiện.
+                Cơ quan Bảo hiểm xã hội chuyển trả Thẻ bảo hiểm y tế cho trẻ em về Ủy ban nhân dân cấp xã.
+                Bộ phận tiếp nhận và trả kết quả theo cơ chế “Một cửa” tại Ủy ban nhân dân cấp xã trả kết quả cho người có yêu cầu.
+                Khi trả Giấy khai sinh cho người có yêu cầu, công chức Tư pháp – hộ tịch ghi vào Sổ đăng ký khai sinh, yêu cầu người có yêu cầu ký tên vào Sổ đăng ký khai sinh và Giấy khai sinh.
+            ',
+            'doiTuongThucHien'=>'Công dân Việt Nam, Cán bộ, công chức, viên chức',
+            'coQuanThucHien'=>'Ủy ban Nhân dân xã, phường, thị trấn., Công đoàn cơ quan BHXH Việt Nam',
             'trangThai'=>'Công khai',
-            'yeuCauDieuKien'=>'Không',
+            'yeuCauDieuKien'=>'- Việc đăng ký khai sinh cho trẻ em dưới 6 tuổi thuộc thẩm quyền giải quyết của Ủy ban nhân dân cấp xã.
+                - Các cơ quan có thẩm quyền thực hiện liên thông các thủ tục hành chính phải cùng thuộc địa bàn một huyện, thị xã, thành phố thuộc tỉnh hoặc cùng thuộc địa bàn một quận, huyện, thị xã thuộc thành phố trực thuộc trung ương.',
             'canCuPhapLy'=>'Luật 60/2014/QH13',
-            'ketQuaThucHien'=>'Phiếu lý lịch tư pháp số 1, Phiếu lý lịch tư pháp số 2',
+            'ketQuaThucHien'=>'Giấy khai sinh',
             ],
         ]);
     }
