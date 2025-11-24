@@ -75,6 +75,79 @@ class SubmitController extends Controller
             }
         }
 
+        // Merge giá trị từ dulieu vào cauHinhForm để hiển thị giá trị đã nhập
+        if (!empty($dulieu) && is_array($dulieu) && !empty($config)) {
+            // Hàm đệ quy để merge giá trị vào các field
+            $mergeValueToFields = function(&$fields, $dulieu) use (&$mergeValueToFields) {
+                if (!is_array($fields)) {
+                    return;
+                }
+
+                foreach ($fields as &$field) {
+                    // Xử lý field có name (input field)
+                    if (isset($field['name'])) {
+                        $fieldName = $field['name'];
+                        $valueFound = null;
+
+                        // Tìm giá trị trong dulieu theo thứ tự ưu tiên:
+                        // 1. Tìm chính xác theo name
+                        if (isset($dulieu[$fieldName])) {
+                            $valueFound = $dulieu[$fieldName];
+                        }
+                        // 2. Tìm với trim
+                        elseif (isset($dulieu[trim($fieldName)])) {
+                            $valueFound = $dulieu[trim($fieldName)];
+                        }
+                        // 3. Tìm với slug name (chuyển khoảng trắng thành underscore)
+                        else {
+                            $slugName = \Illuminate\Support\Str::slug($fieldName, '_');
+                            if (isset($dulieu[$slugName])) {
+                                $valueFound = $dulieu[$slugName];
+                            }
+                            // 4. Tìm không phân biệt hoa thường
+                            else {
+                                foreach ($dulieu as $key => $val) {
+                                    if (strtolower(trim($key)) === strtolower(trim($fieldName))) {
+                                        $valueFound = $val;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Gán giá trị nếu tìm thấy
+                        if ($valueFound !== null) {
+                            $field['value'] = $valueFound;
+                        }
+                    }
+
+                    // Xử lý columns trong row
+                    if (isset($field['type']) && $field['type'] === 'row' && isset($field['columns']) && is_array($field['columns'])) {
+                        $mergeValueToFields($field['columns'], $dulieu);
+                    }
+
+                    // Xử lý fields lồng nhau
+                    if (isset($field['fields']) && is_array($field['fields'])) {
+                        $mergeValueToFields($field['fields'], $dulieu);
+                    }
+                }
+            };
+
+            // Merge dữ liệu vào config
+            // Xử lý trường hợp config là mảng các group
+            if (isset($config[0]) && is_array($config[0])) {
+                // Nếu là mảng các group
+                foreach ($config as &$group) {
+                    if (isset($group['fields']) && is_array($group['fields'])) {
+                        $mergeValueToFields($group['fields'], $dulieu);
+                    }
+                }
+            } elseif (isset($config['fields']) && is_array($config['fields'])) {
+                // Nếu là object có fields ở top level
+                $mergeValueToFields($config['fields'], $dulieu);
+            }
+        }
+
         return view('pages.submit', [
             'maTTHC' => $maTTHC,
             'tthc' => $tthc,
@@ -204,47 +277,38 @@ class SubmitController extends Controller
             'soDienThoai' => ['required', 'string', 'max:10'],
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first(),
-            ], 422);
-        }
+            // 3. CHUẨN BỊ DỮ LIỆU ĐỂ LƯU VÀO DATABASE
+            $form = DB::table('formtructuyen')->where('maTTHC', $maTTHC)->first();
+            $donViXuLy = DB::table('tthc')->where('maTTHC', $maTTHC)->value('coQuanThucHien') ?? 'Bộ phận Một cửa';
 
-        // Lấy IDCD từ người dùng hiện tại đang đăng nhập
-        $authUser = Auth::user();
-        $nguoi = null;
-        
-        if ($authUser instanceof \App\Models\Nguoi) {
-            $nguoi = $authUser;
-        } else {
-            $nguoi = $authUser->nguoi ?? null;
-        }
-        
-        if (!$nguoi) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.',
-            ], 422);
-        }
-        
-        // Lấy hoặc tạo công dân
-        $congDan = DB::table('congdan')
-            ->where('IDnguoiDung', $nguoi->IDnguoiDung)
-            ->first();
-        
-        if (!$congDan) {
-            $IDCD = DB::table('congdan')->insertGetId([
-                'IDnguoiDung' => $nguoi->IDnguoiDung,
-            ]);
-        } else {
-            $IDCD = $congDan->IDCD;
-        }
-        $maTrangThai = DB::table('trangthaihoso')->value('maTrangThai');
-        if (!$maTrangThai) {
-            $maTrangThai = DB::table('trangthaihoso')->insertGetId(['tenTrangThai' => 'Mới nộp']);
-        }
-        $donViXuLy = DB::table('tthc')->where('maTTHC', $maTTHC)->value('coQuanThucHien') ?? 'Bộ phận Một cửa';
+            // Lấy IDCD từ người dùng đang đăng nhập
+            $authUser = Auth::user();
+            $nguoi = null;
+
+            if ($authUser instanceof \App\Models\Nguoi) {
+                $nguoi = $authUser;
+            } else {
+                $nguoi = $authUser->nguoi ?? null;
+            }
+
+            if (!$nguoi) {
+                return redirect()->back()
+                    ->with('error', 'Vui lòng đăng nhập để nộp hồ sơ.')
+                    ->withInput();
+            }
+
+            $congDan = DB::table('congdan')
+                ->where('IDnguoiDung', $nguoi->IDnguoiDung)
+                ->first();
+
+            // Nếu chưa có bản ghi công dân, tự động tạo
+            if (!$congDan) {
+                $IDCD = DB::table('congdan')->insertGetId([
+                    'IDnguoiDung' => $nguoi->IDnguoiDung,
+                ]);
+            } else {
+                $IDCD = $congDan->IDCD;
+            }
 
         // Tạo mã hồ sơ xử lý (maHSXL) duy nhất
         do {
@@ -281,6 +345,89 @@ class SubmitController extends Controller
             $hinhThuc = 'Nhận trực tuyến';
         }
 
+        // Chuẩn bị dữ liệu để lưu vào cột dulieu: merge giá trị từ payload vào cauHinhForm
+        $cauHinhFormData = json_decode($form->cauHinhForm ?? '{}', true) ?: [];
+        $duLieuLuu = $payload; // Mặc định lưu payload
+
+        // Nếu có cauHinhForm, merge giá trị vào cấu trúc form
+        if (!empty($cauHinhFormData)) {
+            // Hàm đệ quy để merge giá trị từ payload vào các field trong cauHinhForm
+            $mergeValueToFields = function(&$fields, $payload) use (&$mergeValueToFields) {
+                if (!is_array($fields)) {
+                    return;
+                }
+
+                foreach ($fields as &$field) {
+                    // Xử lý field có name (input field)
+                    if (isset($field['name'])) {
+                        $fieldName = $field['name'];
+                        $valueFound = null;
+
+                        // Tìm giá trị trong payload theo thứ tự ưu tiên:
+                        // 1. Tìm chính xác theo name
+                        if (isset($payload[$fieldName])) {
+                            $valueFound = $payload[$fieldName];
+                        }
+                        // 2. Tìm với trim
+                        elseif (isset($payload[trim($fieldName)])) {
+                            $valueFound = $payload[trim($fieldName)];
+                        }
+                        // 3. Tìm với slug name (chuyển khoảng trắng thành underscore)
+                        else {
+                            $slugName = \Illuminate\Support\Str::slug($fieldName, '_');
+                            if (isset($payload[$slugName])) {
+                                $valueFound = $payload[$slugName];
+                            }
+                            // 4. Tìm không phân biệt hoa thường
+                            else {
+                                foreach ($payload as $key => $val) {
+                                    if (strtolower(trim($key)) === strtolower(trim($fieldName))) {
+                                        $valueFound = $val;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Gán giá trị nếu tìm thấy
+                        if ($valueFound !== null) {
+                            $field['value'] = $valueFound;
+                        }
+                    }
+
+                    // Xử lý columns trong row
+                    if (isset($field['type']) && $field['type'] === 'row' && isset($field['columns']) && is_array($field['columns'])) {
+                        $mergeValueToFields($field['columns'], $payload);
+                    }
+
+                    // Xử lý fields lồng nhau
+                    if (isset($field['fields']) && is_array($field['fields'])) {
+                        $mergeValueToFields($field['fields'], $payload);
+                    }
+                }
+            };
+
+            // Merge dữ liệu vào cauHinhForm
+            // Xử lý trường hợp cauHinhForm là mảng các group
+            if (isset($cauHinhFormData[0]) && is_array($cauHinhFormData[0])) {
+                // Nếu là mảng các group
+                foreach ($cauHinhFormData as &$group) {
+                    if (isset($group['fields']) && is_array($group['fields'])) {
+                        $mergeValueToFields($group['fields'], $payload);
+                    }
+                }
+            } elseif (isset($cauHinhFormData['fields']) && is_array($cauHinhFormData['fields'])) {
+                // Nếu là object có fields ở top level
+                $mergeValueToFields($cauHinhFormData['fields'], $payload);
+            }
+
+            // Lưu cả cauHinhForm đã merge và payload gốc để có thể truy cập đầy đủ thông tin
+            $duLieuLuu = [
+                'cauHinhForm' => $cauHinhFormData, // Cấu trúc form với giá trị đã merge
+                'payload' => $payload // Payload gốc để lấy thông tin lệ phí, thanh toán, etc.
+            ];
+        }
+
         DB::table('hosoxuly')->insert([
             'maHSXL' => $maHSXL,
             'maTTHC' => $maTTHC,
@@ -290,10 +437,10 @@ class SubmitController extends Controller
             'doiTuongThucHien' => $payload['truong_hop'] ?? null,
             'email' => $email,
             'soDienThoai' => substr(preg_replace('/\D/', '', $soDienThoai), 0, 10),
-            'dulieu' => json_encode($payload),
+            'dulieu' => json_encode($duLieuLuu),
             'ngayTiepNhan' => null,
             'ngayHenTra' => null,
-            'maTrangThai' => $maTrangThai,
+            'maTrangThai' => 1,
             'ngayTra' => null,
             'hanBoSung' => null,
             'thongTinTra' => null,

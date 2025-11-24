@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('coQuanThucHien');
             $table->enum('trangThai',['Công khai','Chờ công khai','Bãi bỏ'])->nullable();
             $table->text('yeuCauDieuKien');
-            $table->string('canCuPhapLy', 500);
+            $table->text('canCuPhapLy');
             $table->string('ketQuaThucHien', 500);
 
 

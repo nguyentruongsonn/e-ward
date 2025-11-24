@@ -15,39 +15,44 @@ class TrangThaiHoSoSeeder extends Seeder
     {
         DB::table('trangthaihoso')->insert([
             [
-                'maTrangThai'=>1,
+                'maTrangThai' => 1,
+                'tenTrangThai' => 'Chờ tiếp nhận'
+            ],
+
+            [
+                'maTrangThai'=>2,
                 'tenTrangThai'=>'Được tiếp nhận'
             ],
             [
-                'maTrangThai'=>2,
+                'maTrangThai'=>3,
                 'tenTrangThai'=>'Không được tiếp nhân'
             ],
             [
-                'maTrangThai'=>3,
+                'maTrangThai'=>4,
                 'tenTrangThai'=>'Đang xử lý'
             ],
             [
-                'maTrangThai'=>4,
+                'maTrangThai'=>5,
                 'tenTrangThai'=>'Yêu cầu bổ sung giấy tờ'
             ],
             [
-                'maTrangThai'=>5,
+                'maTrangThai'=>6,
                 'tenTrangThai'=>'Yêu cầu thực hiện nghĩa vụ tài chính'
             ],
             [
-                'maTrangThai'=>6,
+                'maTrangThai'=>7,
                 'tenTrangThai'=>'Công dân yêu cầu rút hồ sơ'
             ],
             [
-                'maTrangThai'=>7,
+                'maTrangThai'=>8,
                 'tenTrangThai'=>'Dửng xử lý'
             ],
             [
-                'maTrangThai'=>8,
+                'maTrangThai'=>9,
                 'tenTrangThai'=>'Đã xử lý xong'
             ],
             [
-                'maTrangThai'=>9,
+                'maTrangThai'=>10,
                 'tenTrangThai'=>'Đã trả kết quả'
             ]
         ]);

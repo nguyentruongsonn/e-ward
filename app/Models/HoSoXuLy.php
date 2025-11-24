@@ -36,6 +36,13 @@ class HoSoXuLy extends Model
         'donViXuLy',
         'ghiChu',
         'last_mail_sent_at',
+        'nguoiTiepNhan',
+        'nguoiDuyet',
+        'ngayDuyet',
+        'yKienDuyet',
+        'yKienXuLy',
+        'duongdanfileykien',
+        'duongdanfileketqua',
     ];
 
     protected $casts = [
@@ -115,6 +122,11 @@ class HoSoXuLy extends Model
     public function mailHistory()
     {
         return $this->hasMany(HoSoXuLyMailHistory::class, 'maHSXL', 'maHSXL');
+    }
+
+    public function files()
+    {
+        return $this->hasMany(TaiLieuNop::class, 'maHSXL', 'maHSXL');
     }
 
 }

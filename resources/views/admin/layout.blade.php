@@ -15,7 +15,7 @@
 <link href='//fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
 <!-- font-awesome icons -->
 <link rel="stylesheet" href="{{ asset('admin/css/font.css') }}" type="text/css"/>
-<link href="{{ asset('admin/css/font-awesome.css') }}" rel="stylesheet"> 
+<link href="{{ asset('admin/css/font-awesome.css') }}" rel="stylesheet">
 <!-- //font-awesome icons -->
 <script src="{{ asset('admin/js/jquery2.0.3.min.js') }}"></script>
 @stack('styles')
@@ -105,19 +105,32 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
-                
+
+                @php
+                    $user = Auth::user();
+                @endphp
+
+                {{-- Quản lý hồ sơ - All staff roles can see --}}
                 <li class="sub-menu">
                     <a href="javascript:;" class="{{ request()->routeIs('admin.hosoxuly.*') ? 'active' : '' }}">
                         <i class="fa fa-file-text"></i>
                         <span>Quản lý hồ sơ</span>
                     </a>
                     <ul class="sub">
-                        <li><a href="{{ route('admin.hosoxuly.index') }}" class="{{ request()->routeIs('admin.hosoxuly.index') ? 'active' : '' }}">Danh sách hồ sơ</a></li>
-                        <li><a href="#">Hồ sơ mới</a></li>
-                        <li><a href="#">Hồ sơ đang xử lý</a></li>
+                        @if($user->vaiTro === 'Cán bộ một cửa' || $user->vaiTro === 'Quản trị viên')
+                            <li><a href="{{ route('admin.hosoxuly.index') }}" class="{{ request()->routeIs('admin.hosoxuly.index') ? 'active' : '' }}">Hồ sơ chờ tiếp nhận</a></li>
+                        @endif
+                        @if($user->vaiTro === 'Cán bộ thụ lý' || $user->vaiTro === 'Quản trị viên')
+                            <li><a href="{{ route('admin.hosoxuly.tiepnhan') }}" class="{{ request()->routeIs('admin.hosoxuly.tiepnhan') ? 'active' : '' }}">Hồ sơ đã tiếp nhận</a></li>
+                        @endif
+                        @if($user->vaiTro === 'Lãnh đạo' || $user->vaiTro === 'Quản trị viên')
+                            <li><a href="{{ route('admin.hosoxuly.cho-xuly') }}" class="{{ request()->routeIs('admin.hosoxuly.cho-xuly') ? 'active' : '' }}">Hồ sơ chờ phê duyệt</a></li>
+                        @endif
                     </ul>
                 </li>
-                
+
+                {{-- Lịch hẹn - All staff roles can see --}}
+                @if($user->vaiTro === 'Cán bộ một cửa' || $user->vaiTro === 'Cán bộ thụ lý' || $user->vaiTro === 'Lãnh đạo' || $user->vaiTro === 'Quản trị viên')
                 <li class="sub-menu">
                     <a href="javascript:;" class="{{ request()->routeIs('admin.appointment.*') ? 'active' : '' }}">
                         <i class="fa fa-calendar"></i>
@@ -129,42 +142,48 @@
                         <li><a href="{{ route('admin.appointment.today') }}" class="{{ request()->routeIs('admin.appointment.today') ? 'active' : '' }}">Lịch hẹn hôm nay</a></li>
                     </ul>
                 </li>
-                
-                <li class="sub-menu">
-                    <a href="javascript:;">
-                        <i class="fa fa-users"></i>
-                        <span>Quản lý người dùng</span>
-                    </a>
-                    <ul class="sub">
-                        <li><a href="#">Công dân</a></li>
-                        <li><a href="#">Cán bộ</a></li>
-                        <li><a href="#">Quản trị viên</a></li>
-                    </ul>
-                </li>
-                
-                <li class="sub-menu">
-                    <a href="javascript:;">
-                        <i class="fa fa-book"></i>
-                        <span>Thủ tục hành chính</span>
-                    </a>
-                    <ul class="sub">
-                        <li><a href="#">Danh sách TTHC</a></li>
-                        <li><a href="#">Thêm TTHC mới</a></li>
-                        <li><a href="#">Lĩnh vực</a></li>
-                    </ul>
-                </li>
-                
-                <li class="sub-menu">
-                    <a href="javascript:;">
-                        <i class="fa fa-money"></i>
-                        <span>Thanh toán</span>
-                    </a>
-                    <ul class="sub">
-                        <li><a href="#">Lịch sử thanh toán</a></li>
-                        <li><a href="#">Báo cáo doanh thu</a></li>
-                    </ul>
-                </li>
-                
+                @endif
+
+                {{-- Quản lý người dùng - Only Admin --}}
+                @if($user->vaiTro === 'Quản trị viên')
+                    <li class="sub-menu">
+                        <a href="javascript:;">
+                            <i class="fa fa-users"></i>
+                            <span>Quản lý người dùng</span>
+                        </a>
+                        <ul class="sub">
+                            <li><a href="#">Công dân</a></li>
+                            <li><a href="#">Cán bộ</a></li>
+                            <li><a href="#">Quản trị viên</a></li>
+                        </ul>
+                    </li>
+
+                    {{-- Thủ tục hành chính - Only Admin --}}
+                    <li class="sub-menu">
+                        <a href="javascript:;">
+                            <i class="fa fa-book"></i>
+                            <span>Thủ tục hành chính</span>
+                        </a>
+                        <ul class="sub">
+                            <li><a href="#">Danh sách TTHC</a></li>
+                            <li><a href="#">Thêm TTHC mới</a></li>
+                            <li><a href="#">Lĩnh vực</a></li>
+                        </ul>
+                    </li>
+
+                    {{-- Thanh toán - Only Admin --}}
+                    <li class="sub-menu">
+                        <a href="javascript:;">
+                            <i class="fa fa-money"></i>
+                            <span>Thanh toán</span>
+                        </a>
+                        <ul class="sub">
+                            <li><a href="#">Lịch sử thanh toán</a></li>
+                            <li><a href="#">Báo cáo doanh thu</a></li>
+                        </ul>
+                    </li>
+                @endif
+
                 <li>
                     <a href="{{ route('home') }}" target="_blank">
                         <i class="fa fa-globe"></i>
@@ -205,5 +224,8 @@
 </script>
 @stack('scripts')
 </body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous">
+    </script>
 </html>
 

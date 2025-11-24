@@ -62,11 +62,11 @@ public function show($id)
         ->select('d.tenDoiTuong')
         ->get();
 
-    return view('pages.outstanding-service-detail', [
-        'tthc' => $tthc,
-        'cachThucHiens' => $cachThucHiens,
-        'thanhPhanHoSos' => $thanhPhanHoSos,
-        'doiTuongs' => $doiTuongs,
-    ]);
-}
+        return view('pages.outstanding-service-detail', [
+            'tthc' => $tthc,
+            'cachThucHiens' => $cachThucHiens,
+            'thanhPhanHoSos' => $thanhPhanHoSos,
+            'doiTuongs' => $doiTuongs,
+        ]);
+    }
 }

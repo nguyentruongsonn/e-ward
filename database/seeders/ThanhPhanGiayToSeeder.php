@@ -363,12 +363,43 @@ class ThanhPhanGiayToSeeder extends Seeder
                 'soLuongBanSao'=>0
             ],
 
-            // [
+
+            //================Liên thông các thủ tục hành chính về đăng ký khai sinh, cấp Thẻ bảo hiểm y tế cho trẻ em dưới 6 tuổi
+            [
+                'maThanhPhan'=>15,
+                'maGiayTo'=>57,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+
+            [
+                'maThanhPhan'=>15,
+                'maGiayTo'=>58,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+
+            [
+                'maThanhPhan'=>15,
+                'maGiayTo'=>59,
+                'soLuongBanChinh'=>1,
+                'soLuongBanSao'=>0
+            ],
+
+            //             [
             //     'maThanhPhan'=>,
             //     'maGiayTo'=>,
             //     'soLuongBanChinh'=>,
             //     'soLuongBanSao'=>
             // ],
+
+            //             [
+            //     'maThanhPhan'=>,
+            //     'maGiayTo'=>,
+            //     'soLuongBanChinh'=>,
+            //     'soLuongBanSao'=>
+            // ],
+
 
         ]);
     }

@@ -24,9 +24,11 @@ class AdminMiddleware
 
         $user = Auth::user();
 
-        // Kiểm tra vaiTro
-        if ($user->vaiTro !== 'Quản trị viên') {
-            // Kiểm tra trong bảng quantrivien
+        // Kiểm tra vaiTro - cho phép: Quản trị viên, Cán bộ một cửa, Cán bộ thụ lý, Lãnh đạo
+        $allowedRoles = ['Quản trị viên', 'Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo'];
+        
+        if (!in_array($user->vaiTro, $allowedRoles)) {
+            // Nếu không phải 4 role trên, kiểm tra trong bảng quantrivien
             $isQuanTriVien = DB::table('quantrivien')
                 ->where('IDnguoiDung', $user->IDnguoiDung)
                 ->exists();
