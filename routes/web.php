@@ -109,6 +109,23 @@ Route::prefix('admin')->group(function () {
         Route::post('/hosoxuly/{maHSXL}/send-mail', [AdminController::class, 'sendMailHoSo'])->name('admin.hosoxuly.send-mail');
         Route::post('/hosoxuly/{maHSXL}/add-mail-reply', [AdminController::class, 'addMailReply'])->name('admin.hosoxuly.add-mail-reply');
         
+        // Filtered lists
+        Route::get('/hosoxuly-tiepnhan', [AdminController::class, 'indexHoSoTiepNhan'])->name('admin.hosoxuly.tiepnhan');
+        Route::get('/hosoxuly-cho-xuly', [AdminController::class, 'indexHoSoChoXuLy'])->name('admin.hosoxuly.cho-xuly');
+        
+        // Workflow actions
+        Route::post('/hosoxuly/{maHSXL}/tiepnhan', [AdminController::class, 'tiepNhanHoSo'])->name('admin.hosoxuly.tiepnhan-action');
+        Route::post('/hosoxuly/{maHSXL}/chuyen-thuly', [AdminController::class, 'chuyenThuLy'])->name('admin.hosoxuly.chuyen-thuly');
+        Route::post('/hosoxuly/{maHSXL}/chuyen-lanhdao', [AdminController::class, 'chuyenLanhDao'])->name('admin.hosoxuly.chuyen-lanhdao');
+        Route::post('/hosoxuly/{maHSXL}/pheduyet', [AdminController::class, 'pheDuyet'])->name('admin.hosoxuly.pheduyet');
+        Route::post('/hosoxuly/{maHSXL}/tralai', [AdminController::class, 'traLai'])->name('admin.hosoxuly.tralai');
+        Route::post('/hosoxuly/{maHSXL}/tra-ketqua', [AdminController::class, 'traKetQua'])->name('admin.hosoxuly.tra-ketqua');
+        Route::post('/hosoxuly/{maHSXL}/y-kien-xu-ly', [AdminController::class, 'yKienXuLy'])->name('admin.hosoxuly.y-kien-xu-ly');
+        Route::post('/hosoxuly/{maHSXL}/ket-qua-xu-ly', [AdminController::class, 'ketQuaXuLy'])->name('admin.hosoxuly.ket-qua-xu-ly');
+        Route::post('/hosoxuly/{maHSXL}/convert-to-result', [AdminController::class, 'convertToResult'])->name('admin.hosoxuly.convert-to-result');
+        Route::post('/hosoxuly/{maHSXL}/remove-ykien-file', [AdminController::class, 'removeYKienFile'])->name('admin.hosoxuly.remove-ykien-file');
+        Route::post('/hosoxuly/{maHSXL}/remove-ketqua-file', [AdminController::class, 'removeKetQuaFile'])->name('admin.hosoxuly.remove-ketqua-file');
+        
         // Quản lý lịch hẹn
         Route::get('/appointment', [AdminController::class, 'indexAppointments'])->name('admin.appointment.index');
         Route::get('/appointment/today', [AdminController::class, 'todayAppointments'])->name('admin.appointment.today');

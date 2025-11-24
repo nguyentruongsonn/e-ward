@@ -258,6 +258,22 @@ class TTHCSeeder extends Seeder
             'canCuPhapLy'=>'Luật 60/2014/QH13',
             'ketQuaThucHien'=>'Giấy khai sinh',
             ],
+
+
+            [
+            'maTTHC'=>9,
+            'tenTTHC'=>'Gia hạn giấy phép xây dựng đối với công trình cấp III, cấp IV (công trình Không theo tuyến/Theo tuyến trong đô thị/Tín ngưỡng, tôn giáo/Tượng đài, tranh hoành tráng/Sửa chữa, cải tạo/Theo giai đoạn cho công trình không theo tuyến/Theo giai đoạn cho công trình theo tuyến trong đô thị/Dự án) và nhà ở riêng lẻ',
+            'maLinhVuc'=>'2',
+            'maQuayLamViec'=>'2',
+            'trinhTuThucHien'=>'- Chủ đầu tư nộp hồ sơ đề nghị cấp gia hạn giấy phép xây dựng cho Trung tâm phục vụ hành chính công hoặc Bộ phận tiếp nhận và trả kết quả giải quyết thủ tục hành chính của Ủy ban nhân dân cấp xã.
+            - Trong thời hạn 05 ngày làm việc kể từ ngày nhận đủ hồ sơ hợp lệ, cơ quan có thẩm quyền có trách nhiệm xem xét gia hạn giấy phép xây dựng.',
+            'doiTuongThucHien'=>'Công dân Việt Nam, Cán bộ, công chức, viên chức, Doanh nghiệp, Tổ chức (không bao gồm doanh nghiệp, HTX), Hợp tác xãCông dân Việt Nam, Cán bộ, công chức, viên chức',
+            'coQuanThucHien'=>'Ủy ban nhân dân cấp xã',
+            'trangThai'=>'Công khai',
+            'yeuCauDieuKien'=>'Không có.',
+            'canCuPhapLy'=>'Luật Xây dựng năm 2014, Luật sửa đổi, bổ sung một số điều của Luật Xây dựng năm 2020, Nghị định số 175/2024/NĐ-CP của Chính phủ quy định chi tiết một số điều và biện pháp thi hành Luật Xây dựng về quản lý hoạt động xây dựng, quy định về phân định thẩm quyền của chính quyền địa phương 02 cấp trong lĩnh vực quản lý nhà nước của Bộ Xây dựng, quy định về phân quyền, phân cấp trong lĩnh vực quản lý nhà nước của Bộ Xây dựng, quy định chi tiết một số điều và biện pháp thi hành luật phòng cháy, chữa cháy và cứu nạn, cứu hộ',
+            'ketQuaThucHien'=>'Giấy phép xây dựng được gia hạn.',
+            ],
         ]);
     }
 }

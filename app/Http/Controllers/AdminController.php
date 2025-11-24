@@ -23,7 +23,7 @@ class AdminController extends Controller
         if (Auth::check() && $this->isAdmin()) {
             return redirect()->route('admin.dashboard');
         }
-        
+
         return view('admin.login');
     }
 
@@ -41,7 +41,7 @@ class AdminController extends Controller
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $user = Auth::user();
-            
+
             // Kiểm tra quyền admin
             if ($this->isAdmin($user)) {
                 $request->session()->regenerate();
@@ -65,7 +65,7 @@ class AdminController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
+
         return redirect()->route('admin.login');
     }
 
@@ -101,7 +101,7 @@ class AdminController extends Controller
             ->orderBy('maHSXL', 'desc')
             ->limit(10)
             ->get();
-        
+
         // Đảm bảo maHSXL luôn là string (fix cho Eloquent)
         foreach ($hosos as $h) {
             if ($h->maHSXL !== null) {
@@ -139,7 +139,7 @@ class AdminController extends Controller
                       ->orWhereRaw("maHSXL NOT LIKE 'HSXL_%'");
             })
             ->get();
-            
+
         // Nếu không có hồ sơ nào có maHSXL = '0', thì tìm hồ sơ có IDCD = 0 hoặc 1 (và có email)
         if ($hososWithWrongIDCD->isEmpty()) {
             $hososWithWrongIDCD = DB::table('hosoxuly')
@@ -148,7 +148,7 @@ class AdminController extends Controller
                 ->where('email', '!=', '')
                 ->get();
         }
-            
+
         if ($hososWithWrongIDCD->isEmpty()) {
             return;
         }
@@ -157,13 +157,13 @@ class AdminController extends Controller
             try {
                 // Convert object sang array để dễ xử lý
                 $hoso = (object)$hosoItem;
-                
+
                 // Tìm người dùng theo email (nếu có)
                 $nguoi = null;
                 if (!empty($hoso->email)) {
                     $nguoi = DB::table('nguoi')->where('email', $hoso->email)->first();
                 }
-                
+
                 // Nếu không tìm thấy người dùng theo email, thử tìm theo IDCD trong bảng congdan
                 if (!$nguoi && !empty($hoso->IDCD) && $hoso->IDCD > 1) {
                     $congDanTemp = DB::table('congdan')->where('IDCD', $hoso->IDCD)->first();
@@ -171,7 +171,7 @@ class AdminController extends Controller
                         $nguoi = DB::table('nguoi')->where('IDnguoiDung', $congDanTemp->IDnguoiDung)->first();
                     }
                 }
-                
+
                 // Nếu vẫn không tìm thấy, bỏ qua hồ sơ này
                 if (!$nguoi) {
                     continue;
@@ -181,7 +181,7 @@ class AdminController extends Controller
                 $congDan = DB::table('congdan')
                     ->where('IDnguoiDung', $nguoi->IDnguoiDung)
                     ->first();
-                
+
                 if (!$congDan) {
                     $IDCD = DB::table('congdan')->insertGetId([
                         'IDnguoiDung' => $nguoi->IDnguoiDung,
@@ -200,7 +200,7 @@ class AdminController extends Controller
                 if ($oldMaHSXL === '' || $oldMaHSXL === null || $oldMaHSXL === '0' || (int)$oldMaHSXL === 0) {
                     $oldMaHSXL = '0';
                 }
-                
+
                 // Nếu mã cũ đã đúng format và IDCD đã đúng thì bỏ qua
                 if (preg_match('/^HSXL_\d+_\d{8}_\d{4}$/', $oldMaHSXL)) {
                     // Chỉ cập nhật IDCD nếu sai
@@ -211,7 +211,7 @@ class AdminController extends Controller
                     }
                     continue;
                 }
-                
+
                 // Nếu mã cũ là "0" hoặc rỗng hoặc không đúng format, cần tạo mã mới
                 if ($oldMaHSXL === '0' || $oldMaHSXL === '' || !preg_match('/^HSXL_/', $oldMaHSXL)) {
                     // Tiếp tục để tạo mã mới
@@ -231,12 +231,12 @@ class AdminController extends Controller
                         $datePart = now()->format('Ymd');
                     }
                 }
-                
+
                 // Tạo mã mới với IDCD đúng - thử nhiều lần để đảm bảo unique
                 $maxAttempts = 50;
                 $attempts = 0;
                 $newMaHSXL = null;
-                
+
                 do {
                     $rand = random_int(1000, 9999);
                     $newMaHSXL = 'HSXL_' . $IDCD . '_' . $datePart . '_' . $rand;
@@ -260,7 +260,7 @@ class AdminController extends Controller
 
                 // Bắt đầu transaction để đảm bảo tính nhất quán
                 DB::beginTransaction();
-                
+
                 try {
                     // Cập nhật các bảng liên quan trước
                     DB::table('tailieunop')
@@ -310,8 +310,9 @@ class AdminController extends Controller
             return false;
         }
 
-        // Kiểm tra vaiTro trong bảng nguoi
-        if ($user->vaiTro === 'Quản trị viên') {
+        // Kiểm tra vaiTro trong bảng nguoi - cho phép 4 role
+        $allowedRoles = ['Quản trị viên', 'Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo'];
+        if (in_array($user->vaiTro, $allowedRoles)) {
             return true;
         }
 
@@ -355,6 +356,9 @@ class AdminController extends Controller
         // Filter theo trạng thái
         if ($request->filled('maTrangThai')) {
             $query->where('maTrangThai', $request->maTrangThai);
+        } else {
+            // Mặc định chỉ hiển thị hồ sơ chờ tiếp nhận (maTrangThai = 1)
+            $query->where('maTrangThai', 1);
         }
 
         // Filter theo ngày tiếp nhận
@@ -386,6 +390,88 @@ class AdminController extends Controller
     }
 
     /**
+     * Hiển thị danh sách hồ sơ đã tiếp nhận (status = 2)
+     */
+    public function indexHoSoTiepNhan(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = HoSoXuLy::with(['congdan.nguoi', 'tthc', 'trangThai'])
+            ->whereRaw("maHSXL LIKE 'HSXL_%'")
+            ->whereNotNull('maHSXL')
+            ->where('maHSXL', '!=', '0')
+            ->where('maHSXL', '!=', '')
+            ->where('maTrangThai', 2); // Đã tiếp nhận
+
+        // Filter theo tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('maHSXL', 'LIKE', "%{$search}%")
+                  ->orWhere('tenChuHoSo', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('soDienThoai', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $query->orderBy('ngayTiepNhan', 'desc')->orderBy('maHSXL', 'desc');
+        $hosos = $query->paginate(20)->withQueryString();
+
+        foreach ($hosos as $h) {
+            if ($h->maHSXL !== null) {
+                $h->setAttribute('maHSXL', (string)$h->maHSXL);
+            }
+        }
+
+        $trangThais = TrangThaiHoSo::orderBy('maTrangThai')->get();
+        return view('admin.hosoxuly.index', compact('hosos', 'trangThais'));
+    }
+
+    /**
+     * Hiển thị danh sách hồ sơ chờ xử lý (status = 4, đã chuyển lãnh đạo)
+     */
+    public function indexHoSoChoXuLy(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = HoSoXuLy::with(['congdan.nguoi', 'tthc', 'trangThai'])
+            ->whereRaw("maHSXL LIKE 'HSXL_%'")
+            ->whereNotNull('maHSXL')
+            ->where('maHSXL', '!=', '0')
+            ->where('maHSXL', '!=', '')
+            ->where('maTrangThai', 4); // Đang xử lý (chờ lãnh đạo duyệt)
+
+        // Filter theo tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('maHSXL', 'LIKE', "%{$search}%")
+                  ->orWhere('tenChuHoSo', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('soDienThoai', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $query->orderBy('ngayTiepNhan', 'desc')->orderBy('maHSXL', 'desc');
+        $hosos = $query->paginate(20)->withQueryString();
+
+        foreach ($hosos as $h) {
+            if ($h->maHSXL !== null) {
+                $h->setAttribute('maHSXL', (string)$h->maHSXL);
+            }
+        }
+
+        $trangThais = TrangThaiHoSo::orderBy('maTrangThai')->get();
+        return view('admin.hosoxuly.index', compact('hosos', 'trangThais'));
+    }
+
+    /**
      * Hiển thị chi tiết hồ sơ
      */
     public function showHoSo($maHSXL)
@@ -407,18 +493,23 @@ class AdminController extends Controller
             ->get();
 
         // Lấy lịch sử thanh toán (nếu có)
-        $lichSuThanhToan = DB::table('lichsuthanhtoan')
-            ->where('maHSXL', $maHSXL)
-            ->orderBy('ngayGD', 'desc')
-            ->get();
-
-        // Lấy lịch sử mail - sắp xếp theo thời gian gửi giảm dần (mới nhất trước), xen kẽ nhau không phân biệt admin hay công dân
-        $mailHistory = $hoSo->mailHistory()
+        $hoSo = HoSoXuLy::with(['congdan.nguoi', 'tthc', 'trangThai', 'files'])->where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Lấy lịch sử mail
+        $mailHistory = \App\Models\HoSoXuLyMailHistory::where('maHSXL', $maHSXL)
             ->orderBy('sent_at', 'desc')
-            ->orderBy('id', 'desc')
             ->get();
 
-        return view('admin.hosoxuly.show', compact('hoSo', 'taiLieu', 'lichSuThanhToan', 'mailHistory'));
+        // Lấy danh sách tài liệu đã nộp
+        $taiLieu = DB::table('tailieunop')->where('maHSXL', $maHSXL)->get();
+
+        // Lấy danh sách lãnh đạo để chuyển hồ sơ
+        $lanhDaos = DB::table('nguoi')
+            ->where('vaiTro', 'Lãnh đạo')
+            ->select('IDnguoiDung', 'hoTen', 'vaiTro')
+            ->get();
+
+        return view('admin.hosoxuly.show', compact('hoSo', 'mailHistory', 'taiLieu', 'lanhDaos'));
     }
 
     /**
@@ -439,7 +530,7 @@ class AdminController extends Controller
 
         try {
             $hoSo = HoSoXuLy::with('tthc')->where('maHSXL', $maHSXL)->firstOrFail();
-            
+
             if (!$hoSo->email) {
                 return response()->json(['success' => false, 'message' => 'Hồ sơ không có email.']);
             }
@@ -538,19 +629,19 @@ class AdminController extends Controller
             $subject = $this->decodeMimeHeader($request->input('subject') ?? '');
             $content = $request->input('text') ?? $request->input('body') ?? $request->input('content') ?? '';
             $timestamp = $request->input('timestamp') ?? $request->input('date') ?? now();
-            
+
             // Decode content nếu là base64 hoặc quoted-printable
             $content = $this->decodeEmailContent($content);
-            
+
             // Tìm hồ sơ theo email người gửi
             $hoSo = HoSoXuLy::where('email', $fromEmail)->first();
-            
+
             if (!$hoSo) {
                 // Nếu không tìm thấy, log và return
                 \Log::info('Email reply từ email không có trong hệ thống: ' . $fromEmail);
                 return response()->json(['success' => false, 'message' => 'Email không tìm thấy hồ sơ'], 404);
             }
-            
+
             // Lưu email reply vào lịch sử
             \App\Models\HoSoXuLyMailHistory::create([
                 'maHSXL' => $hoSo->maHSXL,
@@ -562,14 +653,14 @@ class AdminController extends Controller
                 'email' => $fromEmail,
                 'sent_at' => is_numeric($timestamp) ? \Carbon\Carbon::createFromTimestamp($timestamp) : \Carbon\Carbon::parse($timestamp),
             ]);
-            
+
             return response()->json(['success' => true, 'message' => 'Đã nhận email reply']);
         } catch (\Exception $e) {
             \Log::error('Lỗi khi nhận email reply: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
-    
+
     /**
      * Decode MIME encoded-word header (RFC 2047)
      */
@@ -578,7 +669,7 @@ class AdminController extends Controller
         if (empty($header)) {
             return '';
         }
-        
+
         // Sử dụng imap_mime_header_decode nếu có
         if (function_exists('imap_mime_header_decode')) {
             $decoded = imap_mime_header_decode($header);
@@ -588,30 +679,30 @@ class AdminController extends Controller
             }
             return $result;
         }
-        
+
         // Fallback: decode thủ công
         $pattern = '/=\?([^?]+)\?([QB])\?([^?]+)\?=/i';
-        
+
         return preg_replace_callback($pattern, function($matches) {
             $charset = $matches[1];
             $encoding = strtoupper($matches[2]);
             $text = $matches[3];
-            
+
             if ($encoding == 'Q') {
                 $text = str_replace('_', ' ', $text);
                 $text = quoted_printable_decode($text);
             } elseif ($encoding == 'B') {
                 $text = base64_decode($text);
             }
-            
+
             if (function_exists('mb_convert_encoding') && strtoupper($charset) != 'UTF-8') {
                 $text = mb_convert_encoding($text, 'UTF-8', $charset);
             }
-            
+
             return $text;
         }, $header);
     }
-    
+
     /**
      * Decode email content
      */
@@ -620,29 +711,29 @@ class AdminController extends Controller
         if (empty($content)) {
             return '';
         }
-        
+
         // Thử decode base64
         $decoded = @base64_decode($content, true);
         if ($decoded !== false && base64_encode($decoded) === $content) {
             $content = $decoded;
         }
-        
+
         // Decode quoted-printable
         if (function_exists('quoted_printable_decode')) {
             $content = quoted_printable_decode($content);
         }
-        
+
         // Loại bỏ HTML tags
         $content = strip_tags($content);
-        
+
         // Decode HTML entities
         $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        
+
         // Normalize whitespace
         $content = preg_replace('/\s+/', ' ', $content);
         $content = preg_replace('/=\r?\n/', '', $content);
         $content = preg_replace('/\n\s*\n/', "\n\n", $content);
-        
+
         return trim($content);
     }
 
@@ -666,7 +757,7 @@ class AdminController extends Controller
 
             // Đảm bảo maHSXL là string (vì primary key là VARCHAR)
             $maHSXLString = (string)$maHSXL;
-            
+
             $hoso = HoSoXuLy::where('maHSXL', $maHSXLString)->first();
 
             if (!$hoso) {
@@ -677,17 +768,17 @@ class AdminController extends Controller
             }
 
             $hoso->maTrangThai = (int)$request->maTrangThai;
-            
+
             // Nếu là trạng thái "Đã trả kết quả" (9), cập nhật ngày trả
             if ($request->maTrangThai == 9 && !$hoso->ngayTra) {
                 $hoso->ngayTra = now()->toDateString();
             }
-            
+
             // Nếu là trạng thái "Đã xử lý xong" (8) hoặc "Đã trả kết quả" (9), cập nhật ngày kết thúc xử lý
             if (in_array($request->maTrangThai, [8, 9]) && !$hoso->ngayKetThucXuLy) {
                 $hoso->ngayKetThucXuLy = now()->toDateString();
             }
-            
+
             $hoso->save();
 
             $trangThai = TrangThaiHoSo::find($request->maTrangThai);
@@ -744,7 +835,7 @@ class AdminController extends Controller
 
             if ($lichHen) {
                 $tthc = DB::table('tthc')->where('maTTHC', $lichHen->maTTHC)->first();
-                
+
                 if ($lichHen->maQuayLamViec) {
                     $quay = DB::table('quaylamviec')->where('maQuayLamViec', $lichHen->maQuayLamViec)->first();
                 }
@@ -869,27 +960,27 @@ class AdminController extends Controller
     {
         $now = Carbon::now('Asia/Ho_Chi_Minh');
         $in24Hours = $now->copy()->addHours(24);
-        
+
         // Lấy các lịch hẹn trong vòng 24 giờ tới, chưa gửi mail, và trạng thái hợp lệ
         $appointments = LichHen::with(['congdan.nguoi', 'tthc'])
             ->whereBetween('thoiGianHen', [$now, $in24Hours])
             ->whereNull('reminder_sent_at')
             ->whereNotIn('trangThai', ['Hoàn thành', 'Đã hủy', 'Không đến'])
             ->get();
-        
+
         foreach ($appointments as $appointment) {
             try {
                 $congDan = $appointment->congdan;
                 if (!$congDan) continue;
-                
+
                 $nguoi = $congDan->nguoi;
                 if (!$nguoi || !$nguoi->email) continue;
-                
+
                 $tthc = $appointment->tthc;
-                
+
                 // Gửi email
                 Mail::to($nguoi->email)->send(new \App\Mail\AppointmentReminderMail($appointment, $tthc, $nguoi));
-                
+
                 // Đánh dấu đã gửi
                 $appointment->reminder_sent_at = $now;
                 $appointment->save();
@@ -911,14 +1002,14 @@ class AdminController extends Controller
         }
 
         $lichHenId = $request->input('lichhen_id');
-        
+
         if (!$lichHenId) {
             return response()->json(['success' => false, 'message' => 'Thiếu thông tin lịch hẹn.']);
         }
 
         try {
             $appointment = LichHen::find($lichHenId);
-            
+
             if (!$appointment) {
                 return response()->json(['success' => false, 'message' => 'Không tìm thấy lịch hẹn.']);
             }
@@ -927,7 +1018,7 @@ class AdminController extends Controller
             $now = Carbon::now('Asia/Ho_Chi_Minh');
             $thoiGianHen = Carbon::parse($appointment->thoiGianHen)->setTimezone('Asia/Ho_Chi_Minh');
             $hoursUntil = $now->diffInHours($thoiGianHen, false);
-            
+
             if ($hoursUntil < 0 || $hoursUntil > 24) {
                 return response()->json(['success' => false, 'message' => 'Chỉ có thể gửi mail nhắc cho lịch hẹn trong vòng 24 giờ tới.']);
             }
@@ -1067,6 +1158,354 @@ class AdminController extends Controller
             'tenQuayLamViec' => $quay->tenQuayLamViec ?? '',
             'thoiGianCheckIn' => now('Asia/Ho_Chi_Minh')->format('d/m/Y H:i'),
         ]);
+    }
+
+    /**
+     * Cán bộ tiếp nhận hồ sơ
+     */
+    public function tiepNhanHoSo($maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login');
+        }
+
+        $user = Auth::user();
+        
+        // Chỉ Cán bộ một cửa mới được tiếp nhận
+        if ($user->vaiTro !== 'Cán bộ một cửa' && $user->vaiTro !== 'Quản trị viên') {
+            return back()->with('error', 'Chỉ Cán bộ một cửa mới được tiếp nhận hồ sơ.');
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Cập nhật ngày tiếp nhận và người tiếp nhận
+        $hoso->ngayTiepNhan = now();
+        $hoso->nguoiTiepNhan = $user->IDnguoiDung;
+        $hoso->maTrangThai = 2; // Được tiếp nhận
+        $hoso->save();
+
+        return back()->with('success', 'Đã tiếp nhận hồ sơ thành công.');
+    }
+
+    /**
+     * Cán bộ một cửa chuyển hồ sơ sang cán bộ thụ lý
+     */
+    public function chuyenThuLy($maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login');
+        }
+
+        $user = Auth::user();
+        
+        // Chỉ Cán bộ một cửa mới được chuyển
+        if ($user->vaiTro !== 'Cán bộ một cửa' && $user->vaiTro !== 'Quản trị viên') {
+            return back()->with('error', 'Chỉ Cán bộ một cửa mới được chuyển hồ sơ sang thụ lý.');
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Cập nhật trạng thái
+        $hoso->maTrangThai = 2; // Đã tiếp nhận (chờ thụ lý xử lý)
+        $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Đã chuyển sang cán bộ thụ lý.";
+        $hoso->save();
+
+        return back()->with('success', 'Đã chuyển hồ sơ sang cán bộ thụ lý.');
+    }
+
+    /**
+     * Cán bộ một cửa trả kết quả cho công dân
+     */
+    public function traKetQua($maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login');
+        }
+
+        $user = Auth::user();
+        
+        // Chỉ Cán bộ một cửa mới được trả kết quả
+        if ($user->vaiTro !== 'Cán bộ một cửa' && $user->vaiTro !== 'Quản trị viên') {
+            return back()->with('error', 'Chỉ Cán bộ một cửa mới được trả kết quả.');
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Cập nhật trạng thái
+        $hoso->maTrangThai = 10; // Đã trả kết quả
+        $hoso->ngayTra = now()->toDateString();
+        $hoso->save();
+
+        return back()->with('success', 'Đã trả kết quả cho công dân.');
+    }
+
+    /**
+     * Lưu ý kiến xử lý và file đính kèm
+     */
+    public function yKienXuLy(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false]);
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Lưu ý kiến xử lý
+        $hoso->yKienXuLy = $request->yKienXuLy;
+        
+        // Xử lý file upload
+        if ($request->hasFile('fileYKien')) {
+            $newFiles = [];
+            foreach ($request->file('fileYKien') as $file) {
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('public/ykien', $fileName);
+                // Save full path
+                $newFiles[] = 'storage/ykien/' . $fileName;
+            }
+            
+            // Merge with existing files
+            $existingFiles = json_decode($hoso->duongdanfileykien, true) ?? [];
+            $allFiles = array_merge($existingFiles, $newFiles);
+            $hoso->duongdanfileykien = json_encode($allFiles);
+        }
+        
+        $hoso->save();
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Đã lưu ý kiến xử lý.',
+            'files' => json_decode($hoso->duongdanfileykien, true)
+        ]);
+    }
+
+    /**
+     * Lưu kết quả xử lý
+     */
+    public function ketQuaXuLy(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false]);
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Xử lý file upload mới
+        if ($request->hasFile('fileKetQua')) {
+            $newFiles = [];
+            foreach ($request->file('fileKetQua') as $file) {
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('public/ketqua', $fileName);
+                // Save full path
+                $newFiles[] = 'storage/ketqua/' . $fileName;
+            }
+            
+            // Merge with existing files
+            $existingFiles = json_decode($hoso->duongdanfileketqua, true) ?? [];
+            $allFiles = array_merge($existingFiles, $newFiles);
+            $hoso->duongdanfileketqua = json_encode($allFiles);
+        }
+        
+        $hoso->save();
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Đã tải lên kết quả xử lý.',
+            'files' => json_decode($hoso->duongdanfileketqua, true)
+        ]);
+    }
+
+    /**
+     * Convert opinion files to result files
+     */
+    public function convertToResult($maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false]);
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        if ($hoso->duongdanfileykien) {
+            $filesYKien = json_decode($hoso->duongdanfileykien, true) ?? [];
+            $copiedFiles = [];
+            
+            // Copy each file from ykien to ketqua folder
+            foreach ($filesYKien as $filePath) {
+                // Extract filename from path
+                $fileName = basename($filePath);
+                $sourcePath = storage_path('app/public/ykien/' . $fileName);
+                $destPath = storage_path('app/public/ketqua/' . $fileName);
+                
+                if (file_exists($sourcePath)) {
+                    copy($sourcePath, $destPath);
+                    $copiedFiles[] = 'storage/ketqua/' . $fileName;
+                }
+            }
+            
+            // Append to existing result files if any
+            $existingFiles = json_decode($hoso->duongdanfileketqua, true) ?? [];
+            $allFiles = array_unique(array_merge($existingFiles, $copiedFiles));
+            
+            $hoso->duongdanfileketqua = json_encode(array_values($allFiles));
+            $hoso->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'files' => json_decode($hoso->duongdanfileketqua, true)
+        ]);
+    }
+
+    /**
+     * Remove opinion file
+     */
+    public function removeYKienFile(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false]);
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        $files = json_decode($hoso->duongdanfileykien, true) ?? [];
+        $files = array_filter($files, fn($f) => $f !== $request->file);
+        $hoso->duongdanfileykien = json_encode(array_values($files));
+        $hoso->save();
+
+        // Delete physical file
+        $fileName = basename($request->file);
+        @unlink(storage_path('app/public/ykien/' . $fileName));
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Remove result file
+     */
+    public function removeKetQuaFile(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false]);
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        $files = json_decode($hoso->duongdanfileketqua, true) ?? [];
+        $files = array_filter($files, fn($f) => $f !== $request->file);
+        $hoso->duongdanfileketqua = json_encode(array_values($files));
+        $hoso->save();
+
+        // Delete physical file
+        $fileName = basename($request->file);
+        @unlink(storage_path('app/public/ketqua/' . $fileName));
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Cán bộ chuyển  hồ sơ sang lãnh đạo
+     */
+    public function chuyenLanhDao(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login');
+        }
+
+        $user = Auth::user();
+        
+        // Chỉ Cán bộ thụ lý mới được chuyển sang lãnh đạo
+        if ($user->vaiTro !== 'Cán bộ thụ lý' && $user->vaiTro !== 'Quản trị viên') {
+            return back()->with('error', 'Chỉ Cán bộ thụ lý mới được chuyển hồ sơ sang lãnh đạo.');
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Cập nhật trạng thái chuyển lãnh đạo
+        $hoso->maTrangThai = 4; // Đang xử lý (chờ lãnh đạo duyệt)
+        
+        // Lưu thông tin người được chuyển đến (nếu có)
+        if ($request->filled('nguoiDuyet')) {
+            // Tạm thời lưu vào cột nguoiDuyet (hoặc có thể cần cột riêng như nguoiDuocChuyenDen)
+            // Trong flow này, nguoiDuyet thường là người ĐÃ duyệt, nhưng ở đây ta dùng để chỉ định người SẼ duyệt
+            // Tuy nhiên, logic pheDuyet sẽ ghi đè lại cột này bằng người thực tế duyệt.
+            // Để đơn giản, ta có thể lưu vào ghi chú hoặc thêm cột mới.
+            // Với yêu cầu hiện tại, ta sẽ ghi vào ghi chú người được chỉ định.
+            $lanhDao = \App\Models\Nguoi::find($request->nguoiDuyet);
+            $tenLanhDao = $lanhDao ? $lanhDao->hoTen : 'Unknown';
+            $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Chuyển đến lãnh đạo: " . $tenLanhDao;
+        }
+
+        // Lưu bình luận
+        if ($request->filled('ghiChu')) {
+            $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Ghi chú chuyển: " . $request->ghiChu;
+        } else {
+            $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Đã chuyển lãnh đạo phê duyệt.";
+        }
+
+        $hoso->save();
+
+        return back()->with('success', 'Đã chuyển hồ sơ sang lãnh đạo.');
+    }
+
+    /**
+     * Lãnh đạo phê duyệt hồ sơ
+     */
+    public function pheDuyet(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login');
+        }
+
+        $user = Auth::user();
+        
+        // Chỉ Lãnh đạo mới được phê duyệt
+        if ($user->vaiTro !== 'Lãnh đạo' && $user->vaiTro !== 'Quản trị viên') {
+            return back()->with('error', 'Chỉ Lãnh đạo mới được phê duyệt hồ sơ.');
+        }
+
+        $request->validate([
+            'yKien' => 'nullable|string|max:1000',
+        ]);
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Cập nhật phê duyệt
+        $hoso->nguoiDuyet = $user->IDnguoiDung;
+        $hoso->ngayDuyet = now();
+        $hoso->yKienDuyet = $request->input('yKien', 'Đồng ý');
+        $hoso->maTrangThai = 9; // Đã xử lý xong
+        $hoso->ngayKetThucXuLy = now()->toDateString();
+        $hoso->save();
+
+        return back()->with('success', 'Đã phê duyệt hồ sơ thành công.');
+    }
+
+    /**
+     * Lãnh đạo trả lại hồ sơ cho cán bộ
+     */
+    public function traLai(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login');
+        }
+
+        $user = Auth::user();
+        
+        // Chỉ Lãnh đạo mới được trả lại
+        if ($user->vaiTro !== 'Lãnh đạo' && $user->vaiTro !== 'Quản trị viên') {
+            return back()->with('error', 'Chỉ Lãnh đạo mới được trả lại hồ sơ.');
+        }
+
+        $request->validate([
+            'lyDo' => 'required|string|max:1000',
+        ]);
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Trả lại hồ sơ cho cán bộ
+        $hoso->maTrangThai = 5; // Yêu cầu bổ sung
+        $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo yêu cầu: " . $request->input('lyDo');
+        $hoso->save();
+
+        return back()->with('error', 'Đã trả lại hồ sơ cho cán bộ.');
     }
 }
 

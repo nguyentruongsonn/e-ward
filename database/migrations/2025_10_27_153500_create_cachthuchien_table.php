@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('kenh'); // 1: trực tiếp, 2: trực tuyến, 3: bưu chính
             $table->text('thoiHanGiaiQuyet')->nullable();
             $table->text('moTaPhiLePhi')->nullable();
+            $table->integer('thoiHan');
             $table->text('moTa')->nullable();
 
             $table->foreign('maTTHC')->references('maTTHC')->on('tthc');

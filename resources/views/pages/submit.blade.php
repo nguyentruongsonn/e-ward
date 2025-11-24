@@ -127,27 +127,40 @@
 
     {{-- FORM --}}
     {{-- Đặt id cho form để JS có thể gọi reportValidity() --}}
-    <form id="nopHoSoForm" method="POST" action="" enctype="multipart/form-data" novalidate>
+<form id="nopHoSoForm" method="POST" action="" enctype="multipart/form-data" novalidate>
         @csrf
         <input type="hidden" name="maTTHC" value="{{ $maTTHC ?? ($hoSo->maTTHC ?? '') }}" id="maTTHCInput">
         <input type="hidden" name="tong_tien" id="tongTienInput" value="0">
 
-        {{-- ========================== STEP 1 ========================== --}}
+        {{-- ========================== STEP 1: THÔNG TIN HỒ SƠ ========================== --}}
         <div class="form-section" data-step="1">
             <h5>Thông tin hồ sơ</h5>
             <div class="row">
                 @if(isset($config) && is_array($config))
                     @foreach($config as $group)
                         @if(isset($group['group']) && !empty($group['fields']))
+                            {{-- Tiêu đề nhóm lớn (Ví dụ: Thông tin người nộp) --}}
                             <div class="col-12">
                                 <h5 class="mt-4 mb-3" style="border-bottom: 1px solid #eee; padding-bottom: 5px; padding-top:30px;">{{ $group['group'] }}</h5>
                             </div>
 
                             @foreach($group['fields'] as $field)
-                                @if(isset($field['type']) && $field['type'] === 'row')
+                                {{-- TRƯỜNG HỢP 1: LÀ DÒNG CHÚ THÍCH (CONTENT) ĐỨNG RIÊNG --}}
+                                @if(isset($field['type']) && $field['type'] === 'content')
+                                    <div class="col-12 {{ $field['class'] ?? '' }}"
+                                        @if(isset($field['attributes']))
+                                            @foreach($field['attributes'] as $attr => $val) {{ $attr }}="{{ $val }}" @endforeach
+                                        @endif
+                                    >
+                                        {!! $field['content'] ?? '' !!}
+                                    </div>
+
+                                {{-- TRƯỜNG HỢP 2: LÀ DÒNG NHẬP LIỆU (ROW) --}}
+                                @elseif(isset($field['type']) && $field['type'] === 'row')
                                     <div class="col-12">
+                                        {{-- Tiêu đề của Row --}}
                                         @if(isset($field['title']) && !empty($field['title']))
-                                            <h6 class="mt-3 mb-2 fw-bold" style="color: #0d6efd;">{{ $field['title'] }}</h6>
+                                            <p class="mt-3 mb-2 " style="color: black; font-size: 17px; font-style: italic;">{{ $field['title'] }}</p>
                                         @endif
 
                                         <div class="row g-3 mb-2">
@@ -158,90 +171,68 @@
                                                     $c_required = isset($column['required']) && $column['required'];
                                                     $c_attributes = $column['attributes'] ?? [];
                                                 @endphp
-                                                <div class="{{ 'col-md-' . ($column['col'] ?? '6') }}">
-                                                    <label for="{{ $c_name }}" class="form-label @if($c_required) required @endif">{{ $c_label }}</label>
 
-                                                    @switch($column['type'] ?? 'text')
-                                                        @case('select')
-                                                            <select
-                                                                class="form-select"
-                                                                name="{{ $c_name }}"
-                                                                id="{{ $c_name }}"
-                                                                @if($c_required) required @endif
-                                                                @foreach($c_attributes as $attr => $val) {{ $attr }}="{{ $val }}" @endforeach
-                                                            >
-                                                                <option value="">-- Vui lòng chọn --</option>
-                                                                @foreach($column['options'] ?? [] as $key => $value)
-                                                                    <option value="{{ is_int($key) ? $value : $key }}">{{ $value }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            @break
-                                                        @default
-                                                            <input
-                                                                type="{{ $column['type'] ?? 'text' }}"
-                                                                class="form-control"
-                                                                name="{{ $c_name }}"
-                                                                id="{{ $c_name }}"
-                                                                @if($c_required) required @endif
-                                                                {{-- ============================================= --}}
-                                                                {{-- THÊM CÁC DÒNG NÀY --}}
-                                                                {{-- ============================================= --}}
-                                                                @if(isset($column['placeholder'])) placeholder="{{ $column['placeholder'] }}" @endif
-                                                                @if(isset($column['min'])) min="{{ $column['min'] }}" @endif
-                                                                @if(isset($column['max'])) max="{{ $column['max'] }}" @endif
-                                                                {{-- ============================================= --}}
-                                                                @foreach($c_attributes as $attr => $val) {{ $attr }}="{{ $val }}" @endforeach
-                                                            >
-                                                    @endswitch
+                                                <div class="{{ 'col-md-' . ($column['col'] ?? '6') }}">
+
+                                                    {{-- Kiểm tra xem Cột này là INPUT hay là CONTENT --}}
+                                                    @if(isset($column['type']) && $column['type'] === 'content')
+                                                        {{-- Hiển thị chú thích nằm trong cột --}}
+                                                        <div class="{{ $column['class'] ?? '' }}"
+                                                            @foreach($c_attributes as $attr => $val) {{ $attr }}="{{ $val }}" @endforeach
+                                                        >
+                                                            {!! $column['content'] ?? $column['label'] ?? '' !!}
+                                                        </div>
+                                                    @else
+                                                        {{-- Hiển thị Input bình thường --}}
+                                                        <label for="{{ $c_name }}" class="form-label @if($c_required) required @endif">{{ $c_label }}</label>
+
+                                                        @switch($column['type'] ?? 'text')
+                                                            @case('select')
+                                                                <select
+                                                                    class="form-select"
+                                                                    name="{{ $c_name }}"
+                                                                    id="{{ $c_name }}"
+                                                                    @if($c_required) required @endif
+                                                                    @foreach($c_attributes as $attr => $val) {{ $attr }}="{{ $val }}" @endforeach
+                                                                >
+                                                                    <option value="">-- Vui lòng chọn --</option>
+                                                                    @foreach($column['options'] ?? [] as $key => $value)
+                                                                        @php
+                                                                            $optionValue = is_int($key) ? $value : $key;
+                                                                            $isSelected = isset($column['value']) && $column['value'] == $optionValue;
+                                                                        @endphp
+                                                                        <option value="{{ $optionValue }}" @if($isSelected) selected @endif>{{ $value }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                                @break
+                                                            @default
+                                                                <input
+                                                                    type="{{ $column['type'] ?? 'text' }}"
+                                                                    class="form-control"
+                                                                    name="{{ $c_name }}"
+                                                                    id="{{ $c_name }}"
+                                                                    @if(isset($column['value'])) value="{{ $column['value'] }}" @endif
+                                                                    @if($c_required) required @endif
+                                                                    @if(isset($column['placeholder'])) placeholder="{{ $column['placeholder'] }}" @endif
+                                                                    @if(isset($column['min'])) min="{{ $column['min'] }}" @endif
+                                                                    @if(isset($column['max'])) max="{{ $column['max'] }}" @endif
+                                                                    @foreach($c_attributes as $attr => $val) {{ $attr }}="{{ $val }}" @endforeach
+                                                                >
+                                                        @endswitch
+                                                    @endif
                                                 </div>
                                             @endforeach
                                         </div>
-                                    </div>
-                                @else
-                                    @php
-                                        $f_name = $field['name'] ?? \Illuminate\Support\Str::slug($field['label'] ?? 'field', '_');
-                                        $f_label = $field['label'] ?? '';
-                                        $f_required = isset($field['required']) && $field['required'];
-                                    @endphp
-                                    <div class="col-12 mb-3">
-                                        <label class="form-label @if($f_required) required @endif">{{ $f_label }}</label>
-                                        @switch($field['type'] ?? 'text')
-                                            @case('radio')
-                                                <div class="d-flex flex-wrap gap-4 mt-2">
-                                                    @foreach($field['options'] ?? [] as $index => $opt)
-                                                        <div class="form-check">
-                                                            <input class="" type="radio" name="{{ $f_name }}" id="{{ $f_name }}_{{ $index }}" value="{{ $opt }}" @if($f_required && $loop->first) required @endif>
-                                                            <label class="" for="{{ $f_name }}_{{ $index }}">{{ $opt }}</label>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                                @break
-                                            @default
-                                                <input
-                                                    type="{{ $field['type'] ?? 'text' }}"
-                                                    class="form-control"
-                                                    name="{{ $f_name }}"
-                                                    id="{{ $f_name }}"
-                                                    @if($f_required) required @endif
-                                                    {{-- ============================================= --}}
-                                                    {{-- THÊM CÁC DÒNG NÀY (CHO TRƯỜNG ĐƠN LẺ) --}}
-                                                    {{-- ============================================= --}}
-                                                    @if(isset($field['placeholder'])) placeholder="{{ $field['placeholder'] }}" @endif
-                                                    @if(isset($field['min'])) min="{{ $field['min'] }}" @endif
-                                                    @if(isset($field['max'])) max="{{ $field['max'] }}" @endif
-                                                    {{-- ============================================= --}}
-                                                >
-                                        @endswitch
                                     </div>
                                 @endif
                             @endforeach
                         @endif
                     @endforeach
-                    @else
-                        <div class="col-12">
-                            <p class="text-muted">Không có thông tin form để hiển thị.</p>
-                        </div>
-                    @endif
+                @else
+                    <div class="col-12">
+                        <p class="text-muted">Không có thông tin form để hiển thị.</p>
+                    </div>
+                @endif
             </div>
 
             <div class="d-flex justify-content-between mt-3">
@@ -250,27 +241,17 @@
             </div>
         </div>
 
-
-
-        {{-- ========================== STEP 2 ========================== --}}
+        {{-- ========================== STEP 2: THÀNH PHẦN HỒ SƠ (GIỮ NGUYÊN) ========================== --}}
         <div class="form-section hidden" data-step="2">
             <h5>Thành phần hồ sơ</h5>
-
             <div class="accordion mt-3" id="thanhPhanHoSoAccordion">
-                @php
-                    // Biến này để kiểm tra xem có bất kỳ hồ sơ nào cần nộp không
-                    $hasRequiredFiles = false;
-                @endphp
-
+                @php $hasRequiredFiles = false; @endphp
                 @forelse($thanhPhanHoSos as $tenThanhPhan => $giayTos)
                     @php
-                        // Lọc ra danh sách giấy tờ thực sự cần nộp (có số lượng > 0)
                         $requiredGiayTos = $giayTos->filter(function ($tp) {
                             return ($tp->soLuongBanChinh ?? 0) >= 1 || ($tp->soLuongBanSao ?? 0) >= 1;
                         });
                     @endphp
-
-                    {{-- Chỉ hiển thị accordion item nếu có ít nhất 1 giấy tờ cần nộp trong nhóm đó --}}
                     @if($requiredGiayTos->isNotEmpty())
                         @php $hasRequiredFiles = true; @endphp
                         <div class="accordion-item">
@@ -282,7 +263,6 @@
                             </h2>
                             <div id="collapse-{{ $loop->index }}" class="accordion-collapse collapse @if($loop->first) show @endif" aria-labelledby="heading-{{ $loop->index }}" data-bs-parent="#thanhPhanHoSoAccordion">
                                 <div class="accordion-body p-0">
-                                    {{-- Bảng chứa các giấy tờ bên trong accordion --}}
                                     <div class="table-responsive">
                                         <table class="table-service-cth table-bordered table-sm align-middle text-dark mb-0">
                                             <thead class="dark">
@@ -299,20 +279,9 @@
                                                     <tr>
                                                         <td class="text-center">{{ $index + 1 }}</td>
                                                         <td>{{ $tp->tenGiayTo }}</td>
-                                                        <td class="text-center">
-                                                            <span class="badge bg-success">{{ $tp->soLuongBanChinh }}</span>
-                                                        </td>
-                                                        <td class="text-center">
-                                                            @if($tp->soLuongBanSao)
-                                                                <span class="badge bg-info">{{ $tp->soLuongBanSao }}</span>
-                                                            @else
-                                                                <span class="text-muted">—</span>
-                                                            @endif
-                                                        </td>
-                                                        <td>
-                                                            {{-- Thêm thuộc tính required cho input file --}}
-                                                            <input type="file" name="taiLieu[{{ $tp->maGiayTo }}][]" class="form-control form-control-sm" multiple >
-                                                        </td>
+                                                        <td class="text-center"><span class="badge bg-success">{{ $tp->soLuongBanChinh }}</span></td>
+                                                        <td class="text-center">@if($tp->soLuongBanSao) <span class="badge bg-info">{{ $tp->soLuongBanSao }}</span> @else <span class="text-muted">—</span> @endif</td>
+                                                        <td><input type="file" name="taiLieu[{{ $tp->maGiayTo }}][]" class="form-control form-control-sm" multiple ></td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -323,30 +292,22 @@
                         </div>
                     @endif
                 @empty
-                    {{-- Xử lý trường hợp không có dữ liệu $thanhPhanHoSos --}}
                     @php $hasRequiredFiles = false; @endphp
                 @endforelse
 
-                {{-- Nếu sau khi lọc, không có bất kỳ giấy tờ nào cần nộp --}}
                 @if(!$hasRequiredFiles)
-                    <div class="alert alert-success text-center">
-                        ✅ Không có giấy tờ nào cần nộp trực tuyến cho thủ tục này.
-                    </div>
+                    <div class="alert alert-success text-center">✅ Không có giấy tờ nào cần nộp trực tuyến.</div>
                 @endif
             </div>
-
             <div class="d-flex justify-content-between mt-4">
                 <button type="button" class="btn btn-secondary prev-step">Quay lại</button>
                 <button type="button" class="btn btn-primary next-step">Tiếp tục</button>
             </div>
-
         </div>
 
-        {{-- ========================== STEP 3 ========================== --}}
+        {{-- ========================== STEP 3: PHÍ, LỆ PHÍ (GIỮ NGUYÊN) ========================== --}}
         <div class="form-section hidden" data-step="3">
             <h5>Thông tin phí, lệ phí</h5>
-
-            {{-- Hình thức nhận kết quả --}}
             <div class="mb-4">
                 <div class="row">
                     <h5>Hình thức nhận kết quả</h5>
@@ -360,10 +321,7 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Phần hiển thị khi chọn "Nhận dịch vụ bưu chính" --}}
             <div id="buuChinhSection" class="mb-5" style="display: none;">
-                {{-- Checkbox đăng ký --}}
                 <div class="mb-3">
                     <div class="form-check">
                         <input class="" type="checkbox" name="dang_ky_nop_ho_so_tai_nha" id="dangKyNopHoSoTaiNha">
@@ -374,74 +332,32 @@
                         <label class="" for="dangKyNhanKetQuaTaiNha">Đăng ký nhận kết quả tại nhà</label>
                     </div>
                 </div>
-
-
-
-                {{-- Thông tin liên hệ --}}
                 <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Tên</label>
-                        <input type="text" name="ten_buu_chinh" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Số điện thoại</label>
-                        <input type="text" name="sdt_buu_chinh" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email_buu_chinh" class="form-control">
-                    </div>
+                    <div class="col-md-4"><label class="form-label">Tên</label><input type="text" name="ten_buu_chinh" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Số điện thoại</label><input type="text" name="sdt_buu_chinh" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Email</label><input type="email" name="email_buu_chinh" class="form-control"></div>
                 </div>
-
-                {{-- Địa chỉ bưu cục đến nhận hồ sơ (hiển thị khi chọn checkbox nộp hồ sơ tại nhà) --}}
                 <div id="diaChiNopHoSo" class="mb-3" style="display: none;">
-                    <p class="mt-5 mb-1" style="color: #007bff;">Địa chỉ bưu cục đến nhận hồ sơ của người dân</p>
+                    <p class="mt-5 mb-1" style="color: #007bff;">Địa chỉ bưu cục đến nhận hồ sơ</p>
                     <div class="row">
-                        <div class="col-md-4">
-                            <label class="form-label required">Tỉnh/TP</label>
-                            <select name="tinh_tp_nop_ho_so" class="form-select">
-                                <option value="">-- Chọn Tỉnh/TP --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Phường/Xã</label>
-                            <input type="text" name="phuong_xa_nop_ho_so" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Địa chỉ chi tiết</label>
-                            <input type="text" name="dia_chi_chi_tiet_nop_ho_so" class="form-control">
-                        </div>
+                        <div class="col-md-4"><label class="form-label required">Tỉnh/TP</label><select name="tinh_tp_nop_ho_so" class="form-select"><option value="">-- Chọn Tỉnh/TP --</option></select></div>
+                        <div class="col-md-4"><label class="form-label">Phường/Xã</label><input type="text" name="phuong_xa_nop_ho_so" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label">Địa chỉ chi tiết</label><input type="text" name="dia_chi_chi_tiet_nop_ho_so" class="form-control"></div>
                     </div>
                 </div>
-
-                {{-- Địa chỉ bưu cục gửi kết quả (hiển thị khi chọn checkbox nhận kết quả tại nhà) --}}
                 <div id="diaChiNhanKetQua" class="mb-3" style="display: none;">
-                    <p class="mt-5 mb-1" style="color:#007bff;">Địa chỉ bưu cục gửi kết quả đến người dân</p>
+                    <p class="mt-5 mb-1" style="color:#007bff;">Địa chỉ bưu cục gửi kết quả</p>
                     <div class="row">
-                        <div class="col-md-4">
-                            <label class="form-label required">Tỉnh/TP nhận kết quả</label>
-                            <select name="tinh_tp_nhan_ket_qua" class="form-select">
-                                <option value="">-- Chọn Tỉnh/TP --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Phường/Xã nhận kết quả</label>
-                            <input type="text" name="phuong_xa_nhan_ket_qua" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Địa chỉ chi tiết nơi nhận kết quả</label>
-                            <input type="text" name="dia_chi_chi_tiet_nhan_ket_qua" class="form-control">
-                        </div>
+                        <div class="col-md-4"><label class="form-label required">Tỉnh/TP nhận kết quả</label><select name="tinh_tp_nhan_ket_qua" class="form-select"><option value="">-- Chọn Tỉnh/TP --</option></select></div>
+                        <div class="col-md-4"><label class="form-label">Phường/Xã nhận kết quả</label><input type="text" name="phuong_xa_nhan_ket_qua" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label">Địa chỉ chi tiết</label><input type="text" name="dia_chi_chi_tiet_nhan_ket_qua" class="form-control"></div>
                     </div>
                 </div>
-                                {{-- Thông tin thu phí tại nhà --}}
                 <div class="mt-4 mb-1">
                     <h6 class="mt-5">Thông tin thu phí hồ sơ/ trả về kết quả tại nhà</h6>
-                    <p class="text-danger">(Nhân viên bưu chính sẽ thu phí trực tiếp tại nhà khi thu hồ sơ/trả kết quả)</p>
+                    <p class="text-danger">(Nhân viên bưu chính sẽ thu phí trực tiếp tại nhà)</p>
                 </div>
             </div>
-
-            {{-- Bảng lệ phí --}}
             <div class="mt-5 mb-1 ">
                 <h5>Thông tin phí, lệ phí</h5>
                 <div class="table-responsive rounded">
@@ -460,44 +376,26 @@
                             @forelse($lePhis as $index => $lePhi)
                                 <tr data-le-phi="{{ $lePhi->soTien }}">
                                     <td>{{ $lePhi->loaiLePhi }}</td>
-                                    <td>
-                                        <input type="number" name="le_phi_so_luong[{{ $lePhi->maLePhi }}]" class="form-control form-control-sm so-luong" value="1" min="1" data-muc-le-phi="{{ $lePhi->soTien }}">
-                                    </td>
-                                    <td>
-                                        <select name="muc_le_phi[{{ $lePhi->maLePhi }}]" class="form-select form-select-sm muc-le-phi">
-                                            <option value="{{ $lePhi->soTien }}">{{ number_format($lePhi->soTien, 0, ',', '.') }} VNĐ</option>
-                                        </select>
-                                    </td>
+                                    <td><input type="number" name="le_phi_so_luong[{{ $lePhi->maLePhi }}]" class="form-control form-control-sm so-luong" value="1" min="1" data-muc-le-phi="{{ $lePhi->soTien }}"></td>
+                                    <td><select name="muc_le_phi[{{ $lePhi->maLePhi }}]" class="form-select form-select-sm muc-le-phi"><option value="{{ $lePhi->soTien }}">{{ number_format($lePhi->soTien, 0, ',', '.') }} VNĐ</option></select></td>
                                     <td class="thanh-tien">{{ number_format($lePhi->soTien, 0, ',', '.') }} VNĐ</td>
                                     <td class="text-center">{{ $lePhi->batBuoc ?? 'Không' }}</td>
                                     <td class="small">{{ $lePhi->moTa ?? '—' }}</td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted py-3">
-                                        Chưa có thông tin lệ phí cho thủ tục này
-                                    </td>
-                                </tr>
+                                <tr><td colspan="6" class="text-center text-muted py-3">Chưa có thông tin lệ phí</td></tr>
                             @endforelse
                         </tbody>
                         <tfoot class="bg-primary rounded-bottom">
                             <tr>
                                 <td colspan="3" class="text-end text-dark"><strong>Tổng</strong></td>
-                                <td class="text-dark fw-bold" id="tongLePhi">
-                                    @if($lePhis->isNotEmpty())
-                                        {{ number_format($lePhis->sum('soTien'), 0, ',', '.') }} VNĐ
-                                    @else
-                                        0 VNĐ
-                                    @endif
-                                </td>
+                                <td class="text-dark fw-bold" id="tongLePhi">@if($lePhis->isNotEmpty()) {{ number_format($lePhis->sum('soTien'), 0, ',', '.') }} VNĐ @else 0 VNĐ @endif</td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
             </div>
-
-            {{-- Hình thức thanh toán --}}
             <div class="mt-5 mb-1 ">
                 <div class="row">
                     <h5>Hình thức thanh toán</h5>
@@ -509,293 +407,61 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Hiển thị QR Code khi có số tiền > 0 --}}
-{{-- File: .../nop-ho-so.blade.php --}}
-
-<div id="qrPaymentSection" class="mt-4 mb-4" style="display: none;">
-    <div class="card border-primary">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="fa fa-qrcode"></i> Thanh toán qua QR Code</h5>
-        </div>
-        <div class="card-body text-center">
-            <p class="text-muted mb-3">Vui lòng quét mã QR bên dưới để thanh toán</p>
-            <div id="qrCodeContainer" class="mb-3">
-                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid" style="max-width: 300px;">
+            <div id="qrPaymentSection" class="mt-4 mb-4" style="display: none;">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="fa fa-qrcode"></i> Thanh toán qua QR Code</h5></div>
+                    <div class="card-body text-center">
+                        <p class="text-muted mb-3">Vui lòng quét mã QR bên dưới để thanh toán</p>
+                        <div id="qrCodeContainer" class="mb-3"><img id="qrCodeImage" src="" alt="QR Code" class="img-fluid" style="max-width: 300px;"></div>
+                        <div class="alert alert-info"><strong>Số tiền cần thanh toán:</strong> <span id="qrAmount" class="fw-bold text-primary"></span></div>
+                        <div id="paymentStatus" class="mt-3 small text-center"></div>
+                        <input type="hidden" name="ma_giao_dich" id="maGiaoDich" value="">
+                    </div>
+                </div>
             </div>
-            <div class="alert alert-info">
-                <strong>Số tiền cần thanh toán:</strong>
-                <span id="qrAmount" class="fw-bold text-primary"></span>
-            </div>
-
-            {{-- THÊM DÒNG NÀY VÀO --}}
-            <div id="paymentStatus" class="mt-3 small text-center"></div>
-            {{-- KẾT THÚC DÒNG CẦN THÊM --}}
-
-            <input type="hidden" name="ma_giao_dich" id="maGiaoDich" value="">
-        </div>
-    </div>
-</div>
-
-            {{-- Checkbox xác nhận --}}
             <div class="mb-4">
                 <div class="form-check">
                     <input class="" type="checkbox" name="xac_nhan_thong_tin" id="xacNhanThongTin" required>
-                    <label class="" for="xacNhanThongTin">
-                        Tôi chắc chắn rằng các thông tin khai báo trên là đúng sự thật và đồng ý chịu trách nhiệm trước pháp luật về lời khai trên.
-                    </label>
+                    <label class="" for="xacNhanThongTin">Tôi chắc chắn rằng các thông tin khai báo trên là đúng sự thật.</label>
                 </div>
             </div>
-
-            {{-- Đăng ký thông tin hoàn tiền --}}
             <div class="mt-5 mb-1">
                 <h5>Đăng ký thông tin hoàn tiền</h5>
                 <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Số tài khoản</label>
-                        <input type="text" name="so_tai_khoan" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Chủ tài khoản</label>
-                        <input type="text" name="chu_tai_khoan" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Tên ngân hàng</label>
-                        <input type="text" name="ten_ngan_hang" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Địa chỉ đơn vị hưởng thụ</label>
-                        <input type="text" name="dia_chi_don_vi_huong_thu" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Chi nhánh ngân hàng</label>
-                        <input type="text" name="chi_nhanh_ngan_hang" class="form-control">
-                    </div>
+                    <div class="col-md-4"><label class="form-label">Số tài khoản</label><input type="text" name="so_tai_khoan" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Chủ tài khoản</label><input type="text" name="chu_tai_khoan" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Tên ngân hàng</label><input type="text" name="ten_ngan_hang" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Địa chỉ đơn vị hưởng thụ</label><input type="text" name="dia_chi_don_vi_huong_thu" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Chi nhánh ngân hàng</label><input type="text" name="chi_nhanh_ngan_hang" class="form-control"></div>
                 </div>
             </div>
-
             <div class="d-flex justify-content-between mt-4">
                 <button type="button" class="btn btn-secondary prev-step">Quay lại</button>
-                <div>
-                    <button type="button" class="btn btn-primary" id="btnSubmitHoSo">Nộp hồ sơ</button>
-                </div>
+                <div><button type="button" class="btn btn-primary" id="btnSubmitHoSo">Nộp hồ sơ</button></div>
             </div>
         </div>
 
-        {{-- ========================== STEP 4 ========================== --}}
+        {{-- ========================== STEP 4: HOÀN THÀNH (GIỮ NGUYÊN) ========================== --}}
         <div class="form-section hidden" data-step="4">
             @if(isset($isSuccess) && $isSuccess)
                 <div class="text-center mb-4">
-                    <div class="mb-3">
-                        <i class="fa fa-check-circle text-success" style="font-size: 64px;"></i>
-                    </div>
+                    <div class="mb-3"><i class="fa fa-check-circle text-success" style="font-size: 64px;"></i></div>
                     <h3 class="text-success mb-3">Nộp hồ sơ thành công!</h3>
                     <p class="text-muted">Mã hồ sơ của bạn: <strong class="text-dark">{{ $maHSXL ?? '' }}</strong></p>
                 </div>
-
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0 text-white">Thông tin người nộp</h5>
-                    </div>
+                    <div class="card-header bg-primary text-white"><h5 class="mb-0 text-white">Thông tin người nộp</h5></div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <strong>Họ tên:</strong> {{ $hoSo->tenChuHoSo ?? ($dulieu['ho_ten'] ?? ($nguoiInfo->hoTen ?? '—')) }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Ngày sinh:</strong> {{ $dulieu['ngay_sinh'] ?? ($nguoiInfo->ngaySinh ? \Carbon\Carbon::parse($nguoiInfo->ngaySinh)->format('d/m/Y') : '—') }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Số CCCD:</strong> {{ $dulieu['so_cccd'] ?? ($dulieu['cccd'] ?? ($nguoiInfo->maCCCD ?? '—')) }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Nơi cấp:</strong> {{ $dulieu['noi_cap'] ?? ($dulieu['noi_cap_cccd'] ?? '—') }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Số điện thoại:</strong> {{ $hoSo->soDienThoai ?? ($dulieu['so_dien_thoai'] ?? ($nguoiInfo->soDienThoai ?? '—')) }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Email:</strong> {{ $hoSo->email ?? ($dulieu['email'] ?? ($nguoiInfo->email ?? '—')) }}
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <strong>Địa chỉ:</strong>
-                                @php
-                                    $diaChiParts = [];
-                                    if (!empty($dulieu['dia_chi_chi_tiet'])) {
-                                        $diaChiParts[] = $dulieu['dia_chi_chi_tiet'];
-                                    }
-                                    if (!empty($dulieu['phuong_xa'])) {
-                                        $diaChiParts[] = $dulieu['phuong_xa'];
-                                    }
-                                    if (!empty($dulieu['tinh_thanh'])) {
-                                        $diaChiParts[] = $dulieu['tinh_thanh'];
-                                    }
-                                    if (!empty($dulieu['quoc_gia'])) {
-                                        $diaChiParts[] = $dulieu['quoc_gia'];
-                                    }
-                                    $diaChi = !empty($diaChiParts) ? implode(', ', $diaChiParts) : ($dulieu['dia_chi'] ?? ($nguoiInfo->noiThuongTru ?? '—'));
-                                @endphp
-                                {{ $diaChi }}
-                            </div>
+                            <div class="col-md-6 mb-3"><strong>Họ tên:</strong> {{ $hoSo->tenChuHoSo ?? ($dulieu['ho_ten'] ?? ($nguoiInfo->hoTen ?? '—')) }}</div>
+                            <div class="col-md-6 mb-3"><strong>Số điện thoại:</strong> {{ $hoSo->soDienThoai ?? ($dulieu['so_dien_thoai'] ?? ($nguoiInfo->soDienThoai ?? '—')) }}</div>
+                            <div class="col-md-12 mb-3"><strong>Địa chỉ:</strong> {{ $dulieu['dia_chi'] ?? ($nguoiInfo->noiThuongTru ?? '—') }}</div>
                         </div>
                     </div>
                 </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0 text-white">Thành phần hồ sơ đã nộp</h5>
-                    </div>
-                    <div class="card-body">
-                        @php
-                            // Tổng hợp tất cả giấy tờ đã nộp từ tất cả thành phần
-                            $allGiayTosCoFile = collect();
-                            $stt = 1;
-                            $hasAnyFiles = false;
-                        @endphp
-                        @foreach($thanhPhanHoSos ?? [] as $tenThanhPhan => $giayTos)
-                            @php
-                                // Lọc chỉ những giấy tờ đã có file đã nộp
-                                foreach ($giayTos as $giayTo) {
-                                    // Đảm bảo maGiayTo được cast về int để so sánh
-                                    $maGiayToInt = (int)$giayTo->maGiayTo;
-                                    $files = $tailieuNop[$maGiayToInt] ?? collect();
-                                    if ($files->isNotEmpty()) {
-                                        $allGiayTosCoFile->push((object)[
-                                            'stt' => $stt++,
-                                            'maGiayTo' => $giayTo->maGiayTo,
-                                            'tenGiayTo' => $giayTo->tenGiayTo,
-                                            'soLuongBanChinh' => $giayTo->soLuongBanChinh,
-                                            'soLuongBanSao' => $giayTo->soLuongBanSao,
-                                            'files' => $files
-                                        ]);
-                                        $hasAnyFiles = true;
-                                    }
-                                }
-                            @endphp
-                        @endforeach
-                        @if($allGiayTosCoFile->isNotEmpty())
-                            <div class="table-responsive rounded">
-                                <table class="table table-sm table-bordered table-hover">
-                                    <thead class="table-dark" style="height: 40px;">
-                                        <tr>
-                                            <th style="width: 5%;" class="text-white">STT</th>
-                                            <th style="width: 60%;"class="text-white">Tên giấy tờ</th>
-                                            <th style="width: 35%;"class="text-white">File đã nộp</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($allGiayTosCoFile as $giayTo)
-                                            <tr>
-                                                <td class="text-center">{{ $giayTo->stt }}</td>
-                                                <td>
-                                                    <p style="text-align:justify;">{{ $giayTo->tenGiayTo }}</p>
-                                                </td>
-                                                <td>
-                                                    @foreach($giayTo->files as $file)
-                                                        <div class="mb-2 p-2 bg-light rounded border">
-                                                            <div class="d-flex align-items-center justify-content-between">
-                                                                <div class="d-flex align-items-center">
-                                                                    @php
-                                #                                        $fileExtension = strtolower(pathinfo($file->tenTep, PATHINFO_EXTENSION));
-                                                                        $fileIcon = 'fa-file';
-                                                                        if (in_array($fileExtension, ['pdf'])) {
-                                                                            $fileIcon = 'fa-file-pdf text-danger';
-                                                                        } elseif (in_array($fileExtension, ['doc', 'docx'])) {
-                                                                            $fileIcon = 'fa-file-word text-primary';
-                                                                        } elseif (in_array($fileExtension, ['xls', 'xlsx'])) {
-                                                                            $fileIcon = 'fa-file-excel text-success';
-                                                                        } elseif (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif'])) {
-                                                                            $fileIcon = 'fa-file-image text-info';
-                                                                        }
-                                                                        $fileSize = $file->kichThuoc ?? 0;
-                                                                        $fileSizeFormatted = $fileSize > 0 ? number_format($fileSize / 1024, 2) . ' KB' : '—';
-                                                                    @endphp
-                                                                    <i class="fa {{ $fileIcon }} me-2" style="font-size: 18px;"></i>
-                                                                    <div>
-                                                                        <a href="{{ asset('storage/' . $file->duongDan) }}" target="_blank" class="text-decoration-none fw-bold">
-                                                                            {{ $file->tenTep }}
-                                                                        </a>
-                                                                        <div class="small text-muted">
-                                                                            <i class="fa fa-calendar"></i> {{ \Carbon\Carbon::parse($file->ngayTai)->format('d/m/Y H:i') }}
-                                                                            <span class="ms-2">
-                                                                                <i class="fa fa-hdd-o"></i> {{ $fileSizeFormatted }}
-                                                                            </span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <a href="{{ asset('storage/' . $file->duongDan) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                                    <i class="fa fa-download"></i> Tải xuống
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @endif
-                        @if(!$hasAnyFiles)
-                            <div class="alert alert-info text-center">
-                                <i class="fa fa-info-circle"></i> Chưa có giấy tờ nào được nộp kèm file.
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0 text-white">Thông tin lệ phí</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Loại lệ phí</th>
-                                        <th>Số lượng</th>
-                                        <th>Mức lệ phí</th>
-                                        <th>Thành tiền</th>
-                                        <th>Mô tả</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($lePhiChiTiet ?? [] as $lePhi)
-                                        <tr>
-                                            <td>{{ $lePhi['loaiLePhi'] }}</td>
-                                            <td>{{ $lePhi['soLuong'] }}</td>
-                                            <td>{{ number_format($lePhi['mucLePhi'], 0, ',', '.') }} VNĐ</td>
-                                            <td><strong>{{ number_format($lePhi['thanhTien'], 0, ',', '.') }} VNĐ</strong></td>
-                                            <td class="small">{{ $lePhi['moTa'] }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted">Không có lệ phí</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                                <tfoot class="table-primary">
-                                    <tr>
-                                        <td colspan="3" class="text-end"><strong>Tổng:</strong></td>
-                                        <td colspan="2"><strong>{{ number_format($hoSo->lePhi ?? 0, 0, ',', '.') }} VNĐ</strong></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="d-flex justify-content-center gap-3 mb-4">
-                    <button type="button" class="btn btn-info" onclick="window.print()">
-                        <i class="fa fa-print"></i> In phiếu nộp hồ sơ
-                    </button>
-                    <button type="button" class="btn btn-warning" id="btnBienLai">
-                        <i class="fa fa-receipt"></i> Thông tin biên lai thanh toán
-                    </button>
-                    <a href="{{ route('home') }}" class="btn btn-success">
-                        <i class="fa fa-check"></i> Đồng ý
-                    </a>
+                    <button type="button" class="btn btn-info" onclick="window.print()"><i class="fa fa-print"></i> In phiếu</button>
+                    <a href="{{ route('home') }}" class="btn btn-success"><i class="fa fa-check"></i> Đồng ý</a>
                 </div>
             @else
                 <h5>Nộp hồ sơ</h5>
@@ -804,6 +470,7 @@
         </div>
 
     </form>
+
 </div>
 
 <script>
@@ -879,18 +546,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    document.querySelectorAll(".prev-step").forEach(btn => {
-        btn.addEventListener("click", () => {
-            if (currentStep > 1) {
-                // Xóa class lỗi khi quay lại
-                const currentSection = document.querySelector(`.form-section[data-step='${currentStep}']`);
-                currentSection.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-
-                currentStep--;
-                showStep(currentStep);
-            }
-        });
-    });
+ 
 
     // ========== XỬ LÝ HIỂN THỊ/ẨN KHI CHỌN "NHẬN DỊCH VỤ BƯU CHÍNH" ==========
     const hinhThucNhanKetQua = document.getElementById('hinhThucNhanKetQua');
@@ -1400,6 +1056,109 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+// ========== LOGIC ẨN/HIỆN FORM ĐỘNG (FIX LỖI TITLE TRIỆT ĐỂ) ==========
+    function initDynamicForms() {
+        const triggers = document.querySelectorAll('[data-trigger]');
+        if (triggers.length === 0) return;
+
+        // Hàm kiểm tra và ẩn/hiện cả khối bao ngoài (bao gồm Title)
+        function checkAndToggleWrapper(inputContainer) {
+            // 1. Tìm thẻ cha chứa các cột (class .row)
+            const parentRow = inputContainer.closest('.row');
+            if (!parentRow) return;
+
+            // 2. Tìm thẻ bao ngoài cùng (class .col-12 trong Blade của bạn) chứa cả h6 và .row
+            const mainWrapper = parentRow.closest('.col-12');
+            // Lưu ý: Nếu trong HTML cấu trúc khác, bạn cần inspect xem thẻ chứa h6 là thẻ nào
+
+            if (mainWrapper) {
+                // 3. Kiểm tra xem trong dòng (.row) này còn cột nào hiển thị không?
+                const allCols = parentRow.children;
+                let hasVisibleCol = false;
+
+                for (let col of allCols) {
+                    // Nếu cột không có style display: none -> Tức là nó đang hiện
+                    if (col.style.display !== 'none') {
+                        hasVisibleCol = true;
+                        break;
+                    }
+                }
+
+                // 4. Ẩn/Hiện toàn bộ khối wrapper (Title + Row)
+                if (hasVisibleCol) {
+                    mainWrapper.style.display = 'block';
+                } else {
+                    mainWrapper.style.display = 'none';
+                }
+            }
+        }
+
+        function handleTriggerChange(triggerName, selectedValue) {
+            // Tìm tất cả các input phụ thuộc
+            const targets = document.querySelectorAll(`[data-group="${triggerName}"]`);
+
+            targets.forEach(target => {
+                const requiredValues = target.getAttribute('data-show').split(',');
+
+                // Tìm container bao ngoài (col-md-*) để ẩn/hiện input
+                const container = target.closest('.col-md-3, .col-md-4, .col-md-6, .col-md-8, .col-md-12, .col-12, .mb-3');
+
+                if (container) {
+                    if (requiredValues.includes(selectedValue)) {
+                        // HIỆN INPUT
+                        container.style.display = 'block';
+                    } else {
+                        // ẨN INPUT
+                        container.style.display = 'none';
+
+                        // Reset giá trị
+                        if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA') {
+                            target.value = '';
+                            target.removeAttribute('required');
+                            target.classList.remove('is-invalid');
+                        }
+                        target.querySelectorAll('input, select, textarea').forEach(input => {
+                            if(input.type === 'checkbox' || input.type === 'radio') input.checked = false;
+                            else input.value = '';
+                            input.removeAttribute('required');
+                        });
+                    }
+
+                    // QUAN TRỌNG: Kiểm tra xem có cần ẩn luôn Title không
+                    checkAndToggleWrapper(container);
+                }
+            });
+        }
+
+        // Gán sự kiện (Giữ nguyên logic cũ)
+        triggers.forEach(trigger => {
+            const triggerName = trigger.getAttribute('data-trigger');
+
+            if (trigger.type === 'radio' || trigger.type === 'checkbox') {
+                const radios = document.querySelectorAll(`input[name="${trigger.name}"]`);
+                radios.forEach(r => {
+                    r.addEventListener('change', () => {
+                        const checked = document.querySelector(`input[name="${trigger.name}"]:checked`);
+                        handleTriggerChange(triggerName, checked ? checked.value : '');
+                    });
+                });
+            } else {
+                trigger.addEventListener('change', function() {
+                    handleTriggerChange(triggerName, this.value);
+                });
+            }
+
+            // Init state
+            let initVal = trigger.value;
+            if (trigger.type === 'radio' || trigger.type === 'checkbox') {
+                const checked = document.querySelector(`input[name="${trigger.name}"]:checked`);
+                initVal = checked ? checked.value : '';
+            }
+            handleTriggerChange(triggerName, initVal);
+        });
+    }
+
+    initDynamicForms();
     // ========== TỰ ĐỘNG HIỂN THỊ STEP 4 NẾU THÀNH CÔNG ==========
     @if(isset($isSuccess) && $isSuccess)
         // Đánh dấu tất cả các step trước đó là completed

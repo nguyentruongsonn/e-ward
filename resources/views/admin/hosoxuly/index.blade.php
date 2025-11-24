@@ -45,8 +45,8 @@
 						</div>
 
 						<!-- Table -->
-						<div class="table-responsive">
-							<table class="table table-striped table-hover">
+						<div class="table-responsive" style="min-height: 300px;">
+							<table class="table table-striped table-hover" >
 								<thead>
 									<tr>
 										<th>Mã HS</th>
@@ -68,17 +68,20 @@
 										<td>{{ is_array($hoso->email) ? json_encode($hoso->email, JSON_UNESCAPED_UNICODE) : ($hoso->email ?? '-') }}</td>
 										<td>{{ is_array($hoso->soDienThoai) ? json_encode($hoso->soDienThoai, JSON_UNESCAPED_UNICODE) : ($hoso->soDienThoai ?? '-') }}</td>
 										<td>{{ $hoso->ngayTiepNhan ? $hoso->ngayTiepNhan->format('d/m/Y') : '-' }}</td>
+										<td>{{ $trangThais->firstWhere('maTrangThai', $hoso->maTrangThai)->tenTrangThai ?? '-' }}</td>
+
+
 										<td>
-											<select class="form-control trangthai-select" data-mahoso="{{ $hoso->maHSXL }}" style="min-width: 200px; font-size: 0.9em;">
-												@foreach($trangThais as $tt)
-													<option value="{{ $tt->maTrangThai }}" {{ $hoso->maTrangThai == $tt->maTrangThai ? 'selected' : '' }}>
-														{{ $tt->tenTrangThai }}
-													</option>
-												@endforeach
-											</select>
-										</td>
-										<td>
-											<a href="{{ route('admin.hosoxuly.show', $hoso->maHSXL) }}" class="btn btn-info btn-sm">Xem chi tiết</a>
+
+                                            <div class="dropdown">
+                                                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-hand"></i>ádasasd</a>
+                                                <ul class="dropdown-menu bg-light m-0">
+                                                    <li><a href="{{ route('admin.hosoxuly.show', $hoso->maHSXL) }}" class="dropdown-item">Xem chi tiết</a></li>
+                                                    <li><a href="#" class="dropdown-item">Tiếp nhận hồ sơ</a></li>
+                                                    <li><a href="#" class="dropdown-item">Từ chối</a></li>
+                                                    <li><a href="#" class="dropdown-item">Yêu cầu bổ sung</a></li>
+                                                </ul>
+                                            </div>
 										</td>
 									</tr>
 									@empty
@@ -105,17 +108,17 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const selects = document.querySelectorAll('.trangthai-select');
-    
+
     selects.forEach(select => {
         select.addEventListener('change', function() {
             const maHSXL = this.getAttribute('data-mahoso');
             const maTrangThai = this.value;
             const originalValue = this.dataset.originalValue || '{{ old("maTrangThai") }}';
-            
+
             if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái hồ sơ này?')) {
                 // Disable select while processing
                 this.disabled = true;
-                
+
                 fetch(`{{ url('admin/hosoxuly') }}/${maHSXL}/trangthai`, {
                     method: 'POST',
                     headers: {
@@ -157,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.value = originalValue;
             }
         });
-        
+
         // Store original value
         select.dataset.originalValue = select.value;
     });
