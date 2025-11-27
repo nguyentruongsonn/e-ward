@@ -30,7 +30,7 @@
 </div>
 <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top shadow p-0">
     <a href="{{ route('home') }}" class="navbar-brand d-flex align-items-center border-end px-4 px-lg-5">
-        <h2 class="m-0" style="color:#32C36C;">ABC</h2>
+        <h2 class="headdername">ABC</h2>
     </a>
 
     <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -49,7 +49,7 @@
                     <a href="{{ route('404') }}" class="dropdown-item">CÂU HỎI THƯỜNG GẶP</a>
                 </div>
             </div>
-            <a href="{{ route('contact') }}" class="nav-item nav-link">ĐÁNH GIÁ DỊCH VỤ</a>
+            <a href="{{ route('service.ratings') }}" class="nav-item nav-link">ĐÁNH GIÁ DỊCH VỤ</a>
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">HỖ TRỢ</a>
                 <div class="dropdown-menu bg-light m-0">
@@ -75,7 +75,7 @@
                     $nguoi = $user->nguoi;
                 }
                 $hoTen = $nguoi?->hoTen ?? ($user->email ?? 'Người dùng');
-                
+
                 // Kiểm tra quyền admin
                 $isAdmin = false;
                 if ($nguoi && $nguoi->vaiTro === 'Quản trị viên') {
@@ -152,12 +152,12 @@
             </div>
         @else
             {{-- Chưa đăng nhập --}}
-            <button type="button" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block "
+            <button type="button" class="btn btn-color rounded-0 py-4 px-lg-5 d-none d-lg-block "
                 data-bs-toggle="modal" data-bs-target="#loginModal">
                 ĐĂNG NHẬP
             </button>
 
-            <a href="{{ route('register') }}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">ĐĂNG
+            <a href="{{ route('register') }}" class="btn btn-color rounded-0 py-4 px-lg-5 d-none d-lg-block">ĐĂNG
                 KÝ</a>
 
 

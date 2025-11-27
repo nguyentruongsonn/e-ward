@@ -6,7 +6,7 @@
         <div class="container py-5">
             <form class="d-flex wow fadeInUp" data-wow-delay="0.3" role="search">
                 <input class="form-control me-2" type="search" placeholder="Nhập từ khóa tìm kiếm" aria-label="Search">
-                <button class="btn btn-primary" type="submit">TÌM KIẾM</button>
+                <button class="btn btn-color" type="submit">TÌM KIẾM</button>
             </form>
         </div>
 

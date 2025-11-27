@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Upload</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Test File Upload</h1>
+    <p>Test với maHSXL: <input type="text" id="maHSXL" value="HSXL000001" /></p>
+    
+    <h2>Test Upload Ý Kiến</h2>
+    <input type="file" id="yKienInput" multiple />
+    <button onclick="testUploadYKien()">Upload Ý Kiến</button>
+    
+    <h2>Test Upload Kết Quả</h2>
+    <input type="file" id="ketQuaInput" multiple />
+    <button onclick="testUploadKetQua()">Upload Kết Quả</button>
+    
+    <h2>Response:</h2>
+    <pre id="response"></pre>
+    
+    <script>
+        function getCsrfToken() {
+            // Try to get from meta tag
+            let token = document.querySelector('meta[name="csrf-token"]');
+            if (token) return token.getAttribute('content');
+            
+            // For testing, we'll make a request to get it
+            return 'test-token'; // This will fail, but will show us the error
+        }
+        
+        function testUploadYKien() {
+            const input = document.getElementById('yKienInput');
+            const maHSXL = document.getElementById('maHSXL').value;
+            
+            if (!input.files || input.files.length === 0) {
+                alert('Vui lòng chọn file');
+                return;
+            }
+            
+            const formData = new FormData();
+            for (let i = 0; i < input.files.length; i++) {
+                formData.append('files[]', input.files[i]);
+            }
+            formData.append('_token', getCsrfToken());
+            
+           $.ajax({
+                url: `/admin/hosoxuly/${maHSXL}/upload-ykien`,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    document.getElementById('response').textContent = JSON.stringify(res, null, 2);
+                },
+                error: function(xhr, status, error) {
+                    document.getElementById('response').textContent = 
+                        'ERROR:\n' +
+                        'Status: ' + xhr.status + '\n' +
+                        'Response: ' + xhr.responseText + '\n' +
+                        'Error: ' + error;
+                }
+            });
+        }
+        
+        function testUploadKetQua() {
+            const input = document.getElementById('ketQuaInput');
+            const maHSXL = document.getElementById('maHSXL').value;
+            
+            if (!input.files || input.files.length === 0) {
+                alert('Vui lòng chọn file');
+                return;
+            }
+            
+            const formData = new FormData();
+            for (let i = 0; i < input.files.length; i++) {
+                formData.append('fileKetQua[]', input.files[i]);
+            }
+            formData.append('_token', getCsrfToken());
+            
+            $.ajax({
+                url: `/admin/hosoxuly/${maHSXL}/ket-qua-xu-ly`,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    document.getElementById('response').textContent = JSON.stringify(res, null, 2);
+                },
+                error: function(xhr, status, error) {
+                    document.getElementById('response').textContent = 
+                        'ERROR:\n' +
+                        'Status: ' + xhr.status + '\n' +
+                        'Response: ' + xhr.responseText + '\n' +
+                        'Error: ' + error;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

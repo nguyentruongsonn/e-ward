@@ -126,6 +126,9 @@
                         @if($user->vaiTro === 'Lãnh đạo' || $user->vaiTro === 'Quản trị viên')
                             <li><a href="{{ route('admin.hosoxuly.cho-xuly') }}" class="{{ request()->routeIs('admin.hosoxuly.cho-xuly') ? 'active' : '' }}">Hồ sơ chờ phê duyệt</a></li>
                         @endif
+                        <li><a href="{{ route('admin.hosoxuly.danh-sach-yeu-cau-bo-sung') }}" class="{{ request()->routeIs('admin.hosoxuly.danh-sach-yeu-cau-bo-sung') ? 'active' : '' }}">Hồ sơ yêu cầu bổ sung</a></li>
+                        <li><a href="{{ route('admin.hosoxuly.da-xu-ly-xong') }}" class="{{ request()->routeIs('admin.hosoxuly.da-xu-ly-xong') ? 'active' : '' }}">Hồ sơ đã xử lý xong</a></li>
+                        <li><a href="{{ route('admin.hosoxuly.da-tra-ket-qua') }}" class="{{ request()->routeIs('admin.hosoxuly.da-tra-ket-qua') ? 'active' : '' }}">Hồ sơ đã trả kết quả</a></li>
                     </ul>
                 </li>
 
@@ -137,7 +140,10 @@
                         <span>Lịch hẹn</span>
                     </a>
                     <ul class="sub">
+                        {{-- Quét QR Code - Only for Quản trị viên --}}
+                        @if($user->vaiTro === 'Quản trị viên')
                         <li><a href="{{ route('admin.appointment.scan') }}" class="{{ request()->routeIs('admin.appointment.scan') ? 'active' : '' }}">Quét QR Code</a></li>
+                        @endif
                         <li><a href="{{ route('admin.appointment.index') }}" class="{{ request()->routeIs('admin.appointment.index') ? 'active' : '' }}">Danh sách lịch hẹn</a></li>
                         <li><a href="{{ route('admin.appointment.today') }}" class="{{ request()->routeIs('admin.appointment.today') ? 'active' : '' }}">Lịch hẹn hôm nay</a></li>
                     </ul>

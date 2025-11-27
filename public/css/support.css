@@ -5,9 +5,9 @@
 
 /* === Thanh cam (menu con) === */
 .support-header {
-    background-color: #c46a32;
+    background-color: #323ec4;
     /* Màu cam đất */
-    border-bottom: 3px solid #a6551e;
+    border-bottom: 3px solid #323ec4;
     z-index: 10;
 }
 
@@ -25,12 +25,12 @@
 }
 
 .support-header .nav-link:hover {
-    background-color: #a6551e;
+    background-color: #323ec4;
     color: #fff;
 }
 
 .support-header .nav-link.active {
-    background-color: #8f4a1d;
+    background-color: #323ec4;
     color: #fff !important;
     font-weight: 600;
 }
@@ -56,7 +56,7 @@
 }
 
 .breadcrumb-item a:hover {
-    color: #c46a32;
+    color: #323ec4;
     /* Đổi sang cam khi hover */
     text-decoration: underline;
 }
@@ -97,19 +97,19 @@
 .about-page .icon-box {
     width: 80px;
     height: 80px;
-    background-color: #fbe5ce;
+    background-color: #1c83e4;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto;
     font-size: 30px;
-    color: #a65c2a;
+    color: #323ec4;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .highlight-box {
-    background-color: #f8e8d4;
+    background-color: #323ec4;
     border-radius: 6px;
     font-size: 16px;
 }
@@ -140,7 +140,7 @@
     left: 10px;
     right: 10px;
     height: 2px;
-    background-color: #e4a670;
+    background-color: #323ec4;
     z-index: 0;
 }
 
@@ -176,7 +176,7 @@
     left: 10%;
     right: 10%;
     height: 2px;
-    background-color: #c46a32;
+    background-color: #323ec4;
     z-index: 0;
 }
 
@@ -192,15 +192,15 @@
     top: 42px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #c46a32;
+    background-color: #323ec4;
 }
 
 .text-brown {
-    color: #c46a32 !important;
+    color: #323ec4 !important;
 }
 
 .bg-brown {
-    background-color: #c46a32 !important;
+    background-color: #323ec4 !important;
 }
 
 .timeline-horizontal h5 {

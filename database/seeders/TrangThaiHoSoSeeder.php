@@ -37,7 +37,7 @@ class TrangThaiHoSoSeeder extends Seeder
             ],
             [
                 'maTrangThai'=>6,
-                'tenTrangThai'=>'Yêu cầu thực hiện nghĩa vụ tài chính'
+                'tenTrangThai'=>'Hồ sơ đã bổ sung giấy tờ'
             ],
             [
                 'maTrangThai'=>7,

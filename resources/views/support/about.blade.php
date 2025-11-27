@@ -3,8 +3,15 @@
 @section('title', 'Giới thiệu')
 
 @section('content')
-    @include('partials.support-header', ['breadcrumb' => 'Giới thiệu'])
+        <div class="container-fluid page-header py-5 mb-5">
+        <div class="container py-5">
+            <form class="d-flex wow fadeInUp" data-wow-delay="0.3" role="search">
+                <input class="form-control me-2" type="search" placeholder="Nhập từ khóa tìm kiếm" aria-label="Search">
+                <button class="btn btn-color" type="submit">TÌM KIẾM</button>
+            </form>
+        </div>
 
+    </div>
     <div class="container py-5 about-page">
         <h1 class="main-title -none">Giới thiệu về Cổng Dịch vụ công Quốc gia</h1>
 
@@ -40,7 +47,7 @@
                     <div class="icon-box mb-3">
                         <i class="fa {{ $feature['icon'] }}"></i>
                     </div>
-                    <p class="text-secondary">{!! $feature['text'] !!}</p>
+                    <p class="text-color">{!! $feature['text'] !!}</p>
                 </div>
             @endforeach
         </div>
@@ -51,8 +58,8 @@
                 trong vận hành <strong>Cổng Dịch vụ công Quốc gia</strong> là góp phần xây dựng
                 <strong>Chính phủ liêm chính, hành động, phát triển, phục vụ Nhân Dân.</strong>
             </p>
-            <p class="fw-bold text-warning mb-0">
-                Hãy truy cập <a href="https://www.dichvucong.gov.vn" target="_blank" class="text-decoration-none text-warning">www.dichvucong.gov.vn</a> !
+            <p class="fw-bold text-color mb-0">
+                Hãy truy cập <a href="https://www.dichvucong.gov.vn" target="_blank" class="text-decoration-none text-color">www.dichvucong.gov.vn</a> !
             </p>
         </div>
 

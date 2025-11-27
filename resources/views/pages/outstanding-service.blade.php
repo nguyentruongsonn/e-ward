@@ -6,7 +6,7 @@
     <div class="container py-5">
         <form class="d-flex wow fadeInUp" data-wow-delay="0.3s" role="search">
             <input class="form-control me-2" type="search" placeholder="Nhập từ khóa tìm kiếm" aria-label="Search">
-            <button class="btn btn-primary" type="submit">TÌM KIẾM</button>
+            <button class="btn btn-color" type="submit">TÌM KIẾM</button>
         </form>
         <!-- <nav aria-label="breadcrumb" class="mt-3">
             <ol class="breadcrumb">
@@ -59,7 +59,7 @@
                             <div class="col-lg-12  wow fadeInUp" data-wow-delay="0.1s">
                                 <div class="service-items rounded h-100 p-4">
                                     <a href="{{ route('outstanding-service.show', ['id' => $tthc->maTTHC]) }}" class="text-dark">
-                                        <i class="fa fa-file-lines me-3" style="color: green; font-size: 25px;"></i>
+                                        <i class="fa fa-file-lines me-3 icon-color" style=" font-size: 25px;"></i>
                                         {{ $tthc->tenTTHC }}
                                     </a>
                                 </div>

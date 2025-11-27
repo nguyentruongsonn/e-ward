@@ -7,7 +7,7 @@
     <div class="container py-5">
         <form class="d-flex wow fadeInUp" data-wow-delay="0.3s" role="search">
             <input class="form-control me-2" type="search" placeholder="Nhập từ khóa tìm kiếm" aria-label="Search">
-            <button class="btn btn-primary" type="submit">TÌM KIẾM</button>
+            <button class="btn btn-color" type="submit">TÌM KIẾM</button>
         </form>
         <!-- <nav aria-label="breadcrumb" class="mt-3">
             <ol class="breadcrumb">
@@ -30,11 +30,11 @@
 
                         <div class="col-8">
                         <h3 class="fw-semibold text-uppercase">
-                            <i class="fa-solid fa-file-lines h-100 w-100 text-primary"></i>{{ $tthc->tenTTHC }}
+                            {{ $tthc->tenTTHC }}
                         </h3>
                         </div>
                         <div class="col-4 justify-content-end d-flex">
-                        <button type="button" class="btn btn-primary shadow-sm" onclick="openCustomModal()">
+                        <button type="button" class="btn btn-color shadow-sm" onclick="openCustomModal()">
                             <i class="fa-solid fa-circle-info me-1"></i> Xem thông tin chi tiết
                         </button>
                         </div>
@@ -84,7 +84,7 @@
                             @forelse($thanhPhanHoSos as $tenThanhPhan => $giayTos)
                                 <div class="accordion-item">
                                     <h2 class="accordion-header" id="heading{{ $loop->index }}">
-                                        <button class="accordion-button bg-primary text-white {{ $loop->first ? '' : 'collapsed' }}" type="button"
+                                        <button class="accordion-button bg-color text-white {{ $loop->first ? '' : 'collapsed' }}" type="button"
                                                 data-bs-toggle="collapse" data-bs-target="#collapse{{ $loop->index }}"
                                                 aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
                                                 aria-controls="collapse{{ $loop->index }}">
@@ -166,20 +166,20 @@
                             <h6 class="card-title text-uppercase mb-3">Thực hiện thủ tục</h6>
                             <div class="d-grid gap-2">
                                 @auth
-                                    <a href="{{ route('appointment', $tthc->maTTHC) }}" class="btn btn-outline-primary">
+                                    <a href="{{ route('appointment', $tthc->maTTHC) }}" class="btn btn-color">
                                         <i class="fa-regular fa-calendar-check me-1"></i> Đặt lịch nộp hồ sơ
                                     </a>
                                 @else
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                    <button type="button" class="btn " data-bs-toggle="modal" data-bs-target="#loginModal">
                                         <i class="fa-regular fa-calendar-check me-1"></i> Đặt lịch nộp hồ sơ
                                     </button>
                                 @endauth
                                 @auth
-                                    <a href="{{ route('nop-ho-so.show', ['maTTHC' => $tthc->maTTHC]) }}" class="btn btn-primary">
+                                    <a href="{{ route('nop-ho-so.show', ['maTTHC' => $tthc->maTTHC]) }}" class="btn btn-color">
                                         <i class="fa-solid fa-paper-plane me-1"></i> Nộp hồ sơ trực tuyến
                                     </a>
                                 @else
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                    <button type="button" class="btn btn-color" data-bs-toggle="modal" data-bs-target="#loginModal">
                                         <i class="fa-solid fa-paper-plane me-1"></i> Nộp hồ sơ trực tuyến
                                     </button>
                                 @endauth
@@ -188,7 +188,7 @@
                     </div>
                     <div class="card shadow-sm border-0">
                         <div class="card-body">
-                            <a class="btn btn-primary w-100" href="#modalmap">
+                            <a class="btn btn-color w-100" href="#modalmap">
                                 <i class="fa-solid fa-map-location-dot me-1"></i> Xem bản đồ
                             </a>
                         </div>
@@ -203,7 +203,7 @@
 <!-- Modal xem bản đồ  -->
 <div id="modalmap" class="modalmap" aria-modal="true" role="dialog" aria-labelledby="modalmapTitle">
     <div class="modalmap-dialog">
-        <div class="modalmap-header bg-primary">
+        <div class="modalmap-header bg-color">
             <h2 id="modalmapTitle" class="modalmap-title">Bản đồ vị trí</h2>
             <a href="#" class="modalmap-close" aria-label="Đóng">&times;</a>
         </div>
@@ -221,7 +221,7 @@
 <!--Modal xem chi tiết thủ tục hành chính-->
 <div id="customModal" class="custom-modal">
     <div class="custom-modal-content">
-        <div class="custom-modal-header  bg-primary ">
+        <div class="custom-modal-header  bg-color ">
             <h2 class="custom-modal-title">
                 Thông tin chi tiết thủ tục
             </h2>
@@ -283,7 +283,7 @@
                             @forelse($thanhPhanHoSos as $tenThanhPhan => $giayTos)
                                 <div class="accordion-item">
                                     <h2 class="accordion-header" id="modalHeading{{ $loop->index }}">
-                                        <button class="accordion-button bg-primary text-white {{ $loop->first ? '' : 'collapsed' }}" type="button"
+                                        <button class="accordion-button bg-color text-white {{ $loop->first ? '' : 'collapsed' }}" type="button"
                                                 data-bs-toggle="collapse" data-bs-target="#modalCollapse{{ $loop->index }}"
                                                 aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
                                                 aria-controls="modalCollapse{{ $loop->index }}">
@@ -296,7 +296,7 @@
                                          aria-labelledby="modalHeading{{ $loop->index }}"
                                          data-bs-parent="#modalThanhPhanAccordion">
                                         <div class="accordion-body p-0">
-                                            <div class="table-responsive">
+                                            <div class="">
                                                 <table class="table-service-cth table-sm text-dark table-bordered align-middle mb-0">
                                                     <thead class="">
                                                         <tr>
@@ -314,7 +314,7 @@
                                                                     <td>{{ $tp->tenGiayTo }}</td>
                                                                     <td class="text-center">
                                                                         @if($tp->soLuongBanChinh)
-                                                                            <span class="badge bg-success">{{ $tp->soLuongBanChinh }}</span>
+                                                                            <span class="badge bg-color">{{ $tp->soLuongBanChinh }}</span>
                                                                         @else
                                                                             <span class="text-muted">—</span>
                                                                         @endif

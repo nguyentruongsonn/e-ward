@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             FormTrucTuyenSeeder::class,
             NguoiSeeder::class,
             CongDanSeeder::class,
-            // CanBoSeeder::class,
+            CanBoSeeder::class,
             // QuanTriVienSeeder::class,
             ThanhPhanHoSoSeeder::class,
             GiayToSeeder::class,

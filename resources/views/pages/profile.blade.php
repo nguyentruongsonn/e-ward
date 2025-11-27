@@ -3,14 +3,14 @@
 @push('styles')
     <style>
         :root {
-            --accent-color: #CE7A58;
+            --accent-color: #007bff;
         }
 
         .profile-stats-card {
             border-left: 4px solid var(--accent-color) !important;
-            border-top: 1px solid #dee2e6;
-            border-right: 1px solid #dee2e6;
-            border-bottom: 1px solid #dee2e6;
+            border-top: 1px solid #007bff;
+            border-right: 1px solid #007bff;
+            border-bottom: 1px solid #007bff;
             background: white !important;
         }
 
@@ -34,13 +34,13 @@
         }
 
         .profile-menu-item.active {
-            background-color: #f5e6d3 !important;
+            background-color: #007bff !important;
             color: #333 !important;
             border-left: 4px solid var(--accent-color) !important;
         }
 
         .profile-menu-item.active-parent {
-            background-color: #f5e6d3 !important;
+            background-color: #70abebff !important;
             color: #333 !important;
             border-left: 4px solid var(--accent-color) !important;
         }
@@ -70,12 +70,13 @@
         }
 
         .profile-search-btn:hover {
-            background-color: #b86947 !important;
-            border-color: #b86947 !important;
+            background-color: #007bff !important;
+            border-color: #007bff !important;
         }
 
         .profile-header {
-            background: linear-gradient(135deg, #f5e6d3 0%, #f0d4b8 100%);
+            background: linear-gradient(135deg, #81b5edff 0%, #197ae3ff 100%);
+            color: white !important;
             padding: 20px;
             border-radius: 8px 8px 0 0;
         }
@@ -161,6 +162,10 @@
                                     <i class="fas fa-calendar-alt me-2"></i> Lịch hẹn
                                 </a>
                             </div>
+                             <a href="{{ route('profile.ratings') }}"
+                                class="list-group-item profile-menu-item {{ ($activePage ?? 'services') == 'ratings' ? 'active' : '' }}">
+                                <i class="fas fa-star me-2"></i> Đánh giá chất lượng dịch vụ
+                            </a>
                             <a href="{{ route('profile.password-change') }}"
                                 class="list-group-item profile-menu-item {{ ($activePage ?? 'services') == 'password-change' || ($activePage ?? 'services') == 'password-change-verify' ? 'active' : '' }}">
                                 <i class="fas fa-file-alt me-2"></i> Đổi mật khẩu
@@ -188,8 +193,8 @@
                             </a>
                             @if(isset($isAdmin) && $isAdmin)
                                 <hr class="dropdown-divider">
-                                <a href="{{ route('admin.dashboard') }}" 
-                                   class="list-group-item profile-menu-item" 
+                                <a href="{{ route('admin.dashboard') }}"
+                                   class="list-group-item profile-menu-item"
                                    style="color: #d9534f; font-weight: bold;">
                                     <i class="fas fa-tachometer-alt me-2"></i> Vào trang quản trị
                                 </a>
@@ -706,9 +711,7 @@
                             <!-- Notifications List -->
                             @if (isset($notifications) && $notifications->count() > 0)
                                 <div class="list-group" id="notificationsList">
-                                    @include('partials.notification-items', [
-                                        'notifications' => $notifications,
-                                    ])
+                                    @include('partials.notification-items', ['notifications' => $notifications])
                                 </div>
 
                                 <!-- Load More Button & Pagination -->
@@ -750,6 +753,61 @@
                     </div>
                 @endif
 
+                {{-- Ratings History Section --}}
+                @if(($activePage ?? 'services') == 'ratings')
+                    <div class="card shadow-sm" style="border: 1px solid #dee2e6;">
+                        <div class="profile-header">
+                            <h4 class="mb-0" style="color: #333;">
+                                <i class="fas fa-star profile-header-icon me-2"></i>
+                                Lịch sử đánh giá
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            @if(isset($ratings) && $ratings->count() > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th class="py-3 px-4">Mã hồ sơ</th>
+                                                <th class="py-3 px-4">Thủ tục</th>
+                                                <th class="py-3 px-4">Đánh giá</th>
+                                                <th class="py-3 px-4">Nhận xét</th>
+                                                <th class="py-3 px-4">Ngày đánh giá</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($ratings as $rating)
+                                                <tr>
+                                                    <td class="px-4">
+                                                        <a href="{{ route('profile.hoso.show', $rating->maHSXL) }}" class="fw-bold text-decoration-none">
+                                                            {{ $rating->maHSXL }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="px-4">{{ $rating->tenTTHC }}</td>
+                                                    <td class="px-4">
+                                                        <div class="text-info">
+                                                            @for($i = 1; $i <= 5; $i++)
+                                                                <i class="fa fa-star {{ $i <= $rating->soDiem ? '' : 'text-muted' }}"></i>
+                                                            @endfor
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4">{{ $rating->nhanXet ?? '-' }}</td>
+                                                    <td class="px-4">{{ \Carbon\Carbon::parse($rating->ngayDanhGia)->format('d/m/Y H:i') }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center py-5">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png" alt="No ratings" style="width: 100px; opacity: 0.5;" class="mb-3">
+                                    <p class="text-muted">Bạn chưa có đánh giá nào.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
                 @if (($activePage ?? 'services') == 'password-change')
                     <!-- Đổi mật khẩu - Form nhập mật khẩu hiện tại -->
                     <div class="card shadow-sm" style="border: 1px solid #dee2e6;">
@@ -771,7 +829,7 @@
                                 @csrf
                                 <div class="mb-3">
                                     <label for="current_password" class="form-label fw-bold">Mật khẩu hiện tại</label>
-                                    <input type="password" class="form-control profile-form-control @error('current_password') is-invalid @enderror" 
+                                    <input type="password" class="form-control profile-form-control @error('current_password') is-invalid @enderror"
                                         id="current_password" name="current_password" required>
                                     @error('current_password')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -813,8 +871,8 @@
                                 @csrf
                                 <div class="mb-3">
                                     <label for="code" class="form-label fw-bold">Mã OTP</label>
-                                    <input type="text" class="form-control profile-form-control @error('code') is-invalid @enderror" 
-                                        id="code" name="code" required maxlength="6" pattern="[0-9]{6}" 
+                                    <input type="text" class="form-control profile-form-control @error('code') is-invalid @enderror"
+                                        id="code" name="code" required maxlength="6" pattern="[0-9]{6}"
                                         placeholder="Nhập 6 chữ số">
                                     @error('code')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -823,7 +881,7 @@
 
                                 <div class="mb-3">
                                     <label for="new_password" class="form-label fw-bold">Mật khẩu mới</label>
-                                    <input type="password" class="form-control profile-form-control @error('new_password') is-invalid @enderror" 
+                                    <input type="password" class="form-control profile-form-control @error('new_password') is-invalid @enderror"
                                         id="new_password" name="new_password" required minlength="6">
                                     @error('new_password')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -832,7 +890,7 @@
 
                                 <div class="mb-3">
                                     <label for="new_password_confirmation" class="form-label fw-bold">Xác nhận mật khẩu mới</label>
-                                    <input type="password" class="form-control profile-form-control" 
+                                    <input type="password" class="form-control profile-form-control"
                                         id="new_password_confirmation" name="new_password_confirmation" required minlength="6">
                                 </div>
 
@@ -1302,23 +1360,6 @@
         });
     </script>
 
-    <!-- Modal chi tiết hồ sơ -->
-    <div class="modal fade" id="hosoDetailModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Chi tiết hồ sơ</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-muted">Đang tải...</div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal chi tiết thông báo -->
     <div class="modal fade" id="notificationDetailModal" tabindex="-1" aria-hidden="true">

@@ -472,6 +472,129 @@ class AdminController extends Controller
     }
 
     /**
+     * Hiển thị danh sách hồ sơ yêu cầu bổ sung (status = 5)
+     */
+    public function indexHoSoYeuCauBoSung(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = HoSoXuLy::with(['congdan.nguoi', 'tthc', 'trangThai'])
+            ->whereRaw("maHSXL LIKE 'HSXL_%'")
+            ->whereNotNull('maHSXL')
+            ->where('maHSXL', '!=', '0')
+            ->where('maHSXL', '!=', '')
+            ->where('maTrangThai', 5); // Yêu cầu bổ sung
+
+        // Filter theo tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('maHSXL', 'LIKE', "%{$search}%")
+                  ->orWhere('tenChuHoSo', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('soDienThoai', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $query->orderBy('ngayTiepNhan', 'desc')->orderBy('maHSXL', 'desc');
+        $hosos = $query->paginate(20)->withQueryString();
+
+        foreach ($hosos as $h) {
+            if ($h->maHSXL !== null) {
+                $h->setAttribute('maHSXL', (string)$h->maHSXL);
+            }
+        }
+
+        $trangThais = TrangThaiHoSo::orderBy('maTrangThai')->get();
+        return view('admin.hosoxuly.index', compact('hosos', 'trangThais'));
+    }
+
+    /**
+     * Hiển thị danh sách hồ sơ đã xử lý xong (status = 9)
+     */
+    public function indexHoSoDaXuLyXong(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = HoSoXuLy::with(['congdan.nguoi', 'tthc', 'trangThai'])
+            ->whereRaw("maHSXL LIKE 'HSXL_%'")
+            ->whereNotNull('maHSXL')
+            ->where('maHSXL', '!=', '0')
+            ->where('maHSXL', '!=', '')
+            ->where('maTrangThai', 9); // Đã xử lý xong
+
+        // Filter theo tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('maHSXL', 'LIKE', "%{$search}%")
+                  ->orWhere('tenChuHoSo', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('soDienThoai', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $query->orderBy('ngayKetThucXuLy', 'desc')->orderBy('maHSXL', 'desc');
+        $hosos = $query->paginate(20)->withQueryString();
+
+        foreach ($hosos as $h) {
+            if ($h->maHSXL !== null) {
+                $h->setAttribute('maHSXL', (string)$h->maHSXL);
+            }
+        }
+
+        $trangThais = TrangThaiHoSo::orderBy('maTrangThai')->get();
+        return view('admin.hosoxuly.index', compact('hosos', 'trangThais'));
+    }
+
+    /**
+     * Hiển thị danh sách hồ sơ đã trả kết quả (status = 10)
+     */
+    public function indexHoSoDaTraKetQua(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = HoSoXuLy::with(['congdan.nguoi', 'tthc', 'trangThai'])
+            ->whereRaw("maHSXL LIKE 'HSXL_%'")
+            ->whereNotNull('maHSXL')
+            ->where('maHSXL', '!=', '0')
+            ->where('maHSXL', '!=', '')
+            ->where('maTrangThai', 10); // Đã trả kết quả
+
+        // Filter theo tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('maHSXL', 'LIKE', "%{$search}%")
+                  ->orWhere('tenChuHoSo', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('soDienThoai', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $query->orderBy('ngayTra', 'desc')->orderBy('maHSXL', 'desc');
+        $hosos = $query->paginate(20)->withQueryString();
+
+        foreach ($hosos as $h) {
+            if ($h->maHSXL !== null) {
+                $h->setAttribute('maHSXL', (string)$h->maHSXL);
+            }
+        }
+
+        $trangThais = TrangThaiHoSo::orderBy('maTrangThai')->get();
+        return view('admin.hosoxuly.index', compact('hosos', 'trangThais'));
+    }
+
+    /**
      * Hiển thị chi tiết hồ sơ
      */
     public function showHoSo($maHSXL)
@@ -1182,6 +1305,17 @@ class AdminController extends Controller
         $hoso->ngayTiepNhan = now();
         $hoso->nguoiTiepNhan = $user->IDnguoiDung;
         $hoso->maTrangThai = 2; // Được tiếp nhận
+
+        // Tính ngày hẹn trả dựa trên Cách thức thực hiện
+        $cachThucHien = \App\Models\CachThucHien::where('maTTHC', $hoso->maTTHC)
+            ->where('kenh', $hoso->hinhThuc)
+            ->first();
+
+        if ($cachThucHien && $cachThucHien->thoiHan) {
+            // Cộng thêm số ngày làm việc (đơn giản là cộng ngày, nếu cần logic ngày làm việc phức tạp hơn thì cần helper)
+            $hoso->ngayHenTra = now()->addDays($cachThucHien->thoiHan);
+        }
+
         $hoso->save();
 
         return back()->with('success', 'Đã tiếp nhận hồ sơ thành công.');
@@ -1283,77 +1417,248 @@ class AdminController extends Controller
      */
     public function ketQuaXuLy(Request $request, $maHSXL)
     {
-        if (!$this->isAdmin()) {
-            return response()->json(['success' => false]);
-        }
+        try {
+            \Log::info('ketQuaXuLy called', [
+                'maHSXL' => $maHSXL, 
+                'has_files' => $request->hasFile('fileKetQua'),
+                'has_converted' => $request->has('converted_files')
+            ]);
+            
+            if (!$this->isAdmin()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized']);
+            }
 
-        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
-        
-        // Xử lý file upload mới
-        if ($request->hasFile('fileKetQua')) {
-            $newFiles = [];
-            foreach ($request->file('fileKetQua') as $file) {
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('public/ketqua', $fileName);
-                // Save full path
-                $newFiles[] = 'storage/ketqua/' . $fileName;
+            $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+            
+            // Case 1: Saving converted files list (from convertYKienFile)
+            if ($request->has('converted_files')) {
+                $convertedFiles = $request->converted_files;
+                
+                // If it's a JSON string, decode it
+                if (is_string($convertedFiles)) {
+                    $filesArray = json_decode($convertedFiles, true);
+                    if (is_array($filesArray)) {
+                        $hoso->duongdanfileketqua = json_encode($filesArray);
+                        $hoso->save();
+                        \Log::info('Converted files saved', ['count' => count($filesArray)]);
+                        
+                        return response()->json([
+                            'success' => true,
+                            'message' => 'Đã lưu danh sách file kết quả',
+                            'files' => $filesArray
+                        ]);
+                    }
+                }
+                
+                return response()->json(['success' => false, 'message' => 'Invalid converted_files format']);
             }
             
-            // Merge with existing files
-            $existingFiles = json_decode($hoso->duongdanfileketqua, true) ?? [];
+            // Case 2: Uploading new files
+            if (!$request->hasFile('fileKetQua')) {
+                \Log::warning('No files received in request');
+                return response()->json(['success' => false, 'message' => 'Không có file được chọn']);
+            }
+            
+            // Ensure directory exists
+            $storageDir = storage_path('app/public/ketqua');
+            if (!file_exists($storageDir)) {
+                mkdir($storageDir, 0755, true);
+                \Log::info('Created directory: ' . $storageDir);
+            }
+            
+            // Process uploaded files
+            $newFiles = [];
+            $uploadedFiles = $request->file('fileKetQua');
+            
+            // Ensure it's an array
+            if (!is_array($uploadedFiles)) {
+                $uploadedFiles = [$uploadedFiles];
+            }
+            
+            foreach ($uploadedFiles as $file) {
+                if ($file->isValid()) {
+                    $fileName = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+                    $path = $file->storeAs('public/ketqua', $fileName);
+                    $newFiles[] = 'storage/ketqua/' . $fileName;
+                    \Log::info('File uploaded', ['name' => $fileName, 'path' => $path]);
+                } else {
+                    \Log::error('Invalid file', ['error' => $file->getErrorMessage()]);
+                }
+            }
+            
+            if (empty($newFiles)) {
+                return response()->json(['success' => false, 'message' => 'Không có file hợp lệ']);
+            }
+            
+            // Get existing files safely
+            $existingFiles = [];
+            if (!empty($hoso->duongdanfileketqua)) {
+                $decoded = json_decode($hoso->duongdanfileketqua, true);
+                if (is_array($decoded)) {
+                    $existingFiles = $decoded;
+                }
+            }
+            
+            // Merge and save
             $allFiles = array_merge($existingFiles, $newFiles);
             $hoso->duongdanfileketqua = json_encode($allFiles);
-        }
-        
-        $hoso->save();
+            $hoso->save();
+            
+            \Log::info('Files saved successfully', ['count' => count($newFiles), 'total' => count($allFiles)]);
 
-        return response()->json([
-            'success' => true, 
-            'message' => 'Đã tải lên kết quả xử lý.',
-            'files' => json_decode($hoso->duongdanfileketqua, true)
-        ]);
+            return response()->json([
+                'success' => true, 
+                'message' => 'Đã tải lên ' . count($newFiles) . ' file.',
+                'files' => $allFiles
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('ketQuaXuLy failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()]);
+        }
     }
 
     /**
-     * Convert opinion files to result files
+     * Upload opinion files
      */
-    public function convertToResult($maHSXL)
+    public function uploadYKien(Request $request, $maHSXL)
+    {
+        try {
+            \Log::info('uploadYKien called', ['maHSXL' => $maHSXL, 'has_files' => $request->hasFile('files')]);
+            
+            if (!$this->isAdmin()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized']);
+            }
+
+            $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+            
+            // Check if files exist
+            if (!$request->hasFile('files')) {
+                \Log::warning('No files received in request');
+                return response()->json(['success' => false, 'message' => 'Không có file được chọn']);
+            }
+            
+            // Ensure directory exists
+            $storageDir = storage_path('app/public/ykien');
+            if (!file_exists($storageDir)) {
+                mkdir($storageDir, 0755, true);
+                \Log::info('Created directory: ' . $storageDir);
+            }
+            
+            // Process uploaded files
+            $newFiles = [];
+            $uploadedFiles = $request->file('files');
+            
+            // Ensure it's an array
+            if (!is_array($uploadedFiles)) {
+                $uploadedFiles = [$uploadedFiles];
+            }
+            
+            foreach ($uploadedFiles as $file) {
+                if ($file->isValid()) {
+                    $fileName = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+                    $path = $file->storeAs('public/ykien', $fileName);
+                    $newFiles[] = 'storage/ykien/' . $fileName;
+                    \Log::info('File uploaded', ['name' => $fileName, 'path' => $path]);
+                } else {
+                    \Log::error('Invalid file', ['error' => $file->getErrorMessage()]);
+                }
+            }
+            
+            if (empty($newFiles)) {
+                return response()->json(['success' => false, 'message' => 'Không có file hợp lệ']);
+            }
+            
+            // Get existing files safely
+            $existingFiles = [];
+            if (!empty($hoso->duongdanfileykien)) {
+                $decoded = json_decode($hoso->duongdanfileykien, true);
+                if (is_array($decoded)) {
+                    $existingFiles = $decoded;
+                }
+            }
+            
+            // Merge and save
+            $allFiles = array_merge($existingFiles, $newFiles);
+            $hoso->duongdanfileykien = json_encode($allFiles);
+            $hoso->save();
+            
+            \Log::info('Files saved successfully', ['count' => count($newFiles), 'total' => count($allFiles)]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã tải lên ' . count($newFiles) . ' file.',
+                'files' => $allFiles
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('uploadYKien failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Save opinion comment
+     */
+    public function saveYKien(Request $request, $maHSXL)
     {
         if (!$this->isAdmin()) {
             return response()->json(['success' => false]);
         }
 
         $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        $hoso->yKienXuLy = $request->noiDung;
+        $hoso->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Convert opinion file to result file
+     */
+    public function convertToResult(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false]);
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        $targetFile = $request->file; // The file path to convert
         
         if ($hoso->duongdanfileykien) {
             $filesYKien = json_decode($hoso->duongdanfileykien, true) ?? [];
-            $copiedFiles = [];
             
-            // Copy each file from ykien to ketqua folder
-            foreach ($filesYKien as $filePath) {
-                // Extract filename from path
-                $fileName = basename($filePath);
+            if (in_array($targetFile, $filesYKien)) {
+                $fileName = basename($targetFile);
                 $sourcePath = storage_path('app/public/ykien/' . $fileName);
                 $destPath = storage_path('app/public/ketqua/' . $fileName);
                 
+                // Ensure directory exists
+                if (!file_exists(dirname($destPath))) {
+                    mkdir(dirname($destPath), 0755, true);
+                }
+
                 if (file_exists($sourcePath)) {
                     copy($sourcePath, $destPath);
-                    $copiedFiles[] = 'storage/ketqua/' . $fileName;
+                    
+                    // Add to result files
+                    $existingFiles = json_decode($hoso->duongdanfileketqua, true) ?? [];
+                    $newResultFile = 'storage/ketqua/' . $fileName;
+                    
+                    if (!in_array($newResultFile, $existingFiles)) {
+                        $existingFiles[] = $newResultFile;
+                        $hoso->duongdanfileketqua = json_encode($existingFiles);
+                        $hoso->save();
+                    }
+                    
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Đã chuyển file thành kết quả',
+                        'files' => $existingFiles
+                    ]);
                 }
             }
-            
-            // Append to existing result files if any
-            $existingFiles = json_decode($hoso->duongdanfileketqua, true) ?? [];
-            $allFiles = array_unique(array_merge($existingFiles, $copiedFiles));
-            
-            $hoso->duongdanfileketqua = json_encode(array_values($allFiles));
-            $hoso->save();
         }
 
-        return response()->json([
-            'success' => true,
-            'files' => json_decode($hoso->duongdanfileketqua, true)
-        ]);
+        return response()->json(['success' => false, 'message' => 'File không tồn tại']);
     }
 
     /**
@@ -1367,12 +1672,15 @@ class AdminController extends Controller
 
         $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
         $files = json_decode($hoso->duongdanfileykien, true) ?? [];
-        $files = array_filter($files, fn($f) => $f !== $request->file);
-        $hoso->duongdanfileykien = json_encode(array_values($files));
+        $targetFile = $request->file;
+
+        // Remove from array
+        $files = array_values(array_filter($files, fn($f) => $f !== $targetFile));
+        $hoso->duongdanfileykien = json_encode($files);
         $hoso->save();
 
         // Delete physical file
-        $fileName = basename($request->file);
+        $fileName = basename($targetFile);
         @unlink(storage_path('app/public/ykien/' . $fileName));
 
         return response()->json(['success' => true]);
@@ -1389,16 +1697,21 @@ class AdminController extends Controller
 
         $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
         $files = json_decode($hoso->duongdanfileketqua, true) ?? [];
-        $files = array_filter($files, fn($f) => $f !== $request->file);
-        $hoso->duongdanfileketqua = json_encode(array_values($files));
+        $targetFile = $request->file;
+
+        // Remove from array
+        $files = array_values(array_filter($files, fn($f) => $f !== $targetFile));
+        $hoso->duongdanfileketqua = json_encode($files);
         $hoso->save();
 
         // Delete physical file
-        $fileName = basename($request->file);
+        $fileName = basename($targetFile);
         @unlink(storage_path('app/public/ketqua/' . $fileName));
 
         return response()->json(['success' => true]);
     }
+
+
 
     /**
      * Cán bộ chuyển  hồ sơ sang lãnh đạo
@@ -1421,6 +1734,16 @@ class AdminController extends Controller
         // Cập nhật trạng thái chuyển lãnh đạo
         $hoso->maTrangThai = 4; // Đang xử lý (chờ lãnh đạo duyệt)
         
+        // Lưu danh sách file kết quả (nếu có thay đổi từ frontend)
+        if ($request->has('ketQuaFiles')) {
+            $files = $request->ketQuaFiles;
+            // Ensure valid JSON or empty array
+            if (empty($files) || $files === 'null' || $files === 'undefined') {
+                $files = '[]';
+            }
+            $hoso->duongdanfileketqua = $files;
+        }
+
         // Lưu thông tin người được chuyển đến (nếu có)
         if ($request->filled('nguoiDuyet')) {
             // Tạm thời lưu vào cột nguoiDuyet (hoặc có thể cần cột riêng như nguoiDuocChuyenDen)
@@ -1456,26 +1779,39 @@ class AdminController extends Controller
 
         $user = Auth::user();
         
-        // Chỉ Lãnh đạo mới được phê duyệt
+        // Chỉ Lãnh đạo hoặc Quản trị viên mới được phê duyệt
         if ($user->vaiTro !== 'Lãnh đạo' && $user->vaiTro !== 'Quản trị viên') {
             return back()->with('error', 'Chỉ Lãnh đạo mới được phê duyệt hồ sơ.');
         }
 
-        $request->validate([
-            'yKien' => 'nullable|string|max:1000',
-        ]);
-
         $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
         
-        // Cập nhật phê duyệt
+        // Cập nhật trạng thái
+        $hoso->maTrangThai = 5; // Đã phê duyệt (chờ trả kết quả)
         $hoso->nguoiDuyet = $user->IDnguoiDung;
         $hoso->ngayDuyet = now();
-        $hoso->yKienDuyet = $request->input('yKien', 'Đồng ý');
-        $hoso->maTrangThai = 9; // Đã xử lý xong
-        $hoso->ngayKetThucXuLy = now()->toDateString();
+        
+        // Lưu danh sách file kết quả (nếu có thay đổi từ frontend)
+        if ($request->has('ketQuaFiles')) {
+            $files = $request->ketQuaFiles;
+            // Ensure valid JSON or empty array
+            if (empty($files) || $files === 'null' || $files === 'undefined') {
+                $files = '[]';
+            }
+            $hoso->duongdanfileketqua = $files;
+        }
+
+        // Lưu ý kiến duyệt
+        if ($request->filled('yKienDuyet')) {
+            $hoso->yKienDuyet = $request->yKienDuyet;
+            $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo phê duyệt: " . $request->yKienDuyet;
+        } else {
+            $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo đã phê duyệt.";
+        }
+
         $hoso->save();
 
-        return back()->with('success', 'Đã phê duyệt hồ sơ thành công.');
+        return back()->with('success', 'Đã phê duyệt hồ sơ.');
     }
 
     /**
@@ -1506,6 +1842,140 @@ class AdminController extends Controller
         $hoso->save();
 
         return back()->with('error', 'Đã trả lại hồ sơ cho cán bộ.');
+    }
+
+    /**
+     * Ký số điện tử file kết quả
+     */
+    public function signFile(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Không có quyền truy cập']);
+        }
+
+        $user = Auth::user();
+        
+        // Chỉ Lãnh đạo mới được ký số
+        if ($user->vaiTro !== 'Lãnh đạo' && $user->vaiTro !== 'Quản trị viên') {
+            return response()->json(['success' => false, 'message' => 'Chỉ Lãnh đạo mới được ký số']);
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        $filePath = $request->input('file_path');
+        $signatureMethod = $request->input('signature_method', 'digital_ca');
+        $note = $request->input('note');
+        
+        // Get existing signatures or create new array
+        $signatures = json_decode($hoso->file_signatures ?? '{}', true);
+        
+        // Check if file is already signed
+        if (isset($signatures[$filePath])) {
+            return response()->json(['success' => false, 'message' => 'File đã được ký số trước đó']);
+        }
+        
+        // Add signature info
+        $signatures[$filePath] = [
+            'signed_by' => $user->IDnguoiDung,
+            'signed_at' => now()->toDateTimeString(),
+            'signature_method' => $signatureMethod,
+            'note' => $note
+        ];
+        
+        $hoso->file_signatures = json_encode($signatures);
+        $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo đã ký số file: " . basename($filePath);
+        $hoso->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ký số thành công'
+        ]);
+    }
+
+    /**
+     * Lãnh đạo yêu cầu xử lý lại
+     */
+    public function yeuCauXuLyLai(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login');
+        }
+
+        $user = Auth::user();
+        
+        // Chỉ Lãnh đạo mới được yêu cầu xử lý lại
+        if ($user->vaiTro !== 'Lãnh đạo' && $user->vaiTro !== 'Quản trị viên') {
+            return back()->with('error', 'Chỉ Lãnh đạo mới được yêu cầu xử lý lại.');
+        }
+
+        $request->validate([
+            'noiDung' => 'required|string|max:1000',
+        ]);
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Chuyển lại cho cán bộ thụ lý
+        $hoso->maTrangThai = 2; // Đã tiếp nhận (chờ thụ lý xử lý lại)
+        $hoso->nguoiDuyet = null; // Reset người duyệt
+        $hoso->ngayDuyet = null;
+        $hoso->yKienDuyet = null;
+        $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo yêu cầu xử lý lại: " . $request->noiDung;
+        $hoso->save();
+
+        return back()->with('success', 'Đã gửi yêu cầu xử lý lại cho cán bộ thụ lý.');
+    }
+
+    /**
+     * Yêu cầu bổ sung giấy tờ
+     */
+    public function yeuCauBoSung(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login');
+        }
+
+        $user = Auth::user();
+        
+        // Cán bộ một cửa và cán bộ thụ lý có thể yêu cầu bổ sung
+        if (!in_array($user->vaiTro, ['Cán bộ một cửa', 'Cán bộ thụ lý', 'Quản trị viên'])) {
+            return back()->with('error', 'Bạn không có quyền yêu cầu bổ sung giấy tờ.');
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        $giayToCanBoSung = $request->input('giayto', []);
+        $ghiChu = $request->input('ghiChu');
+        
+        if (empty($giayToCanBoSung)) {
+            return back()->with('error', 'Vui lòng chọn ít nhất một giấy tờ cần bổ sung.');
+        }
+        
+        // Get document names
+        $giayToNames = DB::table('giayto')
+            ->whereIn('maGiayTo', $giayToCanBoSung)
+            ->pluck('tenGiayTo')
+            ->toArray();
+        
+        // Store supplement request
+        $supplementData = [
+            'giayto' => $giayToCanBoSung,
+            'giayto_names' => $giayToNames,
+            'ghi_chu' => $ghiChu,
+            'requested_by' => $user->IDnguoiDung,
+            'requested_at' => now()->toDateTimeString()
+        ];
+        
+        // Backup current status
+        $hoso->maTrangThai_backup = $hoso->maTrangThai;
+        $hoso->yeu_cau_bo_sung = json_encode($supplementData);
+        $hoso->maTrangThai = 5; // Yêu cầu bổ sung
+        $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Yêu cầu bổ sung giấy tờ: " . implode(', ', $giayToNames);
+        $hoso->save();
+
+        // TODO: Send email to citizen
+        // Mail::to($hoso->email)->send(new DocumentSupplementRequest($hoso, $giayToNames, $ghiChu));
+
+        return back()->with('success', 'Đã gửi yêu cầu bổ sung giấy tờ cho công dân.');
     }
 }
 

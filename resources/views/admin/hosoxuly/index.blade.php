@@ -77,9 +77,6 @@
                                                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-hand"></i>ádasasd</a>
                                                 <ul class="dropdown-menu bg-light m-0">
                                                     <li><a href="{{ route('admin.hosoxuly.show', $hoso->maHSXL) }}" class="dropdown-item">Xem chi tiết</a></li>
-                                                    <li><a href="#" class="dropdown-item">Tiếp nhận hồ sơ</a></li>
-                                                    <li><a href="#" class="dropdown-item">Từ chối</a></li>
-                                                    <li><a href="#" class="dropdown-item">Yêu cầu bổ sung</a></li>
                                                 </ul>
                                             </div>
 										</td>

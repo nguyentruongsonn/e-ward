@@ -26,6 +26,8 @@ Route::post('/webhook/email-reply', [AdminController::class, 'receiveMailReply']
 Route::view('/about', 'pages.about')->name('about');
 
 Route::view('/contact', 'pages.contact')->name('contact');
+Route::get('/danh-gia-dich-vu', [App\Http\Controllers\PublicServiceController::class, 'ratings'])->name('service.ratings');
+Route::get('/danh-gia-dich-vu/{maTTHC}', [App\Http\Controllers\PublicServiceController::class, 'showProcedureRatings'])->name('service.ratings.detail');
 Route::view('/chatbot', 'pages.chatbot')->name('chatbot');
 Route::view('/history', 'pages.history')->name('history');
 Route::view('/register', 'pages.register')->name('register');
@@ -73,6 +75,17 @@ Route::middleware('auth')->group(function () {
         ->name('profile.password-change.verify.submit');
     Route::post('/profile/password-change/resend-otp', [ProfileController::class, 'resendPasswordChangeOtp'])
         ->name('profile.password-change.resend-otp');
+    
+    // Document supplement upload
+    Route::post('/profile/application/{maHSXL}/upload-supplement', [ProfileController::class, 'uploadSupplementDocuments'])
+        ->name('profile.application.upload-supplement');
+    
+    // Service rating
+    Route::post('/profile/application/{maHSXL}/rate', [ProfileController::class, 'rateService'])
+        ->name('profile.application.rate');
+
+    // Ratings history
+    Route::get('/profile/ratings', [ProfileController::class, 'showRatings'])->name('profile.ratings');
 });
 
 // Dev-only: quick mail test endpoint
@@ -112,6 +125,9 @@ Route::prefix('admin')->group(function () {
         // Filtered lists
         Route::get('/hosoxuly-tiepnhan', [AdminController::class, 'indexHoSoTiepNhan'])->name('admin.hosoxuly.tiepnhan');
         Route::get('/hosoxuly-cho-xuly', [AdminController::class, 'indexHoSoChoXuLy'])->name('admin.hosoxuly.cho-xuly');
+        Route::get('/hosoxuly-yeu-cau-bo-sung', [AdminController::class, 'indexHoSoYeuCauBoSung'])->name('admin.hosoxuly.danh-sach-yeu-cau-bo-sung');
+        Route::get('/hosoxuly-da-xu-ly-xong', [AdminController::class, 'indexHoSoDaXuLyXong'])->name('admin.hosoxuly.da-xu-ly-xong');
+        Route::get('/hosoxuly-da-tra-ket-qua', [AdminController::class, 'indexHoSoDaTraKetQua'])->name('admin.hosoxuly.da-tra-ket-qua');
         
         // Workflow actions
         Route::post('/hosoxuly/{maHSXL}/tiepnhan', [AdminController::class, 'tiepNhanHoSo'])->name('admin.hosoxuly.tiepnhan-action');
@@ -121,10 +137,17 @@ Route::prefix('admin')->group(function () {
         Route::post('/hosoxuly/{maHSXL}/tralai', [AdminController::class, 'traLai'])->name('admin.hosoxuly.tralai');
         Route::post('/hosoxuly/{maHSXL}/tra-ketqua', [AdminController::class, 'traKetQua'])->name('admin.hosoxuly.tra-ketqua');
         Route::post('/hosoxuly/{maHSXL}/y-kien-xu-ly', [AdminController::class, 'yKienXuLy'])->name('admin.hosoxuly.y-kien-xu-ly');
+        Route::post('/hosoxuly/{maHSXL}/upload-ykien', [AdminController::class, 'uploadYKien'])->name('admin.hosoxuly.upload-ykien');
+        Route::post('/hosoxuly/{maHSXL}/save-ykien', [AdminController::class, 'saveYKien'])->name('admin.hosoxuly.save-ykien');
         Route::post('/hosoxuly/{maHSXL}/ket-qua-xu-ly', [AdminController::class, 'ketQuaXuLy'])->name('admin.hosoxuly.ket-qua-xu-ly');
         Route::post('/hosoxuly/{maHSXL}/convert-to-result', [AdminController::class, 'convertToResult'])->name('admin.hosoxuly.convert-to-result');
         Route::post('/hosoxuly/{maHSXL}/remove-ykien-file', [AdminController::class, 'removeYKienFile'])->name('admin.hosoxuly.remove-ykien-file');
         Route::post('/hosoxuly/{maHSXL}/remove-ketqua-file', [AdminController::class, 'removeKetQuaFile'])->name('admin.hosoxuly.remove-ketqua-file');
+        
+        // New workflow features
+        Route::post('/hosoxuly/{maHSXL}/sign-file', [AdminController::class, 'signFile'])->name('admin.hosoxuly.sign-file');
+        Route::post('/hosoxuly/{maHSXL}/yeu-cau-xu-ly-lai', [AdminController::class, 'yeuCauXuLyLai'])->name('admin.hosoxuly.yeu-cau-xu-ly-lai');
+        Route::post('/hosoxuly/{maHSXL}/yeu-cau-bo-sung', [AdminController::class, 'yeuCauBoSung'])->name('admin.hosoxuly.yeu-cau-bo-sung');
         
         // Quản lý lịch hẹn
         Route::get('/appointment', [AdminController::class, 'indexAppointments'])->name('admin.appointment.index');
