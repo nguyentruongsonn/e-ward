@@ -5,7 +5,7 @@
     /* ====== BREADCRUMB ====== */
 
     .breadcrumb a {
-        color: #32C36C;
+        color: #007bff;
         text-decoration: none;
     }
 
@@ -48,11 +48,11 @@
         transition: 0.3s;
     }
     .step.active .circle {
-        background-color: #32C36C;
-        box-shadow: 0 0 15px rgba(12, 215, 39, 0.5);
+        background-color: #007bff;
+        box-shadow: 0 0 15px #2C097F;
     }
     .step.completed .circle {
-        background-color: #28a745;
+        background-color: #007bff;
     }
     .step p {
         margin-top: 8px;
@@ -72,7 +72,7 @@
     .form-section h5 {
         font-size: 18px;
         font-weight: 600;
-        color: #32C36C;
+        color: #007bff;
         border-bottom: 1px solid #eee;
         padding-bottom: 5px;
         margin-bottom: 20px;
@@ -237,7 +237,7 @@
 
             <div class="d-flex justify-content-between mt-3">
                 <button type="button" class="btn btn-secondary prev-step" disabled>Quay lại</button>
-                <button type="button" class="btn btn-primary next-step">Tiếp tục</button>
+                <button type="button" class="btn btn-color next-step">Tiếp tục</button>
             </div>
         </div>
 
@@ -258,7 +258,7 @@
                             <h2 class="accordion-header" id="heading-{{ $loop->index }}">
                                 <button class="accordion-button @if(!$loop->first) collapsed @endif" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $loop->index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse-{{ $loop->index }}">
                                     <strong>{{ $tenThanhPhan }}</strong>
-                                    <span class="badge bg-primary rounded-pill ms-2">{{ $requiredGiayTos->count() }} giấy tờ cần nộp</span>
+                                    <span class="badge bg-color rounded-pill ms-2">{{ $requiredGiayTos->count() }} giấy tờ cần nộp</span>
                                 </button>
                             </h2>
                             <div id="collapse-{{ $loop->index }}" class="accordion-collapse collapse @if($loop->first) show @endif" aria-labelledby="heading-{{ $loop->index }}" data-bs-parent="#thanhPhanHoSoAccordion">
@@ -301,7 +301,7 @@
             </div>
             <div class="d-flex justify-content-between mt-4">
                 <button type="button" class="btn btn-secondary prev-step">Quay lại</button>
-                <button type="button" class="btn btn-primary next-step">Tiếp tục</button>
+                <button type="button" class="btn btn-color next-step">Tiếp tục</button>
             </div>
         </div>
 
@@ -362,7 +362,7 @@
                 <h5>Thông tin phí, lệ phí</h5>
                 <div class="table-responsive rounded">
                     <table class="table table-bordered align-middle rounded" id="lePhiTable">
-                        <thead class="bg-primary">
+                        <thead class="bg-color">
                             <tr>
                                 <th class="text-dark">Loại lệ phí</th>
                                 <th style="width: 100px" class="text-dark">Số lượng</th>
@@ -386,7 +386,7 @@
                                 <tr><td colspan="6" class="text-center text-muted py-3">Chưa có thông tin lệ phí</td></tr>
                             @endforelse
                         </tbody>
-                        <tfoot class="bg-primary rounded-bottom">
+                        <tfoot class="bg-color rounded-bottom">
                             <tr>
                                 <td colspan="3" class="text-end text-dark"><strong>Tổng</strong></td>
                                 <td class="text-dark fw-bold" id="tongLePhi">@if($lePhis->isNotEmpty()) {{ number_format($lePhis->sum('soTien'), 0, ',', '.') }} VNĐ @else 0 VNĐ @endif</td>
@@ -408,12 +408,12 @@
                 </div>
             </div>
             <div id="qrPaymentSection" class="mt-4 mb-4" style="display: none;">
-                <div class="card border-primary">
-                    <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="fa fa-qrcode"></i> Thanh toán qua QR Code</h5></div>
+                <div class="card border-color">
+                    <div class="card-header bg-color text-white"><h5 class="mb-0"><i class="fa fa-qrcode"></i> Thanh toán qua QR Code</h5></div>
                     <div class="card-body text-center">
                         <p class="text-muted mb-3">Vui lòng quét mã QR bên dưới để thanh toán</p>
                         <div id="qrCodeContainer" class="mb-3"><img id="qrCodeImage" src="" alt="QR Code" class="img-fluid" style="max-width: 300px;"></div>
-                        <div class="alert alert-info"><strong>Số tiền cần thanh toán:</strong> <span id="qrAmount" class="fw-bold text-primary"></span></div>
+                        <div class="alert alert-info"><strong>Số tiền cần thanh toán:</strong> <span id="qrAmount" class="fw-bold "></span></div>
                         <div id="paymentStatus" class="mt-3 small text-center"></div>
                         <input type="hidden" name="ma_giao_dich" id="maGiaoDich" value="">
                     </div>
@@ -437,7 +437,7 @@
             </div>
             <div class="d-flex justify-content-between mt-4">
                 <button type="button" class="btn btn-secondary prev-step">Quay lại</button>
-                <div><button type="button" class="btn btn-primary" id="btnSubmitHoSo">Nộp hồ sơ</button></div>
+                <div><button type="button" class="btn btn-color" id="btnSubmitHoSo">Nộp hồ sơ</button></div>
             </div>
         </div>
 
@@ -445,23 +445,25 @@
         <div class="form-section hidden" data-step="4">
             @if(isset($isSuccess) && $isSuccess)
                 <div class="text-center mb-4">
-                    <div class="mb-3"><i class="fa fa-check-circle text-success" style="font-size: 64px;"></i></div>
-                    <h3 class="text-success mb-3">Nộp hồ sơ thành công!</h3>
+                    <div class="mb-3"><i class="fa fa-check-circle text-color" style="font-size: 64px;"></i></div>
+                    <h3 class="text-color mb-3">Nộp hồ sơ thành công!</h3>
                     <p class="text-muted">Mã hồ sơ của bạn: <strong class="text-dark">{{ $maHSXL ?? '' }}</strong></p>
                 </div>
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white"><h5 class="mb-0 text-white">Thông tin người nộp</h5></div>
+                    <div class="card-header bg-color text-white"><h5 class="mb-0 text-white">Thông tin người nộp</h5></div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6 mb-3"><strong>Họ tên:</strong> {{ $hoSo->tenChuHoSo ?? ($dulieu['ho_ten'] ?? ($nguoiInfo->hoTen ?? '—')) }}</div>
+                            <div class="col-md-6 mb-3"><strong>Ngày sinh:</strong> {{ $dulieu['ngay_sinh'] ?? ($nguoiInfo->ngaySinh ?? '—') }}</div>
                             <div class="col-md-6 mb-3"><strong>Số điện thoại:</strong> {{ $hoSo->soDienThoai ?? ($dulieu['so_dien_thoai'] ?? ($nguoiInfo->soDienThoai ?? '—')) }}</div>
-                            <div class="col-md-12 mb-3"><strong>Địa chỉ:</strong> {{ $dulieu['dia_chi'] ?? ($nguoiInfo->noiThuongTru ?? '—') }}</div>
+                            <div class="col-md-6 mb-3"><strong>Địa chỉ:</strong> {{ $dulieu['dia_chi'] ?? ($nguoiInfo->noiThuongTru ?? '—') }}</div>
+                            
                         </div>
                     </div>
                 </div>
                 <div class="d-flex justify-content-center gap-3 mb-4">
                     <button type="button" class="btn btn-info" onclick="window.print()"><i class="fa fa-print"></i> In phiếu</button>
-                    <a href="{{ route('home') }}" class="btn btn-success"><i class="fa fa-check"></i> Đồng ý</a>
+                    <a href="{{ route('home') }}" class="btn btn-color"><i class="fa fa-check"></i> Đồng ý</a>
                 </div>
             @else
                 <h5>Nộp hồ sơ</h5>
@@ -1045,10 +1047,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             // Kiểm tra nếu có tiền nhưng chưa thanh toán
-            // if (tongTien > 0 && !isPaymentChecked) {
-            //     alert('Vui lòng quét mã QR và thanh toán trước khi nộp hồ sơ. Hệ thống đang tự động kiểm tra thanh toán của bạn.');
-            //     return;
-            // }
+            if (tongTien > 0 && !isPaymentChecked) {
+                alert('Vui lòng quét mã QR và thanh toán trước khi nộp hồ sơ. Hệ thống đang tự động kiểm tra thanh toán của bạn.');
+                return;
+            }
 
             // Luôn submit về route nop-ho-so.submit
             form.action = '{{ route("nop-ho-so.submit", ["maTTHC" => $tthc->maTTHC ?? ""]) }}';

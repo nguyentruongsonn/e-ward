@@ -168,13 +168,15 @@ class ProfileController extends Controller
         ]);
     }
 
-    // Return JSON detail for a given ho so (belongs to current user)
+    // Show full application detail page for citizen
     public function showHoSo(Request $request, $maHSXL)
     {
         $authUser = Auth::user();
         if ($authUser instanceof \App\Models\Nguoi) {
             $nguoi = $authUser;
+            $user = $authUser->user;
         } else {
+            $user = $authUser;
             $nguoi = $authUser->nguoi;
         }
 
@@ -184,29 +186,114 @@ class ProfileController extends Controller
 
         $IDCD = $nguoi->congDan->IDCD;
 
-        $hoSo = HoSoXuLy::with('tthc')
+        // Get application with relationships
+        $hoSo = HoSoXuLy::with(['tthc', 'trangThai', 'congdan.nguoi'])
             ->where('IDCD', $IDCD)
-            ->findOrFail($maHSXL);
+            ->where('maHSXL', $maHSXL)
+            ->firstOrFail();
 
-        return response()->json([
-            'maHSXL' => $hoSo->maHSXL,
-            'tenTTHC' => optional($hoSo->tthc)->tenTTHC,
-            'tenChuHoSo' => $hoSo->tenChuHoSo,
-            'doiTuongThucHien' => $hoSo->doiTuongThucHien,
-            'email' => $hoSo->email,
-            'soDienThoai' => $hoSo->soDienThoai,
-            'ngayTiepNhan' => $hoSo->ngayTiepNhan ? $hoSo->ngayTiepNhan->format('d/m/Y') : null,
-            'ngayHenTra' => $hoSo->ngayHenTra ? $hoSo->ngayHenTra->format('d/m/Y') : null,
-            'ngayTra' => $hoSo->ngayTra ? $hoSo->ngayTra->format('d/m/Y') : null,
-            'ngayKetThucXuLy' => $hoSo->ngayKetThucXuLy ? $hoSo->ngayKetThucXuLy->format('d/m/Y') : null,
-            'maTrangThai' => $hoSo->maTrangThai,
-            'donViXuLy' => $hoSo->donViXuLy,
-            'lePhi' => $hoSo->lePhi,
-            'hinhThuc' => $hoSo->hinhThuc,
-            'thongTinTra' => $hoSo->thongTinTra,
-            'ghiChu' => $hoSo->ghiChu,
-            'dulieu' => $hoSo->dulieu,
-        ]);
+        // Get form configuration from formtructuyen (same as admin)
+        $form = DB::table('formtructuyen')->where('maTTHC', $hoSo->maTTHC)->first();
+        $cauHinhForm = $form ? json_decode($form->cauHinhForm, true) : [];
+        
+        // Handle dulieu structure (same logic as admin)
+        $dulieuRaw = is_array($hoSo->dulieu) ? $hoSo->dulieu : json_decode($hoSo->dulieu ?? '{}', true);
+        
+        $cauHinhFormMerged = null;
+        $payload = null;
+        
+        if (isset($dulieuRaw['cauHinhForm']) && isset($dulieuRaw['payload'])) {
+            // New structure: has both cauHinhForm and payload
+            $cauHinhFormMerged = $dulieuRaw['cauHinhForm'];
+            $payload = $dulieuRaw['payload'];
+        } elseif (isset($dulieuRaw[0]) && isset($dulieuRaw[0]['group'])) {
+            // dulieu is merged cauHinhForm (old structure)
+            $cauHinhFormMerged = $dulieuRaw;
+            $payload = [];
+        } else {
+            // dulieu is original payload
+            $payload = $dulieuRaw;
+        }
+        
+        // Use cauHinhFormMerged if available, otherwise use cauHinhForm from DB
+        if ($cauHinhFormMerged) {
+            $cauHinhForm = $cauHinhFormMerged;
+        }
+        
+        // dulieu for display
+        $dulieu = $payload;
+
+        // Get documents
+        $taiLieu = DB::table('tailieunop')
+            ->where('maHSXL', $maHSXL)
+            ->get();
+
+        // Get document groups (same logic as admin)
+        $thanhPhanHoSos = collect();
+        if ($hoSo->tthc) {
+            $thanhPhanHoSos = DB::table('thanhphanhoso as tph')
+                ->leftJoin('thanhphangiayto as tpg', 'tpg.maThanhPhan', '=', 'tph.maThanhPhan')
+                ->leftJoin('giayto as gt', 'gt.maGiayTo', '=', 'tpg.maGiayTo')
+                ->where('tph.maTTHC', $hoSo->tthc->maTTHC)
+                ->select(
+                    'tph.maThanhPhan',
+                    'tph.tenThanhPhan',
+                    'gt.maGiayTo',
+                    'gt.tenGiayTo',
+                    'tpg.soLuongBanChinh',
+                    'tpg.soLuongBanSao'
+                )
+                ->get()
+                ->groupBy('tenThanhPhan');
+        }
+
+        // Parse supplement request if exists
+        $yeuCauBoSung = null;
+        if ($hoSo->yeu_cau_bo_sung) {
+            $yeuCauBoSung = json_decode($hoSo->yeu_cau_bo_sung, true);
+        }
+
+        // Get payment history
+        $lichSuThanhToan = DB::table('lichsuthanhtoan')
+            ->where('maHSXL', $maHSXL)
+            ->get();
+
+        // Check if can rate (status 10, within 10 days, not rated yet)
+        $canRate = false;
+        $daysRemaining = 0;
+        $existingRating = null;
+        
+        if ($hoSo->maTrangThai == 10 && $hoSo->ngayTra) {
+            $ngayTra = Carbon::parse($hoSo->ngayTra);
+            $daysSince = $ngayTra->diffInDays(now());
+            $daysRemaining = 10 - $daysSince;
+            
+            $existingRating = DB::table('danhgia')->where('maHSXL', $maHSXL)->first();
+            $canRate = ($daysSince <= 10) && !$existingRating;
+        }
+
+        // Counters for sidebar
+        $hoSoHoanThanh = HoSoXuLy::where('IDCD', $IDCD)->whereNotNull('ngayKetThucXuLy')->count();
+        $hoSoDangXuLy = HoSoXuLy::where('IDCD', $IDCD)->whereNull('ngayKetThucXuLy')->count();
+        $unreadCount = $this->getUnreadCount($IDCD);
+
+        return view('pages.application-detail', compact(
+            'user',
+            'nguoi',
+            'hoSo',
+            'cauHinhForm',
+            'dulieu',
+            'taiLieu',
+            'thanhPhanHoSos',
+            'yeuCauBoSung',
+            'canRate',
+            'daysRemaining',
+            'existingRating',
+            'lichSuThanhToan',
+            'hoSoHoanThanh',
+            'hoSoDangXuLy',
+            'unreadCount'
+        ));
     }
 
     public function payments(Request $request)
@@ -819,5 +906,193 @@ class ProfileController extends Controller
         }
 
         return back()->with('status', 'Đã gửi lại mã OTP.');
+    }
+
+    /**
+     * Upload supplemental documents for application requiring supplements
+     */
+    public function uploadSupplementDocuments(Request $request, $maHSXL)
+    {
+        $authUser = Auth::user();
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+        } else {
+            $nguoi = $authUser->nguoi;
+        }
+
+        if (!$nguoi || !$nguoi->congDan) {
+            return back()->withErrors(['error' => 'Không tìm thấy thông tin người dùng']);
+        }
+
+        $IDCD = $nguoi->congDan->IDCD;
+
+        // Verify ownership and status
+        $hoSo = HoSoXuLy::where('IDCD', $IDCD)
+            ->where('maHSXL', $maHSXL)
+            ->firstOrFail();
+
+        if ($hoSo->maTrangThai != 5) {
+            return back()->withErrors(['error' => 'Hồ sơ không ở trạng thái yêu cầu bổ sung']);
+        }
+
+        $request->validate([
+            'files.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB max
+            'maGiayTo.*' => 'required|integer'
+        ]);
+
+        $uploadedFiles = [];
+        
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $index => $file) {
+                $maGiayTo = $request->maGiayTo[$index] ?? null;
+                
+                if (!$maGiayTo) continue;
+
+                // Store file
+                $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('tailieu', $fileName, 'public');
+
+                // Create tailieunop record
+                DB::table('tailieunop')->insert([
+                    'maHSXL' => $maHSXL,
+                    'maGiayTo' => $maGiayTo,
+                    'tenTep' => $file->getClientOriginalName(),
+                    'duongDan' => $path,
+                    'dinhDang' => $file->getClientOriginalExtension(),
+                    'kichThuoc' => $file->getSize(),
+                    'ngayTai' => now(),
+                ]);
+
+                $uploadedFiles[] = $fileName;
+            }
+        }
+
+
+        // Set status back to "Đã tiếp nhận" (received) for processing
+        $hoSo->maTrangThai = 2;
+        $hoSo->maTrangThai_backup = null;
+
+
+        // Clear supplement request
+        $hoSo->yeu_cau_bo_sung = null;
+        
+        // Log activity
+        $hoSo->ghiChu = ($hoSo->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Công dân đã bổ sung " . count($uploadedFiles) . " tài liệu.";
+        $hoSo->save();
+
+        return back()->with('success', 'Đã nộp bổ sung tài liệu thành công. Hồ sơ sẽ được xử lý tiếp.');
+    }
+
+    /**
+     * Submit service rating for completed application
+     */
+    public function rateService(Request $request, $maHSXL)
+    {
+        $authUser = Auth::user();
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+        } else {
+            $nguoi = $authUser->nguoi;
+        }
+
+        if (!$nguoi || !$nguoi->congDan) {
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy thông tin người dùng']);
+        }
+
+        $IDCD = $nguoi->congDan->IDCD;
+
+        // Verify ownership and status
+        $hoSo = HoSoXuLy::where('IDCD', $IDCD)
+            ->where('maHSXL', $maHSXL)
+            ->firstOrFail();
+
+        if ($hoSo->maTrangThai != 10) {
+            return response()->json(['success' => false, 'message' => 'Hồ sơ chưa được trả kết quả']);
+        }
+
+        // Check if within 10 days
+        if (!$hoSo->ngayTra) {
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy ngày trả kết quả']);
+        }
+
+        $ngayTra = Carbon::parse($hoSo->ngayTra);
+        $daysSince = $ngayTra->diffInDays(now());
+
+        if ($daysSince > 10) {
+            return response()->json(['success' => false, 'message' => 'Đã quá thời hạn đánh giá (10 ngày)']);
+        }
+
+        // Check if already rated
+        $existingRating = DB::table('danhgia')->where('maHSXL', $maHSXL)->first();
+        if ($existingRating) {
+            return response()->json(['success' => false, 'message' => 'Bạn đã đánh giá hồ sơ này rồi']);
+        }
+
+        $request->validate([
+            'soDiem' => 'required|integer|min:1|max:5',
+            'nhanXet' => 'nullable|string|max:1000'
+        ]);
+
+        // Create rating
+        DB::table('danhgia')->insert([
+            'maHSXL' => $maHSXL,
+            'soDiem' => $request->soDiem,
+            'nhanXet' => $request->nhanXet,
+            'IDCD' => $IDCD,
+            'ngayDanhGia' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Cảm ơn bạn đã đánh giá!']);
+    }
+
+    /**
+     * Show citizen ratings history
+     */
+    public function showRatings()
+    {
+        $authUser = Auth::user();
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+            $user = $authUser->user;
+        } else {
+            $user = $authUser;
+            $nguoi = $authUser->nguoi;
+        }
+
+        if (!$nguoi || !$nguoi->congDan) {
+            abort(404);
+        }
+
+        $IDCD = $nguoi->congDan->IDCD;
+
+        // Get ratings with related application info
+        $ratings = DB::table('danhgia')
+            ->join('hosoxuly', 'danhgia.maHSXL', '=', 'hosoxuly.maHSXL')
+            ->join('tthc', 'hosoxuly.maTTHC', '=', 'tthc.maTTHC')
+            ->where('danhgia.IDCD', $IDCD)
+            ->select(
+                'danhgia.*',
+                'hosoxuly.maHSXL',
+                'tthc.tenTTHC'
+            )
+            ->orderBy('danhgia.ngayDanhGia', 'desc')
+            ->get();
+
+        // Counters for sidebar
+        $hoSoHoanThanh = HoSoXuLy::where('IDCD', $IDCD)->whereNotNull('ngayKetThucXuLy')->count();
+        $hoSoDangXuLy = HoSoXuLy::where('IDCD', $IDCD)->whereNull('ngayKetThucXuLy')->count();
+        $unreadCount = $this->getUnreadCount($IDCD);
+
+        return view('pages.profile', [
+            'user' => $user,
+            'nguoi' => $nguoi,
+            'activePage' => 'ratings',
+            'ratings' => $ratings,
+            'hoSoHoanThanh' => $hoSoHoanThanh,
+            'hoSoDangXuLy' => $hoSoDangXuLy,
+            'unreadCount' => $unreadCount
+        ]);
     }
 }

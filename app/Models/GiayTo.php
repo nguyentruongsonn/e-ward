@@ -5,34 +5,28 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ThanhPhanHoSo extends Model
+class GiayTo extends Model
 {
     use HasFactory;
 
-    protected $table = 'thanhphanhoso';
-    protected $primaryKey = 'maThanhPhan';
+    protected $table = 'giayto';
+    protected $primaryKey = 'maGiayTo';
     public $timestamps = false;
 
     protected $fillable = [
-        'maTTHC', 'tenThanhPhan'
+        'tenGiayTo',
+        'loaiGiayTo'
     ];
 
-    public function tthc()
-    {
-        return $this->belongsTo(TTHC::class, 'maTTHC', 'maTTHC');
-    }
-
-    public function giayTos()
+    public function thanhPhanHoSos()
     {
         return $this->belongsToMany(
-            \App\Models\GiayTo::class,
+            ThanhPhanHoSo::class,
             'thanhphangiayto',
-            'maThanhPhan',
             'maGiayTo',
             'maThanhPhan',
-            'maGiayTo'
+            'maGiayTo',
+            'maThanhPhan'
         )->withPivot('soLuongBanChinh', 'soLuongBanSao');
     }
 }
-
-

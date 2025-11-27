@@ -65,7 +65,7 @@ class LoginController extends Controller
     }
 
     /**
-     * Kiểm tra user có phải admin không
+     * Kiểm tra user có phải admin/cán bộ không
      */
     private function isAdmin($user = null)
     {
@@ -77,8 +77,8 @@ class LoginController extends Controller
             return false;
         }
 
-        // Kiểm tra vaiTro trong bảng nguoi
-        if ($user->vaiTro === 'Quản trị viên') {
+        // Kiểm tra vaiTro trong bảng nguoi (bao gồm cả Cán bộ và Quản trị viên)
+        if (in_array($user->vaiTro, ['Quản trị viên', 'Cán bộ một cửa','Cán bộ thụ lý'])) {
             return true;
         }
 

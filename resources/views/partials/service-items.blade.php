@@ -25,7 +25,7 @@
             @endif
         </td>
         <td>
-            <a href="#" class="btn btn-sm btn-info">
+            <a href="{{ route('profile.hoso.show', $hoSo->maHSXL) }}" class="btn btn-sm btn-info">
                 <i class="fas fa-eye"></i> Xem chi tiết
             </a>
         </td>

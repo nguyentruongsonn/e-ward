@@ -26,9 +26,12 @@ class FormTrucTuyenSeeder extends Seeder
                             [
                                 'type' => 'row',
                                 'columns' => [
-                                    ['label' => 'Họ và tên ', 'name' => 'ho_ten', 'type' => 'text', 'col' => 3,],
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date', 'col' => 3,],
-                                    ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Họ và tên ', 'name' => 'ho_ten', 'type' => 'text', 'col' => 3, 
+                                    'required' => true],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date', 'col' => 3,
+                                    'required' => true],
+                                    ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text', 'col' => 3,
+                                    'required' => true],
                                     ['label' => 'Email', 'name' => 'email', 'type' => 'email', 'col' => 3],
                                 ]
                             ],
@@ -45,13 +48,16 @@ class FormTrucTuyenSeeder extends Seeder
                                             'Chứng minh nhân dân', 'Căn cước công dân', 'Hộ chiếu', 'Thẻ căn cước'
                                         ]
                                     ],
-                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to', 'type' => 'text', 'col' => 3,],
-                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap', 'type' => 'date', 'col' => 3,],
+                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to', 'type' => 'text', 'col' => 3,
+                                'required' => true],
+                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap', 'type' => 'date', 'col' => 3,
+                                'required' => true],
                                     [
                                         'label' => 'Nơi cấp giấy tờ',
                                         'name' => 'noi_cap_giay_to',
                                         'type' => 'select',
                                         'col' => 3,
+                                        'required' => true,
                                         'options' => [
                                             'Công an Tỉnh Băc Kạn', 'Công an Tỉnh Bạc Liêu', 'Công an Tỉnh Bắc Ninh', 'Công an Tỉnh Bình Định','Công an Tỉnh Bình Dương','Công an Tỉnh Bình Phước','Công an Tỉnh Bình Thuận','Công an Tỉnh Cà Mau','Công an TP.Cần Thơ','Công an Tỉnh Cao Bằng ','Công an TP. Hải Phòng','Công an Tỉnh Gia Lai','Công an Tỉnh Hà Nam','Công an Tỉnh Hòa Bình','Công an Tỉnh Hưng Yên ','Công an Tỉnh Hải Dương','Công an Tỉnh Hậu Giang','Công an Tỉnh Khánh Hòa','Công an Tỉnh Kiên Giang','Công an Tỉnh Kon Tum','Công an Tỉnh Lai Châu',''
                                         ]
@@ -140,7 +146,30 @@ class FormTrucTuyenSeeder extends Seeder
                                     ],
                                     ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet_co_quan', 'type' => 'text', 'col' => 3,],
                                 ]
-                            ]
+                                ],
+                                [
+                                    'type' => 'row',
+                                    'columns' =>[
+                                        [
+                                            'label' => 'Loại trích lục bản sao cần cấp',
+                                            'name' => 'loai_trich_luc',
+                                            'type' => 'select',
+                                            'col' => 6,
+                                            'required' => true,
+                                            'options'=> [
+                                                '0 - Giấy khai sinh bản sao/ Trích lục ghi vào Sổ hộ tịch việc khai sinh (bản sao)','1 - Trích lục kết hôn (bản sao)/ Trích lục ghi chú kết hôn (bản sao)','2 - Trích lục khai tử (bản sao)','3 - Trích lục đăng ký giám hộ (bản sao)','4 - Trích lục đăng ký chấm dứt giám hộ (bản sao)','5 - Trích lục đăng ký nhận cha, me, con (bản sao)','6 - Trích lục ghi vào Sổ hộ tịch việc nuôi con nuôi (bản sao)'
+                                            ]
+                                        ],
+                                        [
+                                            'label' => 'Số lượng bản sao đề nghị cấp',
+                                            'name' => 'so_luong_ban_sao',
+                                            'type' => 'number',
+                                            'col' => 6,
+                                            'required' => true,
+                                            'min' => 1,
+                                        ]
+                                    ]
+                                ]
                         ]
                     ],
 
@@ -158,17 +187,20 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label' => 'Họ',
                                         'name' => 'Họ',
                                         'type' => 'text',
+                                        'required' => true,
                                         'col' => 4,
                                     ],
                                     [
                                         'label' => 'Chữ đệm',
                                         'name' => 'dem_nguoi_yeu_cau',
+                                        'required' => true,
                                         'type' =>  'text',
                                         'col' => 4
                                     ],
                                     [
                                         'label' => 'Tên',
                                         'name' =>'ten_nguoi_yeu_cau',
+                                        'required' => true,
                                         'type' =>'text',
                                         'col' => 4
                                     ]
@@ -210,6 +242,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name' => 'loai_cu_tru_nguoi_yeu_cau',
                                         'col' => 4,
                                         'type' => 'select',
+                                        'required' => true,
                                         'options' =>
                                         [
                                             'Thường trú',
@@ -260,6 +293,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label' => 'Loại giấy tờ tùy thân',
                                         'name' => 'loai_giay_to_tuy_than_nguoi_yeu_cau',
                                         'type' => 'select',
+                                        'required' => true,
                                         'col' => 3,
                                         'options' => [
                                             'Giấy Chứng minh nhân dân', 'Hộ chiếu', 'Thẻ thường trú', 'Thẻ căn cước công dân','Giấy chứng minh Quân đội nhân dân','Giấy chứng minh Sỹ quan quân đội','Giấy chứng minh Công an nhân dân','Giấy tờ khác','Giấy khai sinh','Giấy chứng sinh','Thẻ căn cước','Giấy chứng nhân căn cước'
@@ -269,15 +303,18 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label' => 'Số giấy tờ',
                                         'name' => 'so_giay_to_nguoi_yeu_cau',
                                         'type' => 'text',
+                                        'required' => true,
                                         'col' => 3,
                                     ],
                                     [
                                         'label' => 'Ngày cấp',
                                         'name' => 'ngay_cap_nguoi_yeu_cau',
                                         'type' => 'date',
+                                        'required' => true,
                                         'col' => 3,
                                     ],
-                                    ['label' => 'Nơi cấp giấy tờ', 'name' => 'noi_cap_giay_to_nguoi_yeu_cau', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Nơi cấp giấy tờ', 'name' => 'noi_cap_giay_to_nguoi_yeu_cau', 'type' => 'text', 'col' => 3,
+                                'required' => true],
                                 ]
                             ],
                             [
@@ -316,18 +353,21 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label' => 'Họ',
                                         'name' => 'ho_nguoi_duoc_cap',
                                         'type' => 'text',
+                                        'required' => true,
                                         'col' => 4,
                                     ],
                                     [
                                         'label' => 'Chữ đệm',
                                         'name' => 'dem_nguoi_duoc_cap',
                                         'type' =>  'text',
+                                        'required' => true,
                                         'col' => 4
                                     ],
                                     [
                                         'label' => 'Tên',
                                         'name' =>'ten_nguoi_duoc_cap',
                                         'type' =>'text',
+                                        'required' => true,
                                         'col' => 4
                                     ]
                                 ]
@@ -368,6 +408,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name' => 'gioi_tinh_nguoi_duoc_cap',
                                         'type' =>'select',
                                         'col' => 4,
+                                        'required' => true,
                                         'options' =>[
                                             'Nam', 'Nữ'
                                         ]
@@ -376,6 +417,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label' => 'Dân tộc',
                                         'name' => 'dan_toc_nguoi_duoc_cap',
                                         'type' =>'select',
+                                        'required' => true,
                                         'col' => 4,
                                         'options' => [
                                                 'Kinh','Khơ me','Hà Nhì','Giẻ Triêng','Hơ mông','Ê Đê','Ba Na','La Chí','Cờ Ho','Brâu','Xơ Đăng','Thổ','Thái','Tà Ôi','Hoa','Sán Dìu','Pu Péo'
@@ -391,6 +433,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name' => 'loai_cu_tru_nguoi_duoc_cap',
                                         'col' => 4,
                                         'type' => 'select',
+                                        'required' => true,
                                         'options' =>
                                         [
                                             'Thường trú',
@@ -490,10 +533,6 @@ class FormTrucTuyenSeeder extends Seeder
                                     ['label' => 'Thông tin khác','name'=>'thong_tin_khac','type'=>'text','col'=>12]
                                 ]
                             ],
-                            [
-                                'type' => 'label', // This is just a label, not an input
-                                'label'=>'Ví dụ: Cung cấp thông tin về cha, mẹ để phục vụ việc cấp bản sao Giấy khai sinh; cung cấp thông tin về vợ, chồng để phục vụ việc cấp bản sao Trích lục kết hôn;...'
-                            ]
                         ]
                     ],
                 ])
@@ -515,9 +554,12 @@ class FormTrucTuyenSeeder extends Seeder
                             [
                                 'type' => 'row',
                                 'columns' => [
-                                    ['label' => 'Họ và tên ', 'name' => 'ho_ten', 'type' => 'text', 'col' => 3,],
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date', 'col' => 3,],
-                                    ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Họ và tên ', 'name' => 'ho_ten', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
                                     ['label' => 'Email', 'name' => 'email', 'type' => 'email', 'col' => 3],
                                 ]
                             ],
@@ -535,13 +577,16 @@ class FormTrucTuyenSeeder extends Seeder
                                             'Chứng minh nhân dân', 'Căn cước công dân', 'Hộ chiếu', 'Thẻ căn cước'
                                         ]
                                     ],
-                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to', 'type' => 'text', 'col' => 3,],
-                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap', 'type' => 'date', 'col' => 3,],
+                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap', 'type' => 'date', 'col' => 3,
+                                'required' => true,],
                                     [
                                         'label' => 'Nơi cấp giấy tờ',
                                         'name' => 'noi_cap_giay_to',
                                         'type' => 'select',
                                         'col' => 3,
+                                        'required' => true,
                                         'options' => [
                                             'Công an Tỉnh Băc Kạn', 'Công an Tỉnh Bạc Liêu', 'Công an Tỉnh Bắc Ninh', 'Công an Tỉnh Bình Định','Công an Tỉnh Bình Dương','Công an Tỉnh Bình Phước','Công an Tỉnh Bình Thuận','Công an Tỉnh Cà Mau','Công an TP.Cần Thơ','Công an Tỉnh Cao Bằng ','Công an TP. Hải Phòng','Công an Tỉnh Gia Lai','Công an Tỉnh Hà Nam','Công an Tỉnh Hòa Bình','Công an Tỉnh Hưng Yên ','Công an Tỉnh Hải Dương','Công an Tỉnh Hậu Giang','Công an Tỉnh Khánh Hòa','Công an Tỉnh Kiên Giang','Công an Tỉnh Kon Tum','Công an Tỉnh Lai Châu',''
                                         ]
@@ -580,7 +625,8 @@ class FormTrucTuyenSeeder extends Seeder
                                             'Thành phố Cần Thơ', 'Thủ đô Hà Nội', 'Thành phố Hải Phòng', 'Thành phố Hồ Chí Minh','Tỉnh Đồng Nai'
                                         ]
                                     ],
-                                    ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
                                 ]
                             ],
 
@@ -647,6 +693,7 @@ class FormTrucTuyenSeeder extends Seeder
                                 'label' => 'Loại đăng ký',
                                 'name' => 'loai_dang_ky',
                                 'type' => 'radio',
+                                'required' => true,
                                 'options' => [
                                     'Đăng ký mới',
                                     'Đăng ký lại',
@@ -656,6 +703,7 @@ class FormTrucTuyenSeeder extends Seeder
                             [
                                 'label' => 'Loại hồ sơ liên thông',
                                 'name' => 'loai_ho_so_lien_thong',
+                                'required' => true,
                                 'type' => 'select',
                                 'options' => ['Loại hồ sơ liên thông', 'Không phải']
                             ],
@@ -673,9 +721,11 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Họ và tên bên nữ',
                                 'columns' => [
-                                    ['label' => 'Họ', 'name' => 'ho_nu', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Họ', 'name' => 'ho_nu', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                     ['label' => 'Đệm', 'name' => 'dem_nu', 'type' => 'text', 'col' => 4],
-                                    ['label' => 'Tên', 'name' => 'ten_nu', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Tên', 'name' => 'ten_nu', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -684,13 +734,14 @@ class FormTrucTuyenSeeder extends Seeder
                                 'columns' => [
                                     ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nu', 'type' => 'number', 'col' => 4],
                                     ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nu', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nu', 'type' => 'number', 'col' => 4,],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nu', 'type' => 'number', 'col' => 4,'required' => true,],
                                 ]
                             ],
                             [
                                 'label' => 'Loại cư trú',
                                 'name' => 'loai_cu_tru_nu',
                                 'type' => 'radio',
+                                'required' => true,
                                 'options' => ['Thường trú', 'Tạm trú', 'Nơi ở hiện tại']
                             ],
                             [
@@ -724,7 +775,8 @@ class FormTrucTuyenSeeder extends Seeder
                                             'Thành phố Cần Thơ', 'Thủ đô Hà Nội', 'Thành phố Hải Phòng', 'Thành phố Hồ Chí Minh','Tỉnh Đồng Nai'
                                         ]
                                     ],
-                                    ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet_nu', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet_nu', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -735,6 +787,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'dan_toc_nu',
                                         'type'=>'select',
                                         'col'=>3,
+                                        'required' => true,
                                         'options'=>[
                                             'Kinh','Khơ me','Hà Nhì','Giẻ Triêng','Hơ mông','Ê Đê','Ba Na','La Chí','Cờ Ho','Brâu','Xơ Đăng','Thổ','Thái','Tà Ôi','Hoa','Sán Dìu','Pu Péo'
                                         ]
@@ -744,6 +797,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'quoc_tich_nu',
                                         'type'=>'select',
                                         'col'=>3,
+                                        'required' => true,
                                         'options'=>[
                                             'Việt Nam', 'CH Séc', 'Brunei', 'Triều Tiên','Venezuela','Myanmar','Tây Ban Nha','Ả Rập Xê Úp','Ả Rập','Campuchia','Indonesia','Bhutan','Hungary','Australia','Lào','Iran','Pakistan'
                                         ]
@@ -758,20 +812,20 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name' => 'loai_giay_to_nu',
                                         'type' => 'select',
                                         'col' => 3,
+                                        'required' => true,
                                         'options' => [
                                             'Giấy Chứng minh nhân dân', 'Thẻ Căn cước công dân', 'Hộ chiếu','Thẻ thường trú', 'Thẻ căn cước','Giấy chứng minh quân đội nhân dân','Giấy chứng minh Sỹ quan quân đội',''
                                         ]
                                     ],
-                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nu', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nu', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
                                     ['label' => 'Ngày cấp', 'name' => 'ngay_cap_nu', 'type' => 'date', 'col' => 3,],
                                     [
                                         'label' => 'Nơi cấp giấy tờ',
                                         'name' => 'noi_cap_giay_to_nu',
-                                        'type' => 'select',
+                                        'type' => 'text',
                                         'col' => 3,
-                                        'options' => [
-                                            'Công an Tỉnh Băc Kạn', 'Công an Tỉnh Bạc Liêu', 'Công an Tỉnh Bắc Ninh', 'Công an Tỉnh Bình Định','Công an Tỉnh Bình Dương','Công an Tỉnh Bình Phước','Công an Tỉnh Bình Thuận','Công an Tỉnh Cà Mau','Công an TP.Cần Thơ','Công an Tỉnh Cao Bằng ','Công an TP. Hải Phòng','Công an Tỉnh Gia Lai','Công an Tỉnh Hà Nam','Công an Tỉnh Hòa Bình','Công an Tỉnh Hưng Yên ','Công an Tỉnh Hải Dương','Công an Tỉnh Hậu Giang','Công an Tỉnh Khánh Hòa','Công an Tỉnh Kiên Giang','Công an Tỉnh Kon Tum','Công an Tỉnh Lai Châu',''
-                                        ]
+
                                     ],
                                 ]
                             ],
@@ -799,6 +853,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label'=>'Loại trình trạng hôn nhân',
                                         'name'=>'loai_tinh_trang_hon_nhan_vo',
                                         'type'=>'select',
+                                        'required' => true,
                                         'col'=>8,
                                         'options'=>[
                                             'Hiện tại chưa đăng ký kết hôn với ai','Hiện tại đang có vợ/chồng','Đã đăng ký kết hôn hoặc đã có vợ/chồng nhưng đã ly hôn; hiện tại chưa đăng ký kết hôn với ai','Đã đăng ký kết hôn hoặc đã có vợ/chồng nhưng vợ/chồng đã chết; hiện tại chưa đăng ký kết hôn với ai','Từ ngày...tháng...năm... đến ngày...tháng...năm... chưa đăng ký kết hôn với ai; hiện tại đang có vợ chồng','Khác - nếu không thuộc trường hợp trên'
@@ -813,6 +868,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label'=>'Tình trang hôn nhân',
                                         'name'=>'tinh_trang_hon_nhan_vo',
                                         'type'=>'text',
+                                        'required' => true,
                                         'col'=>8,
                                     ]
                                 ]
@@ -830,9 +886,11 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Họ và tên bên nam',
                                 'columns' => [
-                                    ['label' => 'Họ', 'name' => 'ho_nam', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Họ', 'name' => 'ho_nam', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                     ['label' => 'Đệm', 'name' => 'dem_nam', 'type' => 'text', 'col' => 4],
-                                    ['label' => 'Tên', 'name' => 'ten_nam', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Tên', 'name' => 'ten_nam', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -841,13 +899,15 @@ class FormTrucTuyenSeeder extends Seeder
                                 'columns' => [
                                     ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nam', 'type' => 'number', 'col' => 4],
                                     ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nam', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nam', 'type' => 'number', 'col' => 4,],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nam', 'type' => 'number', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
                                 'label' => 'Loại cư trú',
                                 'name' => 'loai_cu_tru_nam',
                                 'type' => 'radio',
+                                'required' => true,
                                 'options' => ['Thường trú', 'Tạm trú', 'Nơi ở hiện tại']
                             ],
                             [
@@ -881,7 +941,7 @@ class FormTrucTuyenSeeder extends Seeder
                                             'Thành phố Cần Thơ', 'Thủ đô Hà Nội', 'Thành phố Hải Phòng', 'Thành phố Hồ Chí Minh','Tỉnh Đồng Nai'
                                         ]
                                     ],
-                                    ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet_nam', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet_nam', 'type' => 'text', 'col' => 3,'required' => true,],
                                 ]
                             ],
                             [
@@ -892,6 +952,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'dan_toc_nam',
                                         'type'=>'select',
                                         'col'=>3,
+                                        'required' => true,
                                         'options'=>[
                                             'Kinh','Khơ me','Hà Nhì','Giẻ Triêng','Hơ mông','Ê Đê','Ba Na','La Chí','Cờ Ho','Brâu','Xơ Đăng','Thổ','Thái','Tà Ôi','Hoa','Sán Dìu','Pu Péo'
                                         ]
@@ -901,6 +962,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'quoc_tich_nam',
                                         'type'=>'select',
                                         'col'=>3,
+                                        'required' => true,
                                         'options'=>[
                                             'Việt Nam', 'CH Séc', 'Brunei', 'Triều Tiên','Venezuela','Myanmar','Tây Ban Nha','Ả Rập Xê Úp','Ả Rập','Campuchia','Indonesia','Bhutan','Hungary','Australia','Lào','Iran','Pakistan'
                                         ]
@@ -914,12 +976,13 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label' => 'Giấy tờ tùy thân',
                                         'name' => 'loai_giay_to_nam',
                                         'type' => 'select',
+                                        'required' => true,
                                         'col' => 3,
                                         'options' => [
                                             'Giấy Chứng minh nhân dân', 'Thẻ Căn cước công dân', 'Hộ chiếu','Thẻ thường trú', 'Thẻ căn cước','Giấy chứng minh quân đội nhân dân','Giấy chứng minh Sỹ quan quân đội',''
                                         ]
                                     ],
-                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nam', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nam', 'type' => 'text', 'col' => 3,'required' => true,],
                                     ['label' => 'Ngày cấp', 'name' => 'ngay_cap_nam', 'type' => 'date', 'col' => 3,],
                                     [
                                         'label' => 'Nơi cấp giấy tờ',
@@ -957,6 +1020,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'loai_tinh_trang_hon_nhan_chong',
                                         'type'=>'select',
                                         'col'=>8,
+                                        'required' => true,
                                         'options'=>[
                                             'Hiện tại chưa đăng ký kết hôn với ai','Hiện tại đang có vợ/chồng','Đã đăng ký kết hôn hoặc đã có vợ/chồng nhưng đã ly hôn; hiện tại chưa đăng ký kết hôn với ai','Đã đăng ký kết hôn hoặc đã có vợ/chồng nhưng vợ/chồng đã chết; hiện tại chưa đăng ký kết hôn với ai','Từ ngày...tháng...năm... đến ngày...tháng...năm... chưa đăng ký kết hôn với ai; hiện tại đang có vợ chồng','Khác - nếu không thuộc trường hợp trên'
                                         ]
@@ -970,6 +1034,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label'=>'Tình trang hôn nhân',
                                         'name'=>'tinh_trang_hon_nhan_chong',
                                         'type'=>'text',
+                                        'required' => true,
                                         'col'=>8,
                                     ]
                                 ]
@@ -997,9 +1062,12 @@ class FormTrucTuyenSeeder extends Seeder
                             [
                                 'type' => 'row',
                                 'columns' => [
-                                    ['label' => 'Họ và tên ', 'name' => 'ho_ten', 'type' => 'text', 'col' => 3,],
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date', 'col' => 3,],
-                                    ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Họ và tên ', 'name' => 'ho_ten', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
                                     ['label' => 'Email', 'name' => 'email', 'type' => 'email', 'col' => 3],
                                 ]
                             ],
@@ -1008,16 +1076,15 @@ class FormTrucTuyenSeeder extends Seeder
                             [
                                 'type' => 'row',
                                 'columns' => [
-                                    ['label' => 'Số CMND/CCCD', 'name' => 'so_cmnd_cccd', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Số CMND/CCCD', 'name' => 'so_cmnd_cccd', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                     ['label' => 'Ngày cấp', 'name' => 'ngay_cap', 'type' => 'date', 'col' => 4,],
                                     [
                                         'label' => 'Nơi cấp giấy tờ',
                                         'name' => 'noi_cap_giay_to',
-                                        'type' => 'select',
+                                        'type' => 'text',
                                         'col' => 3,
-                                        'options' => [
-                                            'Công an Tỉnh Băc Kạn', 'Công an Tỉnh Bạc Liêu', 'Công an Tỉnh Bắc Ninh', 'Công an Tỉnh Bình Định','Công an Tỉnh Bình Dương','Công an Tỉnh Bình Phước','Công an Tỉnh Bình Thuận','Công an Tỉnh Cà Mau','Công an TP.Cần Thơ','Công an Tỉnh Cao Bằng ','Công an TP. Hải Phòng','Công an Tỉnh Gia Lai','Công an Tỉnh Hà Nam','Công an Tỉnh Hòa Bình','Công an Tỉnh Hưng Yên ','Công an Tỉnh Hải Dương','Công an Tỉnh Hậu Giang','Công an Tỉnh Khánh Hòa','Công an Tỉnh Kiên Giang','Công an Tỉnh Kon Tum','Công an Tỉnh Lai Châu',''
-                                        ]
+
                                     ],
                                 ]
                             ],
@@ -1031,6 +1098,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name' => 'quoc_gia',
                                         'type' => 'select',
                                         'col' => 3,
+                                        'required' => true,
                                         'options' => [
                                             'Việt Nam', 'CH Séc', 'Brunei', 'Triều Tiên','Venezuela','Myanmar','Tây Ban Nha','Ả Rập Xê Úp','Ả Rập','Campuchia','Indonesia','Bhutan','Hungary','Australia','Lào','Iran','Pakistan'
                                         ]
@@ -1070,7 +1138,7 @@ class FormTrucTuyenSeeder extends Seeder
                                 'label' => 'Nơi đăng ký khai sinh',
                                 'name' => 'noi_dang_ky_khai_sinh',
                                 'type' => 'text',
-                                'disable' =>true,
+                                'required' => true,
                                 'col' => 4,
                             ],
                             [
@@ -1095,7 +1163,8 @@ class FormTrucTuyenSeeder extends Seeder
                                 'columns' => [
                                     ['label' => 'Họ', 'name' => 'ho_nguoi_yeu_cau', 'type' => 'text', 'col' => 4,],
                                     ['label' => 'Đệm', 'name' => 'dem_nguoi_yeu_cau', 'type' => 'text', 'col' => 4],
-                                    ['label' => 'Tên', 'name' => 'ten_nguoi_yeu_cau', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Tên', 'name' => 'ten_nguoi_yeu_cau', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -1155,18 +1224,22 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label' => 'Giấy tờ tùy thân',
                                         'name' => 'loai_giay_to_nguoi_yeu_cau',
                                         'type' => 'select',
+                                        'required' => true,
                                         'col' => 3,
                                         'options' => [
                                             'Giấy Chứng minh nhân dân', 'Thẻ Căn cước công dân', 'Hộ chiếu','Thẻ thường trú', 'Thẻ căn cước','Giấy chứng minh quân đội nhân dân','Giấy chứng minh Sỹ quan quân đội',''
                                         ]
                                     ],
-                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nguoi_yeu_cau', 'type' => 'text', 'col' => 3,],
-                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap_nguoi_yeu_cau', 'type' => 'date', 'col' => 3,],
+                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nguoi_yeu_cau', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap_nguoi_yeu_cau', 'type' => 'date', 'col' => 3,
+                                    'required' => true,],
                                     [
                                         'label' => 'Nơi cấp giấy tờ',
                                         'name' => 'noi_cap_giay_to_nguoi_yeu_cau',
                                         'type' => 'select',
                                         'col' => 3,
+                                        'required' => true,
                                         'options' => [
                                             'Công an Tỉnh Băc Kạn', 'Công an Tỉnh Bạc Liêu', 'Công an Tỉnh Bắc Ninh', 'Công an Tỉnh Bình Định','Công an Tỉnh Bình Dương','Công an Tỉnh Bình Phước','Công an Tỉnh Bình Thuận','Công an Tỉnh Cà Mau','Công an TP.Cần Thơ','Công an Tỉnh Cao Bằng ','Công an TP. Hải Phòng','Công an Tỉnh Gia Lai','Công an Tỉnh Hà Nam','Công an Tỉnh Hòa Bình','Công an Tỉnh Hưng Yên ','Công an Tỉnh Hải Dương','Công an Tỉnh Hậu Giang','Công an Tỉnh Khánh Hòa','Công an Tỉnh Kiên Giang','Công an Tỉnh Kon Tum','Công an Tỉnh Lai Châu',''
                                         ]
@@ -1180,6 +1253,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label'=>'Quan hệ với người được khai sinh',
                                         'name'=>'quan_he_nguoi_duoc_khai_sinh',
                                         'type'=>'text',
+                                        'required' => true,
                                         'col'=>4,
                                     ],
                                     [
@@ -1187,6 +1261,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'xac_thuc_thong_tin',
                                         'type'=>'select',
                                         'col'=>3,
+                                        'required' => true,
                                         'options' =>[
                                             'Thông tin chưa được xác thực','Thông tin danh tính cá nhân, cư trú đã được xác thực với CSDLQG về dân cư','Thông tin danhh tính cá nhân đã được xác thực với CSDLQG về dân cư'
                                         ]
@@ -1206,9 +1281,11 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Họ, chữ đệm, tên',
                                 'columns' => [
-                                    ['label' => 'Họ', 'name' => 'ho_nguoi_duoc_dk', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Họ', 'name' => 'ho_nguoi_duoc_dk', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                     ['label' => 'Đệm', 'name' => 'dem_nguoi_duoc_dk', 'type' => 'text', 'col' => 4],
-                                    ['label' => 'Tên', 'name' => 'ten_nguoi_duoc_dk', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Tên', 'name' => 'ten_nguoi_duoc_dk', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -1217,7 +1294,8 @@ class FormTrucTuyenSeeder extends Seeder
                                 'columns' => [
                                     ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4],
                                     ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4,],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -1240,6 +1318,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'gioi_tinh_nguoi_duoc_dk',
                                         'type'=>'select',
                                         'col'=>4,
+                                        'required' => true,
                                         'options' =>[
                                             'Nam','Nữ','Chưa xác định giới tính'
                                         ]
@@ -1258,6 +1337,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'quoc_tich_nguoi_duoc_dk',
                                         'type'=>'select',
                                         'col'=>4,
+                                        'required' => true,
                                         'options'=>[
                                             'Việt Nam', 'CH Séc', 'Brunei', 'Triều Tiên','Venezuela','Myanmar','Tây Ban Nha','Ả Rập Xê Úp','Ả Rập','Campuchia','Indonesia','Bhutan','Hungary','Australia','Lào','Iran','Pakistan'
                                         ]
@@ -1274,6 +1354,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'noi_sinh_nguoi_duoc_dk',
                                         'type'=>'select',
                                         'col'=>4,
+                                        'required' => true,
                                         'options'=>[
                                             'Trong nước','Nước ngoài'
                                         ]
@@ -1343,6 +1424,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name' => 'loai_khai_sinh',
                                         'type' =>'select',
                                         'col' => 6,
+                                        'required' => true,
                                         'options' =>[
                                             'Đã xác định được cả cha lẫn mẹ','Chưa xác định được mẹ','Chưa xác định được cha','Chưa xác định được cả cha lẫn mẹ','Trẻ bị bỏ rơi'
                                         ]
@@ -1366,9 +1448,11 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Họ, chữ đệm, tên',
                                 'columns' => [
-                                    ['label' => 'Họ', 'name' => 'ho_me', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Họ', 'name' => 'ho_me', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                     ['label' => 'Đệm', 'name' => 'dem_me', 'type' => 'text', 'col' => 4],
-                                    ['label' => 'Tên', 'name' => 'ten_me', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Tên', 'name' => 'ten_me', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -1377,7 +1461,8 @@ class FormTrucTuyenSeeder extends Seeder
                                 'columns' => [
                                     ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_me', 'type' => 'number', 'col' => 4],
                                     ['label' => 'Tháng sinh', 'name' => 'thang_sinh_me', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_me', 'type' => 'number', 'col' => 4,],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_me', 'type' => 'number', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -1482,9 +1567,11 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Họ, chữ đệm, tên',
                                 'columns' => [
-                                    ['label' => 'Họ', 'name' => 'ho_cha', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Họ', 'name' => 'ho_cha', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                     ['label' => 'Đệm', 'name' => 'dem_cha', 'type' => 'text', 'col' => 4],
-                                    ['label' => 'Tên', 'name' => 'ten_cha', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Tên', 'name' => 'ten_cha', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -2045,9 +2132,12 @@ class FormTrucTuyenSeeder extends Seeder
                             [
                                 'type' => 'row',
                                 'columns' => [
-                                    ['label' => 'Họ và tên ', 'name' => 'ho_ten', 'type' => 'text', 'col' => 3,],
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date', 'col' => 3,],
-                                    ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Họ và tên ', 'name' => 'ho_ten', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
                                     ['label' => 'Email', 'name' => 'email', 'type' => 'email', 'col' => 3],
                                 ]
                             ],
@@ -2056,12 +2146,24 @@ class FormTrucTuyenSeeder extends Seeder
                             [
                                 'type' => 'row',
                                 'columns' => [
-                                    ['label' => 'Số CMND/CCCD', 'name' => 'so_cmnd_cccd', 'type' => 'text', 'col' => 4,],
-                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap', 'type' => 'date', 'col' => 4,],
+                                    [
+                                        'label' => 'Giấy tờ tùy thân',
+                                        'name' => 'loai_giay_to_nguoi_yeu_cau',
+                                        'type' => 'select',
+                                        'col' => 3,
+                                        'options' => [
+                                            'Giấy Chứng minh nhân dân', 'Thẻ Căn cước công dân', 'Hộ chiếu','Thẻ thường trú', 'Thẻ căn cước','Giấy chứng minh quân đội nhân dân','Giấy chứng minh Sỹ quan quân đội',''
+                                        ]
+                                    ],
+                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nguoi_nop', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap', 'type' => 'date', 'col' => 3,
+                                'required' => true,],
                                     [
                                         'label' => 'Nơi cấp giấy tờ',
                                         'name' => 'noi_cap_giay_to',
                                         'type' => 'select',
+                                        'required' => true,
                                         'col' => 3,
                                         'options' => [
                                             'Công an Tỉnh Băc Kạn', 'Công an Tỉnh Bạc Liêu', 'Công an Tỉnh Bắc Ninh', 'Công an Tỉnh Bình Định','Công an Tỉnh Bình Dương','Công an Tỉnh Bình Phước','Công an Tỉnh Bình Thuận','Công an Tỉnh Cà Mau','Công an TP.Cần Thơ','Công an Tỉnh Cao Bằng ','Công an TP. Hải Phòng','Công an Tỉnh Gia Lai','Công an Tỉnh Hà Nam','Công an Tỉnh Hòa Bình','Công an Tỉnh Hưng Yên ','Công an Tỉnh Hải Dương','Công an Tỉnh Hậu Giang','Công an Tỉnh Khánh Hòa','Công an Tỉnh Kiên Giang','Công an Tỉnh Kon Tum','Công an Tỉnh Lai Châu',''
@@ -2101,7 +2203,9 @@ class FormTrucTuyenSeeder extends Seeder
                                             'Thành phố Cần Thơ', 'Thủ đô Hà Nội', 'Thành phố Hải Phòng', 'Thành phố Hồ Chí Minh','Tỉnh Đồng Nai'
                                         ]
                                     ],
-                                    ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Địa chỉ chi tiết', 'name' => 'dia_chi_chi_tiet', 'type' => 'text', 'col' => 3,
+                                'required' => true,
+                                ],
                                 ]
                             ],
 
@@ -2114,20 +2218,29 @@ class FormTrucTuyenSeeder extends Seeder
                     [
                         'group' => 'Thông tin chi tiết',
                         'fields' => [
-                            [
-                                'label' => 'Nơi đăng ký khai sinh',
-                                'name' => 'noi_dang_ky_khai_sinh',
-                                'type' => 'text',
-                                'disable' =>true,
-                                'col' => 4,
-                            ],
-                            [
-                                'label' => 'Loại đăng ký',
-                                'name' => 'loai_dang_ky',
-                                'type' => 'select',
-                                'options' => ['Đăng ký đúng hạn', 'Đăng ký quá hạn','Đăng ký lại','Ghi vào sổ việc khai sinh đã đăng ký tại cơ quan có thẩm quyền ở nước ngoài']
-                            ],
-                            ['label' => 'Số lượng bản sao đề nghị cấp', 'name' => 'so_luong_ban_sao', 'type' => 'number','min' =>1,]
+                                [
+
+                                    'type' => 'row',
+                                    'columns' => 
+                                    [
+                                        [
+                                            'label' => 'Nơi đăng ký khai sinh',
+                                            'name' => 'noi_dang_ky_khai_sinh',
+                                            'type' => 'text',
+                                            'disable' =>true,
+                                            'value' => 'UBND phường ABC',
+                                            'required' => true,
+                                            'col' => 4,
+                                        ],
+                                        [
+                                            'label' => 'Loại đăng ký',
+                                            'name' => 'loai_dang_ky',
+                                            'type' => 'select',
+                                            'options' => ['Đăng ký đúng hạn', 'Đăng ký quá hạn','Đăng ký lại','Ghi vào sổ việc khai sinh đã đăng ký tại cơ quan có thẩm quyền ở nước ngoài']
+                                        ],
+                                        ['label' => 'Số lượng bản sao đề nghị cấp', 'name' => 'so_luong_ban_sao', 'type' => 'number','min' =>1,]
+                                ]
+                            ]
                         ]
                     ],
 
@@ -2143,7 +2256,8 @@ class FormTrucTuyenSeeder extends Seeder
                                 'columns' => [
                                     ['label' => 'Họ', 'name' => 'ho_nguoi_yeu_cau', 'type' => 'text', 'col' => 4,],
                                     ['label' => 'Đệm', 'name' => 'dem_nguoi_yeu_cau', 'type' => 'text', 'col' => 4],
-                                    ['label' => 'Tên', 'name' => 'ten_nguoi_yeu_cau', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Tên', 'name' => 'ten_nguoi_yeu_cau', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -2203,18 +2317,22 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label' => 'Giấy tờ tùy thân',
                                         'name' => 'loai_giay_to_nguoi_yeu_cau',
                                         'type' => 'select',
+                                        'required' => true,
                                         'col' => 3,
                                         'options' => [
                                             'Giấy Chứng minh nhân dân', 'Thẻ Căn cước công dân', 'Hộ chiếu','Thẻ thường trú', 'Thẻ căn cước','Giấy chứng minh quân đội nhân dân','Giấy chứng minh Sỹ quan quân đội',''
                                         ]
                                     ],
-                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nguoi_yeu_cau', 'type' => 'text', 'col' => 3,],
-                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap_nguoi_yeu_cau', 'type' => 'date', 'col' => 3,],
+                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to_nguoi_yeu_cau', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap_nguoi_yeu_cau', 'type' => 'date', 'col' => 3,
+                                'required' => true,],
                                     [
                                         'label' => 'Nơi cấp giấy tờ',
                                         'name' => 'noi_cap_giay_to_nguoi_yeu_cau',
                                         'type' => 'select',
                                         'col' => 3,
+                                        'required' => true,
                                         'options' => [
                                             'Công an Tỉnh Băc Kạn', 'Công an Tỉnh Bạc Liêu', 'Công an Tỉnh Bắc Ninh', 'Công an Tỉnh Bình Định','Công an Tỉnh Bình Dương','Công an Tỉnh Bình Phước','Công an Tỉnh Bình Thuận','Công an Tỉnh Cà Mau','Công an TP.Cần Thơ','Công an Tỉnh Cao Bằng ','Công an TP. Hải Phòng','Công an Tỉnh Gia Lai','Công an Tỉnh Hà Nam','Công an Tỉnh Hòa Bình','Công an Tỉnh Hưng Yên ','Công an Tỉnh Hải Dương','Công an Tỉnh Hậu Giang','Công an Tỉnh Khánh Hòa','Công an Tỉnh Kiên Giang','Công an Tỉnh Kon Tum','Công an Tỉnh Lai Châu',''
                                         ]
@@ -2228,12 +2346,14 @@ class FormTrucTuyenSeeder extends Seeder
                                         'label'=>'Quan hệ với người được khai sinh',
                                         'name'=>'quan_he_nguoi_duoc_khai_sinh',
                                         'type'=>'text',
+                                        'required' => true,
                                         'col'=>4,
                                     ],
                                     [
                                         'label'=>'Xác thực thông tin ',
                                         'name'=>'xac_thuc_thong_tin',
                                         'type'=>'select',
+                                        'required' => true,
                                         'col'=>3,
                                         'options' =>[
                                             'Thông tin chưa được xác thực','Thông tin danh tính cá nhân, cư trú đã được xác thực với CSDLQG về dân cư','Thông tin danhh tính cá nhân đã được xác thực với CSDLQG về dân cư'
@@ -2254,9 +2374,12 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Họ, chữ đệm, tên',
                                 'columns' => [
-                                    ['label' => 'Họ', 'name' => 'ho_nguoi_duoc_dk', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Họ', 'name' => 'ho_nguoi_duoc_dk', 'type' => 'text', 'col' => 4,
+                                    'required' => true,
+                                ],
                                     ['label' => 'Đệm', 'name' => 'dem_nguoi_duoc_dk', 'type' => 'text', 'col' => 4],
-                                    ['label' => 'Tên', 'name' => 'ten_nguoi_duoc_dk', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Tên', 'name' => 'ten_nguoi_duoc_dk', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -2265,7 +2388,8 @@ class FormTrucTuyenSeeder extends Seeder
                                 'columns' => [
                                     ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4],
                                     ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4,],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -2288,6 +2412,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'gioi_tinh_nguoi_duoc_dk',
                                         'type'=>'select',
                                         'col'=>4,
+                                        'required' => true,
                                         'options' =>[
                                             'Nam','Nữ','Chưa xác định giới tính'
                                         ]
@@ -2306,6 +2431,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'quoc_tich_nguoi_duoc_dk',
                                         'type'=>'select',
                                         'col'=>4,
+                                        'required' => true,
                                         'options'=>[
                                             'Việt Nam', 'CH Séc', 'Brunei', 'Triều Tiên','Venezuela','Myanmar','Tây Ban Nha','Ả Rập Xê Úp','Ả Rập','Campuchia','Indonesia','Bhutan','Hungary','Australia','Lào','Iran','Pakistan'
                                         ]
@@ -2322,6 +2448,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name'=>'noi_sinh_nguoi_duoc_dk',
                                         'type'=>'select',
                                         'col'=>4,
+                                        'required' => true,
                                         'options'=>[
                                             'Trong nước','Nước ngoài'
                                         ]
@@ -2391,6 +2518,7 @@ class FormTrucTuyenSeeder extends Seeder
                                         'name' => 'loai_khai_sinh',
                                         'type' =>'select',
                                         'col' => 6,
+                                        'required' => true,
                                         'options' =>[
                                             'Đã xác định được cả cha lẫn mẹ','Chưa xác định được mẹ','Chưa xác định được cha','Chưa xác định được cả cha lẫn mẹ','Trẻ bị bỏ rơi'
                                         ]
@@ -2414,9 +2542,11 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Họ, chữ đệm, tên',
                                 'columns' => [
-                                    ['label' => 'Họ', 'name' => 'ho_me', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Họ', 'name' => 'ho_me', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                     ['label' => 'Đệm', 'name' => 'dem_me', 'type' => 'text', 'col' => 4],
-                                    ['label' => 'Tên', 'name' => 'ten_me', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Tên', 'name' => 'ten_me', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -2425,7 +2555,8 @@ class FormTrucTuyenSeeder extends Seeder
                                 'columns' => [
                                     ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_me', 'type' => 'number', 'col' => 4],
                                     ['label' => 'Tháng sinh', 'name' => 'thang_sinh_me', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_me', 'type' => 'number', 'col' => 4,],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_me', 'type' => 'number', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -2532,7 +2663,8 @@ class FormTrucTuyenSeeder extends Seeder
                                 'columns' => [
                                     ['label' => 'Họ', 'name' => 'ho_cha', 'type' => 'text', 'col' => 4,],
                                     ['label' => 'Đệm', 'name' => 'dem_cha', 'type' => 'text', 'col' => 4],
-                                    ['label' => 'Tên', 'name' => 'ten_cha', 'type' => 'text', 'col' => 4,],
+                                    ['label' => 'Tên', 'name' => 'ten_cha', 'type' => 'text', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -2541,7 +2673,8 @@ class FormTrucTuyenSeeder extends Seeder
                                 'columns' => [
                                     ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_cha', 'type' => 'number', 'col' => 4],
                                     ['label' => 'Tháng sinh', 'name' => 'thang_sinh_cha', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_cha', 'type' => 'number', 'col' => 4,],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_cha', 'type' => 'number', 'col' => 4,
+                                'required' => true,],
                                 ]
                             ],
                             [
@@ -2665,9 +2798,12 @@ class FormTrucTuyenSeeder extends Seeder
                             [
                                 'type' => 'row',
                                 'columns' => [
-                                    ['label' => 'Họ và tên ', 'name' => 'ho_ten', 'type' => 'text', 'col' => 3,],
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date', 'col' => 3,],
-                                    ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text', 'col' => 3,],
+                                    ['label' => 'Họ và tên ', 'name' => 'ho_ten', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh', 'type' => 'date', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Số điện thoại', 'name' => 'so_dien_thoai', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
                                     ['label' => 'Email', 'name' => 'email', 'type' => 'email', 'col' => 3],
                                 ]
                             ],
@@ -2684,13 +2820,16 @@ class FormTrucTuyenSeeder extends Seeder
                                             'Chứng minh nhân dân', 'Căn cước công dân', 'Hộ chiếu', 'Thẻ căn cước'
                                         ]
                                     ],
-                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to', 'type' => 'text', 'col' => 3,],
-                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap', 'type' => 'date', 'col' => 3,],
+                                    ['label' => 'Số giấy tờ', 'name' => 'so_giay_to', 'type' => 'text', 'col' => 3,
+                                'required' => true,],
+                                    ['label' => 'Ngày cấp', 'name' => 'ngay_cap', 'type' => 'date', 'col' => 3,
+                                'required' => true,],
                                     [
                                         'label' => 'Nơi cấp giấy tờ',
                                         'name' => 'noi_cap_giay_to',
                                         'type' => 'select',
                                         'col' => 3,
+                                        'required' => true,
                                         'options' => [
                                             'Công an Tỉnh Băc Kạn', 'Công an Tỉnh Bạc Liêu', 'Công an Tỉnh Bắc Ninh', 'Công an Tỉnh Bình Định','Công an Tỉnh Bình Dương','Công an Tỉnh Bình Phước','Công an Tỉnh Bình Thuận','Công an Tỉnh Cà Mau','Công an TP.Cần Thơ','Công an Tỉnh Cao Bằng ','Công an TP. Hải Phòng','Công an Tỉnh Gia Lai','Công an Tỉnh Hà Nam','Công an Tỉnh Hòa Bình','Công an Tỉnh Hưng Yên ','Công an Tỉnh Hải Dương','Công an Tỉnh Hậu Giang','Công an Tỉnh Khánh Hòa','Công an Tỉnh Kiên Giang','Công an Tỉnh Kon Tum','Công an Tỉnh Lai Châu',''
                                         ]
