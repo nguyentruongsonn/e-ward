@@ -272,15 +272,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Lấy token từ URL (nếu QR code là URL)
                     let token = decodedText;
-                    if (decodedText.includes('token=')) {
+                    
+                    // Xử lý URL dạng /appointment/checkin/{token}
+                    if (decodedText.includes('/appointment/checkin/')) {
+                        const match = decodedText.match(/\/appointment\/checkin\/([a-f0-9\-]+)/i);
+                        if (match && match[1]) {
+                            token = match[1];
+                        }
+                    }
+                    // Xử lý URL có token= query parameter
+                    else if (decodedText.includes('token=')) {
                         const urlParams = new URLSearchParams(decodedText.split('?')[1]);
                         token = urlParams.get('token');
-                    } else if (decodedText.includes('/admin/appointment/scan')) {
-                        // Nếu là full URL, extract token
+                    }
+                    // Xử lý URL dạng /admin/appointment/scan?token=...
+                    else if (decodedText.includes('/admin/appointment/scan')) {
                         const match = decodedText.match(/token=([^&]+)/);
                         if (match) {
                             token = match[1];
                         }
+                    }
+                    // Nếu là UUID thuần (không có URL), giữ nguyên
+                    else if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(decodedText.trim())) {
+                        token = decodedText.trim();
                     }
                     
                     // Điền token vào input

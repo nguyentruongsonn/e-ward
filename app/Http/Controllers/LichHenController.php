@@ -308,12 +308,15 @@ class LichHenController extends Controller
 
     public function checkin($token)
     {
+        // Trim và làm sạch token
+        $token = trim($token);
+        
         $lichHen = DB::table('lichhen')
             ->where('checkin_token', $token)
             ->first();
 
         if (!$lichHen) {
-            abort(404, 'Không tìm thấy lịch hẹn');
+            abort(404, 'Không tìm thấy lịch hẹn với token này');
         }
 
         // Kiểm tra xem đã check-in chưa
@@ -338,6 +341,9 @@ class LichHenController extends Controller
 
     public function processCheckin(Request $request, $token)
     {
+        // Trim và làm sạch token
+        $token = trim($token);
+        
         $lichHen = DB::table('lichhen')
             ->where('checkin_token', $token)
             ->first();
@@ -345,7 +351,7 @@ class LichHenController extends Controller
         if (!$lichHen) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không tìm thấy lịch hẹn.',
+                'message' => 'Không tìm thấy lịch hẹn với token này.',
             ], 404);
         }
 

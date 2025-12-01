@@ -66,7 +66,7 @@ class AdminController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login');
+        return redirect()->route('home');
     }
 
     public function dashboard()
@@ -80,7 +80,7 @@ class AdminController extends Controller
         // Tự động cập nhật lại IDCD cho các hồ sơ có IDCD = 0 hoặc 1 (do bug cũ)
         $this->fixHoSoWithWrongIDCD();
 
-        // Thống kê
+        // Thống kê tổng quan
         $stats = [
             'total_hoso' => HoSoXuLy::count(),
             'hoso_moi' => HoSoXuLy::whereDate('ngayTiepNhan', today())->count(),
@@ -89,6 +89,70 @@ class AdminController extends Controller
             'lichhen_hom_nay' => LichHen::whereDate('thoiGianHen', today())->count(),
             'total_tthc' => TTHC::count(),
         ];
+
+        // Hồ sơ theo tháng (12 tháng gần nhất)
+        $hososByMonth = HoSoXuLy::selectRaw('DATE_FORMAT(ngayTiepNhan, "%Y-%m") as month, COUNT(*) as total')
+            ->whereNotNull('ngayTiepNhan')
+            ->where('ngayTiepNhan', '>=', now()->subMonths(11)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->pluck('total', 'month')
+            ->toArray();
+
+        // Chuẩn hóa đủ 12 tháng (nếu tháng nào không có hồ sơ thì = 0)
+        $monthlyLabels = [];
+        $monthlyValues = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $key = $date->format('Y-m');
+            $monthlyLabels[] = $date->format('m/Y');
+            $monthlyValues[] = (int) ($hososByMonth[$key] ?? 0);
+        }
+
+        // Hồ sơ theo từng trạng thái chi tiết (kể cả trạng thái chưa có hồ sơ, để luôn có đủ màu trong chart)
+        $hososByStatus = DB::table('trangthaihoso')
+            ->leftJoin('hosoxuly', 'hosoxuly.maTrangThai', '=', 'trangthaihoso.maTrangThai')
+            ->select('trangthaihoso.tenTrangThai as name', DB::raw('COUNT(hosoxuly.maHSXL) as total'))
+            ->groupBy('trangthaihoso.maTrangThai', 'trangthaihoso.tenTrangThai')
+            ->orderBy('trangthaihoso.maTrangThai')
+            ->get();
+
+        // Lịch hẹn 7 ngày gần nhất
+        $appointmentsByDay = LichHen::selectRaw('DATE(thoiGianHen) as date, COUNT(*) as total')
+            ->where('thoiGianHen', '>=', now()->subDays(6)->startOfDay())
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('total', 'date')
+            ->toArray();
+
+        $appointmentLabels = [];
+        $appointmentValues = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $appointmentLabels[] = \Carbon\Carbon::parse($date)->format('d/m');
+            $appointmentValues[] = (int) ($appointmentsByDay[$date] ?? 0);
+        }
+
+        // Doanh thu 7 ngày gần nhất (nếu có module thanh toán)
+        $revenueByDay = DB::table('lichsuthanhtoan')
+            ->selectRaw('DATE(ngayGD) as date, SUM(soTien) as total')
+            ->where('trangThai', 'Thành công')
+            ->where('ngayGD', '>=', now()->subDays(6)->startOfDay())
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('total', 'date')
+            ->toArray();
+
+        $revenueLabels = [];
+        $revenueValues = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $revenueLabels[] = \Carbon\Carbon::parse($date)->format('d/m');
+            $revenueValues[] = (float) ($revenueByDay[$date] ?? 0);
+        }
 
         // Hồ sơ mới nhất - Dùng Eloquent với model đã config đúng primary key VARCHAR
         // Model đã có: public $incrementing = false; và protected $keyType = 'string';
@@ -117,7 +181,18 @@ class AdminController extends Controller
             ->limit(10)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'hosos', 'lichhens'));
+        return view('admin.dashboard', [
+            'stats' => $stats,
+            'hosos' => $hosos,
+            'lichhens' => $lichhens,
+            'monthlyLabels' => $monthlyLabels,
+            'monthlyValues' => $monthlyValues,
+            'hososByStatus' => $hososByStatus,
+            'appointmentLabels' => $appointmentLabels,
+            'appointmentValues' => $appointmentValues,
+            'revenueLabels' => $revenueLabels,
+            'revenueValues' => $revenueValues,
+        ]);
     }
 
     /**
@@ -952,6 +1027,9 @@ class AdminController extends Controller
         $nguoi = null;
 
         if ($token) {
+            // Trim và làm sạch token
+            $token = trim($token);
+            
             $lichHen = DB::table('lichhen')
                 ->where('checkin_token', $token)
                 ->first();
@@ -1196,6 +1274,9 @@ class AdminController extends Controller
             ], 403);
         }
 
+        // Trim và làm sạch token
+        $token = trim($token);
+        
         $lichHen = DB::table('lichhen')
             ->where('checkin_token', $token)
             ->first();
@@ -1203,7 +1284,7 @@ class AdminController extends Controller
         if (!$lichHen) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không tìm thấy lịch hẹn.',
+                'message' => 'Không tìm thấy lịch hẹn với token này.',
             ], 404);
         }
 
@@ -1976,6 +2057,885 @@ class AdminController extends Controller
         // Mail::to($hoso->email)->send(new DocumentSupplementRequest($hoso, $giayToNames, $ghiChu));
 
         return back()->with('success', 'Đã gửi yêu cầu bổ sung giấy tờ cho công dân.');
+    }
+
+    /**
+     * Hiển thị danh sách công dân
+     */
+    public function indexCongDan(Request $request)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = DB::table('nguoi')
+            ->where('vaiTro', 'Công dân/ Tổ chức')
+            ->leftJoin('congdan', 'nguoi.IDnguoiDung', '=', 'congdan.IDnguoiDung')
+            ->select('nguoi.*', 'congdan.IDCD');
+
+        // Tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nguoi.hoTen', 'LIKE', "%{$search}%")
+                  ->orWhere('nguoi.email', 'LIKE', "%{$search}%")
+                  ->orWhere('nguoi.soDienThoai', 'LIKE', "%{$search}%")
+                  ->orWhere('nguoi.maCCCD', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $congDans = $query->orderBy('nguoi.IDnguoiDung', 'desc')->paginate(20);
+
+        return view('admin.users.congdan', compact('congDans'));
+    }
+
+    /**
+     * Hiển thị danh sách cán bộ
+     */
+    public function indexCanBo(Request $request)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = DB::table('nguoi')
+            ->whereIn('vaiTro', ['Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo'])
+            ->leftJoin('canbo', 'nguoi.IDnguoiDung', '=', 'canbo.IDnguoiDung')
+            ->leftJoin('quaylamviec', 'canbo.maQuayLamViec', '=', 'quaylamviec.maQuayLamViec')
+            ->select('nguoi.*', 'canbo.IDCB', 'canbo.maQuayLamViec', 'quaylamviec.tenQuayLamViec');
+
+        // Tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nguoi.hoTen', 'LIKE', "%{$search}%")
+                  ->orWhere('nguoi.email', 'LIKE', "%{$search}%")
+                  ->orWhere('nguoi.soDienThoai', 'LIKE', "%{$search}%")
+                  ->orWhere('nguoi.maCCCD', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Lọc theo vai trò
+        if ($request->filled('vaiTro')) {
+            $query->where('nguoi.vaiTro', $request->vaiTro);
+        }
+
+        $canBos = $query->orderBy('nguoi.IDnguoiDung', 'desc')->paginate(20);
+
+        return view('admin.users.canbo', compact('canBos'));
+    }
+
+    // ==================== QUẢN LÝ LĨNH VỰC ====================
+    
+    /**
+     * Hiển thị danh sách lĩnh vực
+     */
+    public function indexLinhVuc(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = DB::table('linhvuc');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('tenLinhVuc', 'LIKE', "%{$search}%");
+        }
+
+        $linhVucs = $query->orderBy('maLinhVuc', 'desc')->paginate(20);
+
+        return view('admin.tthc.linhvuc.index', compact('linhVucs'));
+    }
+
+    /**
+     * Hiển thị form thêm lĩnh vực
+     */
+    public function createLinhVuc()
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        return view('admin.tthc.linhvuc.create');
+    }
+
+    /**
+     * Lưu lĩnh vực mới
+     */
+    public function storeLinhVuc(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $validated = $request->validate([
+            'tenLinhVuc' => 'required|string|max:500',
+        ]);
+
+        DB::table('linhvuc')->insert([
+            'tenLinhVuc' => $validated['tenLinhVuc'],
+        ]);
+
+        return redirect()->route('admin.tthc.linhvuc.index')
+            ->with('success', 'Thêm lĩnh vực thành công!');
+    }
+
+    /**
+     * Hiển thị form sửa lĩnh vực
+     */
+    public function editLinhVuc($id)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $linhVuc = DB::table('linhvuc')->where('maLinhVuc', $id)->first();
+
+        if (!$linhVuc) {
+            return redirect()->route('admin.tthc.linhvuc.index')
+                ->withErrors(['error' => 'Không tìm thấy lĩnh vực.']);
+        }
+
+        return view('admin.tthc.linhvuc.edit', compact('linhVuc'));
+    }
+
+    /**
+     * Cập nhật lĩnh vực
+     */
+    public function updateLinhVuc(Request $request, $id)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $validated = $request->validate([
+            'tenLinhVuc' => 'required|string|max:500',
+        ]);
+
+        DB::table('linhvuc')
+            ->where('maLinhVuc', $id)
+            ->update([
+                'tenLinhVuc' => $validated['tenLinhVuc'],
+            ]);
+
+        return redirect()->route('admin.tthc.linhvuc.index')
+            ->with('success', 'Cập nhật lĩnh vực thành công!');
+    }
+
+    /**
+     * Xóa lĩnh vực
+     */
+    public function destroyLinhVuc($id)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        // Kiểm tra xem lĩnh vực có đang được sử dụng không
+        $count = DB::table('tthc')->where('maLinhVuc', $id)->count();
+        if ($count > 0) {
+            return redirect()->route('admin.tthc.linhvuc.index')
+                ->withErrors(['error' => 'Không thể xóa lĩnh vực này vì đang có ' . $count . ' thủ tục hành chính sử dụng.']);
+        }
+
+        DB::table('linhvuc')->where('maLinhVuc', $id)->delete();
+
+        return redirect()->route('admin.tthc.linhvuc.index')
+            ->with('success', 'Xóa lĩnh vực thành công!');
+    }
+
+    // ==================== QUẢN LÝ TTHC ====================
+
+    /**
+     * Hiển thị danh sách TTHC
+     */
+    public function indexTTHC(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = DB::table('tthc')
+            ->leftJoin('linhvuc', 'tthc.maLinhVuc', '=', 'linhvuc.maLinhVuc')
+            ->leftJoin('quaylamviec', 'tthc.maQuayLamViec', '=', 'quaylamviec.maQuayLamViec')
+            ->select('tthc.*', 'linhvuc.tenLinhVuc', 'quaylamviec.tenQuayLamViec');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('tthc.tenTTHC', 'LIKE', "%{$search}%")
+                  ->orWhere('linhvuc.tenLinhVuc', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('maLinhVuc')) {
+            $query->where('tthc.maLinhVuc', $request->maLinhVuc);
+        }
+
+        if ($request->filled('trangThai')) {
+            $query->where('tthc.trangThai', $request->trangThai);
+        }
+
+        $tthcs = $query->orderBy('tthc.maTTHC', 'desc')->paginate(20);
+        $linhVucs = DB::table('linhvuc')->orderBy('tenLinhVuc')->get();
+
+        return view('admin.tthc.index', compact('tthcs', 'linhVucs'));
+    }
+
+    /**
+     * Hiển thị form thêm TTHC
+     */
+    public function createTTHC()
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $linhVucs = DB::table('linhvuc')->orderBy('tenLinhVuc')->get();
+        $quayLamViecs = DB::table('quaylamviec')->orderBy('maQuayLamViec')->get();
+
+        return view('admin.tthc.create', compact('linhVucs', 'quayLamViecs'));
+    }
+
+    /**
+     * Lưu TTHC mới
+     */
+    public function storeTTHC(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $validated = $request->validate([
+            'tenTTHC' => 'required|string|max:500',
+            'maLinhVuc' => 'required|exists:linhvuc,maLinhVuc',
+            'maQuayLamViec' => 'nullable|exists:quaylamviec,maQuayLamViec',
+            'trinhTuThucHien' => 'required|string',
+            'doiTuongThucHien' => 'required|string',
+            'coQuanThucHien' => 'required|string',
+            'trangThai' => 'nullable|in:Công khai,Chờ công khai,Bãi bỏ',
+            'yeuCauDieuKien' => 'required|string',
+            'canCuPhapLy' => 'required|string',
+            'ketQuaThucHien' => 'required|string|max:500',
+        ]);
+
+        DB::table('tthc')->insert([
+            'tenTTHC' => $validated['tenTTHC'],
+            'maLinhVuc' => $validated['maLinhVuc'],
+            'maQuayLamViec' => $validated['maQuayLamViec'] ?? null,
+            'trinhTuThucHien' => $validated['trinhTuThucHien'],
+            'doiTuongThucHien' => $validated['doiTuongThucHien'],
+            'coQuanThucHien' => $validated['coQuanThucHien'],
+            'trangThai' => $validated['trangThai'] ?? 'Chờ công khai',
+            'yeuCauDieuKien' => $validated['yeuCauDieuKien'],
+            'canCuPhapLy' => $validated['canCuPhapLy'],
+            'ketQuaThucHien' => $validated['ketQuaThucHien'],
+        ]);
+
+        return redirect()->route('admin.tthc.index')
+            ->with('success', 'Thêm thủ tục hành chính thành công!');
+    }
+
+    /**
+     * Hiển thị form sửa TTHC
+     */
+    public function editTTHC($id)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $tthc = DB::table('tthc')->where('maTTHC', $id)->first();
+
+        if (!$tthc) {
+            return redirect()->route('admin.tthc.index')
+                ->withErrors(['error' => 'Không tìm thấy thủ tục hành chính.']);
+        }
+
+        $linhVucs = DB::table('linhvuc')->orderBy('tenLinhVuc')->get();
+        $quayLamViecs = DB::table('quaylamviec')->orderBy('maQuayLamViec')->get();
+
+        return view('admin.tthc.edit', compact('tthc', 'linhVucs', 'quayLamViecs'));
+    }
+
+    /**
+     * Cập nhật TTHC
+     */
+    public function updateTTHC(Request $request, $id)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $validated = $request->validate([
+            'tenTTHC' => 'required|string|max:500',
+            'maLinhVuc' => 'required|exists:linhvuc,maLinhVuc',
+            'maQuayLamViec' => 'nullable|exists:quaylamviec,maQuayLamViec',
+            'trinhTuThucHien' => 'required|string',
+            'doiTuongThucHien' => 'required|string',
+            'coQuanThucHien' => 'required|string',
+            'trangThai' => 'nullable|in:Công khai,Chờ công khai,Bãi bỏ',
+            'yeuCauDieuKien' => 'required|string',
+            'canCuPhapLy' => 'required|string',
+            'ketQuaThucHien' => 'required|string|max:500',
+        ]);
+
+        DB::table('tthc')
+            ->where('maTTHC', $id)
+            ->update([
+                'tenTTHC' => $validated['tenTTHC'],
+                'maLinhVuc' => $validated['maLinhVuc'],
+                'maQuayLamViec' => $validated['maQuayLamViec'] ?? null,
+                'trinhTuThucHien' => $validated['trinhTuThucHien'],
+                'doiTuongThucHien' => $validated['doiTuongThucHien'],
+                'coQuanThucHien' => $validated['coQuanThucHien'],
+                'trangThai' => $validated['trangThai'] ?? 'Chờ công khai',
+                'yeuCauDieuKien' => $validated['yeuCauDieuKien'],
+                'canCuPhapLy' => $validated['canCuPhapLy'],
+                'ketQuaThucHien' => $validated['ketQuaThucHien'],
+            ]);
+
+        return redirect()->route('admin.tthc.index')
+            ->with('success', 'Cập nhật thủ tục hành chính thành công!');
+    }
+
+    /**
+     * Xóa TTHC
+     */
+    public function destroyTTHC($id)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        // Kiểm tra xem TTHC có đang được sử dụng không
+        $count = DB::table('hosoxuly')->where('maTTHC', $id)->count();
+        if ($count > 0) {
+            return redirect()->route('admin.tthc.index')
+                ->withErrors(['error' => 'Không thể xóa thủ tục này vì đang có ' . $count . ' hồ sơ sử dụng.']);
+        }
+
+        DB::table('tthc')->where('maTTHC', $id)->delete();
+
+        return redirect()->route('admin.tthc.index')
+            ->with('success', 'Xóa thủ tục hành chính thành công!');
+    }
+
+    // ==================== QUẢN LÝ THANH TOÁN ====================
+
+    /**
+     * Hiển thị lịch sử thanh toán
+     */
+    public function indexPaymentHistory(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = DB::table('lichsuthanhtoan')
+            ->leftJoin('congdan', 'lichsuthanhtoan.IDCD', '=', 'congdan.IDCD')
+            ->leftJoin('nguoi', 'congdan.IDnguoiDung', '=', 'nguoi.IDnguoiDung')
+            ->leftJoin('hosoxuly', 'lichsuthanhtoan.maHSXL', '=', 'hosoxuly.maHSXL')
+            ->select(
+                'lichsuthanhtoan.*',
+                'nguoi.hoTen',
+                'nguoi.email',
+                'nguoi.soDienThoai',
+                'hosoxuly.tenChuHoSo'
+            );
+
+        // Tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('lichsuthanhtoan.maGD', 'LIKE', "%{$search}%")
+                  ->orWhere('nguoi.hoTen', 'LIKE', "%{$search}%")
+                  ->orWhere('nguoi.email', 'LIKE', "%{$search}%")
+                  ->orWhere('hosoxuly.tenChuHoSo', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Lọc theo loại giao dịch
+        if ($request->filled('loaiGD')) {
+            $query->where('lichsuthanhtoan.loaiGD', $request->loaiGD);
+        }
+
+        // Lọc theo trạng thái
+        if ($request->filled('trangThai')) {
+            $query->where('lichsuthanhtoan.trangThai', $request->trangThai);
+        }
+
+        // Lọc theo ngày
+        if ($request->filled('from_date')) {
+            $query->whereDate('lichsuthanhtoan.ngayGD', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('lichsuthanhtoan.ngayGD', '<=', $request->to_date);
+        }
+
+        $payments = $query->orderBy('lichsuthanhtoan.ngayGD', 'desc')->paginate(20);
+
+        // Thống kê nhanh
+        $stats = [
+            'total' => DB::table('lichsuthanhtoan')->where('trangThai', 'Thành công')->sum('soTien'),
+            'today' => DB::table('lichsuthanhtoan')
+                ->where('trangThai', 'Thành công')
+                ->whereDate('ngayGD', today())
+                ->sum('soTien'),
+            'this_month' => DB::table('lichsuthanhtoan')
+                ->where('trangThai', 'Thành công')
+                ->whereMonth('ngayGD', now()->month)
+                ->whereYear('ngayGD', now()->year)
+                ->sum('soTien'),
+            'count' => DB::table('lichsuthanhtoan')->where('trangThai', 'Thành công')->count(),
+        ];
+
+        return view('admin.payment.history', compact('payments', 'stats'));
+    }
+
+    /**
+     * Báo cáo doanh thu
+     */
+    public function revenueReport(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        // Mặc định: tháng hiện tại
+        $month = $request->get('month', now()->month);
+        $year = $request->get('year', now()->year);
+        $period = $request->get('period', 'month'); // month, year, custom
+
+        // Thống kê tổng quan
+        $totalRevenue = DB::table('lichsuthanhtoan')
+            ->where('trangThai', 'Thành công')
+            ->sum('soTien');
+
+        $todayRevenue = DB::table('lichsuthanhtoan')
+            ->where('trangThai', 'Thành công')
+            ->whereDate('ngayGD', today())
+            ->sum('soTien');
+
+        $thisMonthRevenue = DB::table('lichsuthanhtoan')
+            ->where('trangThai', 'Thành công')
+            ->whereMonth('ngayGD', now()->month)
+            ->whereYear('ngayGD', now()->year)
+            ->sum('soTien');
+
+        $thisYearRevenue = DB::table('lichsuthanhtoan')
+            ->where('trangThai', 'Thành công')
+            ->whereYear('ngayGD', now()->year)
+            ->sum('soTien');
+
+        // Dữ liệu biểu đồ theo ngày (30 ngày gần nhất)
+        $dailyData = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $revenue = DB::table('lichsuthanhtoan')
+                ->where('trangThai', 'Thành công')
+                ->whereDate('ngayGD', $date->format('Y-m-d'))
+                ->sum('soTien');
+            
+            $dailyData[] = [
+                'date' => $date->format('d/m'),
+                'revenue' => (float) $revenue
+            ];
+        }
+
+        // Dữ liệu biểu đồ theo tháng (12 tháng gần nhất)
+        $monthlyData = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $revenue = DB::table('lichsuthanhtoan')
+                ->where('trangThai', 'Thành công')
+                ->whereMonth('ngayGD', $date->month)
+                ->whereYear('ngayGD', $date->year)
+                ->sum('soTien');
+            
+            $monthlyData[] = [
+                'month' => $date->format('m/Y'),
+                'revenue' => (float) $revenue
+            ];
+        }
+
+        // Dữ liệu theo loại giao dịch
+        $byPaymentType = DB::table('lichsuthanhtoan')
+            ->where('trangThai', 'Thành công')
+            ->select('loaiGD', DB::raw('SUM(soTien) as total'))
+            ->groupBy('loaiGD')
+            ->get();
+
+        // Top 10 hồ sơ có giá trị cao nhất
+        $topHoSos = DB::table('lichsuthanhtoan')
+            ->leftJoin('hosoxuly', 'lichsuthanhtoan.maHSXL', '=', 'hosoxuly.maHSXL')
+            ->leftJoin('congdan', 'lichsuthanhtoan.IDCD', '=', 'congdan.IDCD')
+            ->leftJoin('nguoi', 'congdan.IDnguoiDung', '=', 'nguoi.IDnguoiDung')
+            ->where('lichsuthanhtoan.trangThai', 'Thành công')
+            ->select(
+                'lichsuthanhtoan.maHSXL',
+                'hosoxuly.tenChuHoSo',
+                'nguoi.hoTen',
+                DB::raw('SUM(lichsuthanhtoan.soTien) as total')
+            )
+            ->groupBy('lichsuthanhtoan.maHSXL', 'hosoxuly.tenChuHoSo', 'nguoi.hoTen')
+            ->orderBy('total', 'desc')
+            ->limit(10)
+            ->get();
+
+        return view('admin.payment.revenue', compact(
+            'totalRevenue',
+            'todayRevenue',
+            'thisMonthRevenue',
+            'thisYearRevenue',
+            'dailyData',
+            'monthlyData',
+            'byPaymentType',
+            'topHoSos'
+        ));
+    }
+
+    /**
+     * Xuất Excel lịch sử thanh toán (sử dụng PhpSpreadsheet, không dùng Laravel Excel)
+     */
+    public function exportPaymentHistory(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $filters = [
+            'search' => $request->get('search'),
+            'loaiGD' => $request->get('loaiGD'),
+            'trangThai' => $request->get('trangThai'),
+            'from_date' => $request->get('from_date'),
+            'to_date' => $request->get('to_date'),
+        ];
+
+        $filename = 'lich_su_thanh_toan_' . date('Y-m-d_His') . '.xlsx';
+
+        // Lấy dữ liệu lịch sử thanh toán với filter giống trang lịch sử
+        $query = DB::table('lichsuthanhtoan')
+            ->leftJoin('congdan', 'lichsuthanhtoan.IDCD', '=', 'congdan.IDCD')
+            ->leftJoin('nguoi', 'congdan.IDnguoiDung', '=', 'nguoi.IDnguoiDung')
+            ->leftJoin('hosoxuly', 'lichsuthanhtoan.maHSXL', '=', 'hosoxuly.maHSXL')
+            ->select(
+                'lichsuthanhtoan.*',
+                'nguoi.hoTen',
+                'nguoi.email',
+                'nguoi.soDienThoai',
+                'hosoxuly.tenChuHoSo'
+            );
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('lichsuthanhtoan.maGD', 'LIKE', "%{$search}%")
+                    ->orWhere('nguoi.hoTen', 'LIKE', "%{$search}%")
+                    ->orWhere('nguoi.email', 'LIKE', "%{$search}%")
+                    ->orWhere('hosoxuly.tenChuHoSo', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if (!empty($filters['loaiGD'])) {
+            $query->where('lichsuthanhtoan.loaiGD', $filters['loaiGD']);
+        }
+
+        if (!empty($filters['trangThai'])) {
+            $query->where('lichsuthanhtoan.trangThai', $filters['trangThai']);
+        }
+
+        if (!empty($filters['from_date'])) {
+            $query->whereDate('lichsuthanhtoan.ngayGD', '>=', $filters['from_date']);
+        }
+
+        if (!empty($filters['to_date'])) {
+            $query->whereDate('lichsuthanhtoan.ngayGD', '<=', $filters['to_date']);
+        }
+
+        $payments = $query->orderBy('lichsuthanhtoan.ngayGD', 'desc')->get();
+
+        // Tạo file Excel bằng PhpSpreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Lịch sử thanh toán');
+
+        // Header
+        $headers = [
+            'Mã GD',
+            'Số GD',
+            'Người thanh toán',
+            'Email',
+            'Số điện thoại',
+            'Mã hồ sơ',
+            'Chủ hồ sơ',
+            'Loại GD',
+            'Ngày GD',
+            'Số tiền (VNĐ)',
+            'Trạng thái',
+            'Mô tả',
+        ];
+
+        $sheet->fromArray($headers, null, 'A1');
+
+        // Style header
+        $sheet->getStyle('A1:L1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 12,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4472C4'],
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+
+        // Dữ liệu
+        $row = 2;
+        foreach ($payments as $payment) {
+            $sheet->setCellValue('A' . $row, $payment->maGD ?? '');
+            $sheet->setCellValue('B' . $row, $payment->soGD ?? '');
+            $sheet->setCellValue('C' . $row, $payment->hoTen ?? '');
+            $sheet->setCellValue('D' . $row, $payment->email ?? '');
+            $sheet->setCellValue('E' . $row, $payment->soDienThoai ?? '');
+            $sheet->setCellValue('F' . $row, $payment->maHSXL ?? '');
+            $sheet->setCellValue('G' . $row, $payment->tenChuHoSo ?? '');
+            $sheet->setCellValue('H' . $row, $payment->loaiGD ?? '');
+            $sheet->setCellValue(
+                'I' . $row,
+                $payment->ngayGD ? \Carbon\Carbon::parse($payment->ngayGD)->format('d/m/Y H:i:s') : ''
+            );
+            $sheet->setCellValue('J' . $row, (float) ($payment->soTien ?? 0));
+            $sheet->setCellValue('K' . $row, $payment->trangThai ?? '');
+            $sheet->setCellValue('L' . $row, $payment->moTa ?? '');
+            $row++;
+        }
+
+        // Định dạng cột số tiền
+        $sheet->getStyle('J2:J' . ($row - 1))
+            ->getNumberFormat()
+            ->setFormatCode('#,##0');
+
+        // Set độ rộng cột
+        $sheet->getColumnDimension('A')->setWidth(20);
+        $sheet->getColumnDimension('B')->setWidth(20);
+        $sheet->getColumnDimension('C')->setWidth(25);
+        $sheet->getColumnDimension('D')->setWidth(30);
+        $sheet->getColumnDimension('E')->setWidth(15);
+        $sheet->getColumnDimension('F')->setWidth(20);
+        $sheet->getColumnDimension('G')->setWidth(30);
+        $sheet->getColumnDimension('H')->setWidth(20);
+        $sheet->getColumnDimension('I')->setWidth(20);
+        $sheet->getColumnDimension('J')->setWidth(18);
+        $sheet->getColumnDimension('K')->setWidth(15);
+        $sheet->getColumnDimension('L')->setWidth(40);
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $tempFile = tempnam(sys_get_temp_dir(), 'excel_');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Xuất Excel báo cáo doanh thu (sử dụng PhpSpreadsheet, không dùng Laravel Excel)
+     */
+    public function exportRevenueReport()
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $filename = 'bao_cao_doanh_thu_' . date('Y-m-d_His') . '.xlsx';
+
+        // Sheet 1: Thống kê tổng quan
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet1 = $spreadsheet->getActiveSheet();
+        $sheet1->setTitle('Thống kê tổng quan');
+
+        $totalRevenue = DB::table('lichsuthanhtoan')
+            ->where('trangThai', 'Thành công')
+            ->sum('soTien');
+
+        $todayRevenue = DB::table('lichsuthanhtoan')
+            ->where('trangThai', 'Thành công')
+            ->whereDate('ngayGD', today())
+            ->sum('soTien');
+
+        $thisMonthRevenue = DB::table('lichsuthanhtoan')
+            ->where('trangThai', 'Thành công')
+            ->whereMonth('ngayGD', now()->month)
+            ->whereYear('ngayGD', now()->year)
+            ->sum('soTien');
+
+        $thisYearRevenue = DB::table('lichsuthanhtoan')
+            ->where('trangThai', 'Thành công')
+            ->whereYear('ngayGD', now()->year)
+            ->sum('soTien');
+
+        $sheet1->setCellValue('A1', 'Chỉ tiêu');
+        $sheet1->setCellValue('B1', 'Giá trị');
+        $sheet1->setCellValue('A2', 'Tổng doanh thu');
+        $sheet1->setCellValue('B2', number_format($totalRevenue, 0, ',', '.') . ' đ');
+        $sheet1->setCellValue('A3', 'Doanh thu hôm nay');
+        $sheet1->setCellValue('B3', number_format($todayRevenue, 0, ',', '.') . ' đ');
+        $sheet1->setCellValue('A4', 'Doanh thu tháng này');
+        $sheet1->setCellValue('B4', number_format($thisMonthRevenue, 0, ',', '.') . ' đ');
+        $sheet1->setCellValue('A5', 'Doanh thu năm này');
+        $sheet1->setCellValue('B5', number_format($thisYearRevenue, 0, ',', '.') . ' đ');
+
+        $sheet1->getStyle('A1:B1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 12,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4472C4'],
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+
+        $sheet1->getColumnDimension('A')->setWidth(30);
+        $sheet1->getColumnDimension('B')->setWidth(25);
+
+        // Sheet 2: Doanh thu theo tháng (12 tháng gần nhất)
+        $sheet2 = $spreadsheet->createSheet();
+        $sheet2->setTitle('Doanh thu theo tháng');
+
+        $sheet2->setCellValue('A1', 'Tháng');
+        $sheet2->setCellValue('B1', 'Doanh thu (VNĐ)');
+
+        $row = 2;
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $revenue = DB::table('lichsuthanhtoan')
+                ->where('trangThai', 'Thành công')
+                ->whereMonth('ngayGD', $date->month)
+                ->whereYear('ngayGD', $date->year)
+                ->sum('soTien');
+
+            $sheet2->setCellValue('A' . $row, $date->format('m/Y'));
+            $sheet2->setCellValue('B' . $row, number_format($revenue, 0, ',', '.'));
+            $row++;
+        }
+
+        $sheet2->getStyle('A1:B1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 12,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4472C4'],
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+
+        $sheet2->getColumnDimension('A')->setWidth(20);
+        $sheet2->getColumnDimension('B')->setWidth(25);
+
+        // Sheet 3: Top 10 hồ sơ
+        $sheet3 = $spreadsheet->createSheet();
+        $sheet3->setTitle('Top 10 hồ sơ');
+
+        $sheet3->setCellValue('A1', 'STT');
+        $sheet3->setCellValue('B1', 'Mã hồ sơ');
+        $sheet3->setCellValue('C1', 'Chủ hồ sơ');
+        $sheet3->setCellValue('D1', 'Người nộp');
+        $sheet3->setCellValue('E1', 'Tổng tiền (VNĐ)');
+
+        $sheet3->getStyle('A1:E1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 12,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4472C4'],
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+
+        $topHoSos = DB::table('lichsuthanhtoan')
+            ->leftJoin('hosoxuly', 'lichsuthanhtoan.maHSXL', '=', 'hosoxuly.maHSXL')
+            ->leftJoin('congdan', 'lichsuthanhtoan.IDCD', '=', 'congdan.IDCD')
+            ->leftJoin('nguoi', 'congdan.IDnguoiDung', '=', 'nguoi.IDnguoiDung')
+            ->where('lichsuthanhtoan.trangThai', 'Thành công')
+            ->select(
+                'lichsuthanhtoan.maHSXL',
+                'hosoxuly.tenChuHoSo',
+                'nguoi.hoTen',
+                DB::raw('SUM(lichsuthanhtoan.soTien) as total')
+            )
+            ->groupBy('lichsuthanhtoan.maHSXL', 'hosoxuly.tenChuHoSo', 'nguoi.hoTen')
+            ->orderBy('total', 'desc')
+            ->limit(10)
+            ->get();
+
+        $row = 2;
+        foreach ($topHoSos as $index => $hoSo) {
+            $sheet3->setCellValue('A' . $row, $index + 1);
+            $sheet3->setCellValue('B' . $row, $hoSo->maHSXL ?? '');
+            $sheet3->setCellValue('C' . $row, $hoSo->tenChuHoSo ?? '');
+            $sheet3->setCellValue('D' . $row, $hoSo->hoTen ?? '');
+            $sheet3->setCellValue('E' . $row, number_format($hoSo->total, 0, ',', '.'));
+            $row++;
+        }
+
+        $sheet3->getColumnDimension('A')->setWidth(10);
+        $sheet3->getColumnDimension('B')->setWidth(20);
+        $sheet3->getColumnDimension('C')->setWidth(30);
+        $sheet3->getColumnDimension('D')->setWidth(25);
+        $sheet3->getColumnDimension('E')->setWidth(20);
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $tempFile = tempnam(sys_get_temp_dir(), 'excel_');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
     }
 }
 
