@@ -49,18 +49,11 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        $user = Auth::user();
-        $isAdmin = $user ? $this->isAdmin($user) : false;
-        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        // Nếu là admin thì redirect về trang login admin, không thì về trang chủ
-        if ($isAdmin) {
-            return redirect()->route('admin.login');
-        }
-        
+        // Tất cả đều redirect về trang chủ
         return redirect()->route('home');
     }
 

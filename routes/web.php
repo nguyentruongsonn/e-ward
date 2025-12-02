@@ -80,11 +80,11 @@ Route::middleware('auth')->group(function () {
         ->name('profile.password-change.verify.submit');
     Route::post('/profile/password-change/resend-otp', [ProfileController::class, 'resendPasswordChangeOtp'])
         ->name('profile.password-change.resend-otp');
-    
+
     // Document supplement upload
     Route::post('/profile/application/{maHSXL}/upload-supplement', [ProfileController::class, 'uploadSupplementDocuments'])
         ->name('profile.application.upload-supplement');
-    
+
     // Service rating
     Route::post('/profile/application/{maHSXL}/rate', [ProfileController::class, 'rateService'])
         ->name('profile.application.rate');
@@ -95,7 +95,7 @@ Route::middleware('auth')->group(function () {
 
 // Dev-only: quick mail test endpoint
 if (app()->environment('local')) {
-    Route::get('/_mail-test', function() {
+    Route::get('/_mail-test', function () {
         $to = request('to');
         if (!$to) {
             return 'Thiếu ?to=email@example.com';
@@ -114,12 +114,12 @@ Route::view('/404', 'pages.404')->name('404');
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminController::class, 'showLogin'])->name('admin.login');
     Route::post('/login', [AdminController::class, 'login'])->name('admin.login.submit');
-    
+
     // Admin routes cần authentication và middleware admin
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::post('/logout', [AdminController::class, 'logout'])->name('admin.logout');
-        
+
         // Quản lý hồ sơ
         Route::get('/hosoxuly', [AdminController::class, 'indexHoSo'])->name('admin.hosoxuly.index');
         Route::get('/hosoxuly/nhan-truc-tiep', [AdminController::class, 'indexHoSoNhanTrucTiep'])->name('admin.hosoxuly.nhan-truc-tiep');
@@ -128,7 +128,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/hosoxuly/{maHSXL}/trangthai', [AdminController::class, 'updateTrangThai'])->name('admin.hosoxuly.updateTrangThai');
         Route::post('/hosoxuly/{maHSXL}/send-mail', [AdminController::class, 'sendMailHoSo'])->name('admin.hosoxuly.send-mail');
         Route::post('/hosoxuly/{maHSXL}/add-mail-reply', [AdminController::class, 'addMailReply'])->name('admin.hosoxuly.add-mail-reply');
-        
+
         // Filtered lists
         Route::get('/hosoxuly-tiepnhan', [AdminController::class, 'indexHoSoTiepNhan'])->name('admin.hosoxuly.tiepnhan');
         Route::get('/hosoxuly-cho-xuly', [AdminController::class, 'indexHoSoChoXuLy'])->name('admin.hosoxuly.cho-xuly');
@@ -136,7 +136,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/hosoxuly-da-xu-ly-xong', [AdminController::class, 'indexHoSoDaXuLyXong'])->name('admin.hosoxuly.da-xu-ly-xong');
         Route::get('/hosoxuly-da-tra-ket-qua', [AdminController::class, 'indexHoSoDaTraKetQua'])->name('admin.hosoxuly.da-tra-ket-qua');
         Route::get('/hosoxuly-tat-ca', [AdminController::class, 'indexAllHoSo'])->name('admin.hosoxuly.all');
-        
+
         // Workflow actions
         Route::post('/hosoxuly/{maHSXL}/tiepnhan', [AdminController::class, 'tiepNhanHoSo'])->name('admin.hosoxuly.tiepnhan-action');
         Route::post('/hosoxuly/{maHSXL}/chuyen-thuly', [AdminController::class, 'chuyenThuLy'])->name('admin.hosoxuly.chuyen-thuly');
@@ -151,21 +151,49 @@ Route::prefix('admin')->group(function () {
         Route::post('/hosoxuly/{maHSXL}/convert-to-result', [AdminController::class, 'convertToResult'])->name('admin.hosoxuly.convert-to-result');
         Route::post('/hosoxuly/{maHSXL}/remove-ykien-file', [AdminController::class, 'removeYKienFile'])->name('admin.hosoxuly.remove-ykien-file');
         Route::post('/hosoxuly/{maHSXL}/remove-ketqua-file', [AdminController::class, 'removeKetQuaFile'])->name('admin.hosoxuly.remove-ketqua-file');
-        
+
         // New workflow features
         Route::post('/hosoxuly/{maHSXL}/sign-file', [AdminController::class, 'signFile'])->name('admin.hosoxuly.sign-file');
         Route::post('/hosoxuly/{maHSXL}/yeu-cau-xu-ly-lai', [AdminController::class, 'yeuCauXuLyLai'])->name('admin.hosoxuly.yeu-cau-xu-ly-lai');
         Route::post('/hosoxuly/{maHSXL}/yeu-cau-bo-sung', [AdminController::class, 'yeuCauBoSung'])->name('admin.hosoxuly.yeu-cau-bo-sung');
-        
+
         // Quản lý lịch hẹn
         Route::get('/appointment', [AdminController::class, 'indexAppointments'])->name('admin.appointment.index');
         Route::get('/appointment/today', [AdminController::class, 'todayAppointments'])->name('admin.appointment.today');
         Route::get('/appointment/scan', [AdminController::class, 'showScanQR'])->name('admin.appointment.scan');
         Route::post('/appointment/checkin/{token}', [AdminController::class, 'processCheckin'])->name('admin.appointment.checkin');
         Route::post('/appointment/send-reminder', [AdminController::class, 'sendReminder'])->name('admin.appointment.send-reminder');
-        Route::post('/appointment/{id}/update-status', [AdminController::class, 'updateAppointmentStatus'])->name('admin.appointment.update-status');
-        Route::post('/hosoxuly/{maHSXL}/update-general-info', [AdminController::class, 'updateGeneralInfo'])->name('admin.hosoxuly.update-general-info');
-        Route::post('/hosoxuly/{maHSXL}/upload-component', [AdminController::class, 'uploadComponentFile'])->name('admin.hosoxuly.upload-component');
+
+        // Quản lý người dùng
+        Route::get('/users/congdan', [AdminController::class, 'indexCongDan'])->name('admin.users.congdan');
+        Route::get('/users/canbo', [AdminController::class, 'indexCanBo'])->name('admin.users.canbo');
+
+        // Quản lý thủ tục hành chính
+        Route::prefix('tthc')->group(function () {
+            // TTHC
+            Route::get('/', [AdminController::class, 'indexTTHC'])->name('admin.tthc.index');
+            Route::get('/create', [AdminController::class, 'createTTHC'])->name('admin.tthc.create');
+            Route::post('/store', [AdminController::class, 'storeTTHC'])->name('admin.tthc.store');
+            Route::get('/{id}/edit', [AdminController::class, 'editTTHC'])->name('admin.tthc.edit');
+            Route::post('/{id}/update', [AdminController::class, 'updateTTHC'])->name('admin.tthc.update');
+            Route::post('/{id}/delete', [AdminController::class, 'destroyTTHC'])->name('admin.tthc.destroy');
+
+            // Lĩnh vực
+            Route::prefix('linhvuc')->group(function () {
+                Route::get('/', [AdminController::class, 'indexLinhVuc'])->name('admin.tthc.linhvuc.index');
+                Route::get('/create', [AdminController::class, 'createLinhVuc'])->name('admin.tthc.linhvuc.create');
+                Route::post('/store', [AdminController::class, 'storeLinhVuc'])->name('admin.tthc.linhvuc.store');
+                Route::get('/{id}/edit', [AdminController::class, 'editLinhVuc'])->name('admin.tthc.linhvuc.edit');
+                Route::post('/{id}/update', [AdminController::class, 'updateLinhVuc'])->name('admin.tthc.linhvuc.update');
+                Route::post('/{id}/delete', [AdminController::class, 'destroyLinhVuc'])->name('admin.tthc.linhvuc.destroy');
+            });
+        });
+
+        // Quản lý thanh toán
+        Route::get('/payment/history', [AdminController::class, 'indexPaymentHistory'])->name('admin.payment.history');
+        Route::get('/payment/revenue', [AdminController::class, 'revenueReport'])->name('admin.payment.revenue');
+        Route::get('/payment/history/export', [AdminController::class, 'exportPaymentHistory'])->name('admin.payment.history.export');
+        Route::get('/payment/revenue/export', [AdminController::class, 'exportRevenueReport'])->name('admin.payment.revenue.export');
     });
 });
 
@@ -202,6 +230,6 @@ Route::controller(SupportController::class)->group(function () {
     Route::get('/support/notice', 'notice')->name('support.notice');
     Route::get('/support/faq', 'faq')->name('support.faq');
 });
-Route::post('/vnpay_payment',[PaymentController::class,'vnpay_payment']);
-Route::get('/vnpay_return',[PaymentController::class,'vnpay_return'])->name('vnpay.return');
-Route::view('form','pages.form')->name('form');
+Route::post('/vnpay_payment', [PaymentController::class, 'vnpay_payment']);
+Route::get('/vnpay_return', [PaymentController::class, 'vnpay_return'])->name('vnpay.return');
+Route::view('form', 'pages.form')->name('form');

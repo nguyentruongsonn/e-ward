@@ -152,42 +152,43 @@
                 </li>
                 @endif
 
-                {{-- Quản lý người dùng - Only Admin --}}
-                @if($user->vaiTro === 'Quản trị viên')
+                {{-- Quản lý người dùng - Cho phép tất cả Cán bộ --}}
+                @if(in_array($user->vaiTro, ['Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo', 'Quản trị viên']))
                     <li class="sub-menu">
-                        <a href="javascript:;">
+                        <a href="javascript:;" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                             <i class="fa fa-users"></i>
                             <span>Quản lý người dùng</span>
                         </a>
                         <ul class="sub">
-                            <li><a href="#">Công dân</a></li>
-                            <li><a href="#">Cán bộ</a></li>
-                            <li><a href="#">Quản trị viên</a></li>
+                            <li><a href="{{ route('admin.users.congdan') }}" class="{{ request()->routeIs('admin.users.congdan') ? 'active' : '' }}">Công dân</a></li>
+                            <li><a href="{{ route('admin.users.canbo') }}" class="{{ request()->routeIs('admin.users.canbo') ? 'active' : '' }}">Cán bộ</a></li>
                         </ul>
                     </li>
+                @endif
 
-                    {{-- Thủ tục hành chính - Only Admin --}}
+                {{-- Thủ tục hành chính - Only Admin --}}
+                @if($user->vaiTro === 'Quản trị viên')
                     <li class="sub-menu">
-                        <a href="javascript:;">
+                        <a href="javascript:;" class="{{ request()->routeIs('admin.tthc.*') ? 'active' : '' }}">
                             <i class="fa fa-book"></i>
                             <span>Thủ tục hành chính</span>
                         </a>
                         <ul class="sub">
-                            <li><a href="#">Danh sách TTHC</a></li>
-                            <li><a href="#">Thêm TTHC mới</a></li>
-                            <li><a href="#">Lĩnh vực</a></li>
+                            <li><a href="{{ route('admin.tthc.index') }}" class="{{ request()->routeIs('admin.tthc.index') ? 'active' : '' }}">Danh sách TTHC</a></li>
+                            <li><a href="{{ route('admin.tthc.create') }}" class="{{ request()->routeIs('admin.tthc.create') ? 'active' : '' }}">Thêm TTHC mới</a></li>
+                            <li><a href="{{ route('admin.tthc.linhvuc.index') }}" class="{{ request()->routeIs('admin.tthc.linhvuc.*') ? 'active' : '' }}">Lĩnh vực</a></li>
                         </ul>
                     </li>
 
                     {{-- Thanh toán - Only Admin --}}
                     <li class="sub-menu">
-                        <a href="javascript:;">
+                        <a href="javascript:;" class="{{ request()->routeIs('admin.payment.*') ? 'active' : '' }}">
                             <i class="fa fa-money"></i>
                             <span>Thanh toán</span>
                         </a>
                         <ul class="sub">
-                            <li><a href="#">Lịch sử thanh toán</a></li>
-                            <li><a href="#">Báo cáo doanh thu</a></li>
+                            <li><a href="{{ route('admin.payment.history') }}" class="{{ request()->routeIs('admin.payment.history') ? 'active' : '' }}">Lịch sử thanh toán</a></li>
+                            <li><a href="{{ route('admin.payment.revenue') }}" class="{{ request()->routeIs('admin.payment.revenue') ? 'active' : '' }}">Báo cáo doanh thu</a></li>
                         </ul>
                     </li>
                 @endif
