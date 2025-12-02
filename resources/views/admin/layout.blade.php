@@ -99,11 +99,34 @@
         <!-- sidebar menu start-->
         <div class="leftside-navigation">
             <ul class="sidebar-menu" id="nav-accordion">
-                <li>
-                    <a class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                {{-- Dashboard + các báo cáo con --}}
+                <li class="sub-menu">
+                    <a href="javascript:;" class="{{ request()->routeIs('admin.dashboard') || request()->routeIs('admin.payment.*') ? 'active' : '' }}">
                         <i class="fa fa-dashboard"></i>
                         <span>Dashboard</span>
                     </a>
+                    <ul class="sub">
+                        <li>
+                            <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                                Tổng quan
+                            </a>
+                        </li>
+                        @php
+                            $user = Auth::user();
+                        @endphp
+                        @if(in_array($user->vaiTro, ['Quản trị viên', 'Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo']))
+                            <li>
+                                <a href="{{ route('admin.payment.history') }}" class="{{ request()->routeIs('admin.payment.history') ? 'active' : '' }}">
+                                    Lịch sử thanh toán
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.payment.revenue') }}" class="{{ request()->routeIs('admin.payment.revenue') ? 'active' : '' }}">
+                                    Báo cáo doanh thu
+                                </a>
+                            </li>
+                        @endif
+                    </ul>
                 </li>
 
                 @php
@@ -184,18 +207,6 @@
                             <li><a href="{{ route('admin.tthc.index') }}" class="{{ request()->routeIs('admin.tthc.index') ? 'active' : '' }}">Danh sách TTHC</a></li>
                             <li><a href="{{ route('admin.tthc.create') }}" class="{{ request()->routeIs('admin.tthc.create') ? 'active' : '' }}">Thêm TTHC mới</a></li>
                             <li><a href="{{ route('admin.tthc.linhvuc.index') }}" class="{{ request()->routeIs('admin.tthc.linhvuc.*') ? 'active' : '' }}">Lĩnh vực</a></li>
-                        </ul>
-                    </li>
-
-                    {{-- Thanh toán - Only Admin --}}
-                    <li class="sub-menu">
-                        <a href="javascript:;" class="{{ request()->routeIs('admin.payment.*') ? 'active' : '' }}">
-                            <i class="fa fa-money"></i>
-                            <span>Thanh toán</span>
-                        </a>
-                        <ul class="sub">
-                            <li><a href="{{ route('admin.payment.history') }}" class="{{ request()->routeIs('admin.payment.history') ? 'active' : '' }}">Lịch sử thanh toán</a></li>
-                            <li><a href="{{ route('admin.payment.revenue') }}" class="{{ request()->routeIs('admin.payment.revenue') ? 'active' : '' }}">Báo cáo doanh thu</a></li>
                         </ul>
                     </li>
                 @elseif(in_array($user->vaiTro, ['Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo']))
