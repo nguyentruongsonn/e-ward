@@ -465,6 +465,70 @@ class AdminController extends Controller
     }
 
     /**
+     * Hiển thị danh sách TẤT CẢ hồ sơ (không filter theo trạng thái mặc định)
+     */
+    public function indexAllHoSo(Request $request)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $user = Auth::user();
+
+        // Query hồ sơ với filter
+        $query = HoSoXuLy::with(['congdan.nguoi', 'tthc', 'trangThai'])
+            ->whereRaw("maHSXL LIKE 'HSXL_%'")
+            ->whereNotNull('maHSXL')
+            ->where('maHSXL', '!=', '0')
+            ->where('maHSXL', '!=', '');
+
+        // Filter theo tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('maHSXL', 'LIKE', "%{$search}%")
+                  ->orWhere('tenChuHoSo', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('soDienThoai', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Filter theo trạng thái (không có giá trị mặc định - hiển thị tất cả)
+        if ($request->filled('maTrangThai')) {
+            $query->where('maTrangThai', $request->maTrangThai);
+        }
+
+        // Filter theo ngày tiếp nhận
+        if ($request->filled('ngayTiepNhan_from')) {
+            $query->whereDate('ngayTiepNhan', '>=', $request->ngayTiepNhan_from);
+        }
+        if ($request->filled('ngayTiepNhan_to')) {
+            $query->whereDate('ngayTiepNhan', '<=', $request->ngayTiepNhan_to);
+        }
+
+        // Sắp xếp
+        $query->orderBy('ngayTiepNhan', 'desc')
+              ->orderBy('maHSXL', 'desc');
+
+        // Phân trang
+        $hosos = $query->paginate(20)->withQueryString();
+
+        // Đảm bảo maHSXL luôn là string
+        foreach ($hosos as $h) {
+            if ($h->maHSXL !== null) {
+                $h->setAttribute('maHSXL', (string)$h->maHSXL);
+            }
+        }
+
+        // Lấy danh sách trạng thái để hiển thị trong filter
+        $trangThais = TrangThaiHoSo::orderBy('maTrangThai')->get();
+
+        return view('admin.hosoxuly.all', compact('hosos', 'trangThais', 'user'));
+    }
+
+    /**
      * Hiển thị danh sách hồ sơ đã tiếp nhận (status = 2)
      */
     public function indexHoSoTiepNhan(Request $request)
@@ -521,6 +585,47 @@ class AdminController extends Controller
             ->where('maHSXL', '!=', '0')
             ->where('maHSXL', '!=', '')
             ->where('maTrangThai', 4); // Đang xử lý (chờ lãnh đạo duyệt)
+
+        // Filter theo tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('maHSXL', 'LIKE', "%{$search}%")
+                  ->orWhere('tenChuHoSo', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('soDienThoai', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $query->orderBy('ngayTiepNhan', 'desc')->orderBy('maHSXL', 'desc');
+        $hosos = $query->paginate(20)->withQueryString();
+
+        foreach ($hosos as $h) {
+            if ($h->maHSXL !== null) {
+                $h->setAttribute('maHSXL', (string)$h->maHSXL);
+            }
+        }
+
+        $trangThais = TrangThaiHoSo::orderBy('maTrangThai')->get();
+        return view('admin.hosoxuly.index', compact('hosos', 'trangThais'));
+    }
+
+    /**
+     * Hiển thị danh sách hồ sơ nhận trực tiếp (status = 11)
+     */
+    public function indexHoSoNhanTrucTiep(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $query = HoSoXuLy::with(['congdan.nguoi', 'tthc', 'trangThai'])
+            ->whereRaw("maHSXL LIKE 'HSXL_%'")
+            ->whereNotNull('maHSXL')
+            ->where('maHSXL', '!=', '0')
+            ->where('maHSXL', '!=', '')
+            ->where('maTrangThai', 11); // Nhận trực tiếp
 
         // Filter theo tìm kiếm
         if ($request->filled('search')) {
@@ -1104,7 +1209,123 @@ class AdminController extends Controller
         // Phân trang
         $appointments = $query->paginate(20)->withQueryString();
 
-        return view('admin.appointment.index', compact('appointments'));
+        $user = Auth::user();
+
+        return view('admin.appointment.index', compact('appointments', 'user'));
+    }
+
+    /**
+     * Cập nhật trạng thái lịch hẹn (Chỉ Cán bộ một cửa và Quản trị viên)
+     * Tự động tạo HoSoXuLy khi trạng thái = "Hoàn thành"
+     */
+    public function updateAppointmentStatus(Request $request, $id)
+    {
+        // Kiểm tra quyền admin
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $user = Auth::user();
+        
+        // Chỉ Cán bộ một cửa và Quản trị viên mới được cập nhật trạng thái lịch hẹn
+        if (!in_array($user->vaiTro, ['Cán bộ một cửa', 'Quản trị viên'])) {
+            return response()->json(['success' => false, 'message' => 'Chỉ Cán bộ một cửa và Quản trị viên mới được cập nhật trạng thái lịch hẹn.']);
+        }
+
+        $request->validate([
+            'trangThai' => 'required|string|in:Đã đặt lịch,Chờ đến,Đang xử lý,Hoàn thành,Đã hủy,Yêu cầu bổ sung giấy tờ,Không đến',
+        ]);
+
+        try {
+            $appointment = LichHen::find($id);
+
+            if (!$appointment) {
+                return response()->json(['success' => false, 'message' => 'Không tìm thấy lịch hẹn.']);
+            }
+
+            $oldStatus = $appointment->trangThai;
+            $newStatus = $request->trangThai;
+
+            // Cập nhật trạng thái
+            $appointment->trangThai = $newStatus;
+            $appointment->save();
+
+            $responseData = [
+                'success' => true,
+                'message' => "Đã cập nhật trạng thái lịch hẹn từ '{$oldStatus}' sang '{$newStatus}'.",
+            ];
+
+            // Nếu trạng thái = "Hoàn thành", tự động tạo HoSoXuLy
+            if ($newStatus === 'Hoàn thành') {
+                // Generate maHSXL
+                $IDCD = $appointment->IDCD;
+                $date = now()->format('Ymd');
+                $random = rand(1000, 9999);
+                $maHSXL = "HSXL_{$IDCD}_{$date}_{$random}";
+
+                // Check if maHSXL already exists (unlikely but safe)
+                while (HoSoXuLy::where('maHSXL', $maHSXL)->exists()) {
+                    $random = rand(1000, 9999);
+                    $maHSXL = "HSXL_{$IDCD}_{$date}_{ $random}";
+                }
+
+                // Lấy thông tin công dân để copy dữ liệu
+                $congDan = $appointment->congdan;
+                $nguoi = $congDan ? $congDan->nguoi : null;
+
+                // Tạo HoSoXuLy mới
+                $hoSo = new HoSoXuLy();
+                $hoSo->maHSXL = $maHSXL;
+                $hoSo->IDCD = $IDCD;
+                $hoSo->maTTHC = $appointment->maTTHC;
+                $hoSo->maTrangThai = 11; // Nhận trực tiếp (chờ cán bộ điền thông tin chung)
+                $hoSo->ngayTiepNhan = now();
+                $hoSo->hinhThuc = 'Nhận trực tiếp'; // Từ lịch hẹn
+                
+                // Chuẩn bị dữ liệu JSON từ thông tin công dân
+                $dulieu = [
+                    'hinhThuc' => 'Nhận trực tiếp',
+                    'tenTTHC' => $appointment->tthc->tenTTHC ?? '',
+                ];
+
+                if ($nguoi) {
+                    $hoSo->tenChuHoSo = $nguoi->hoTen;
+                    $hoSo->email = $nguoi->email;
+                    $hoSo->soDienThoai = $nguoi->soDienThoai;
+
+                    // Thêm các trường thông tin chung vào dulieu
+                    $dulieu['hoTen'] = $nguoi->hoTen;
+                    $dulieu['ngaySinh'] = $nguoi->ngaySinh;
+                    $dulieu['gioiTinh'] = $nguoi->gioiTinh;
+                    $dulieu['cccd'] = $nguoi->maCCCD;
+                    $dulieu['email'] = $nguoi->email;
+                    $dulieu['soDienThoai'] = $nguoi->soDienThoai;
+                    $dulieu['diaChi'] = $nguoi->noiThuongTru ?? $nguoi->noiTamTru ?? '';
+                    $dulieu['ngayCap'] = ''; // Initialize empty
+                    $dulieu['noiCap'] = ''; // Initialize empty
+                }
+
+                $hoSo->dulieu = json_encode($dulieu, JSON_UNESCAPED_UNICODE);
+                $hoSo->lePhi = 0; // Default fee
+                $hoSo->donViXuLy = 'UBND Phường Hòa Hải'; // Default unit
+
+                $hoSo->ghiChu = "Hồ sơ được tạo tự động từ lịch hẹn {$appointment->maLichHen} vào lúc " . now()->format('d/m/Y H:i');
+                $hoSo->save();
+
+                $responseData['message'] .= " Đã tự động tạo hồ sơ xử lý {$maHSXL}.";
+                $responseData['hoSoCreated'] = true;
+                $responseData['maHSXL'] = $maHSXL;
+                $responseData['hoSoUrl'] = route('admin.hosoxuly.show', $maHSXL);
+            }
+
+            return response()->json($responseData);
+        } catch (\Exception $e) {
+            \Log::error('updateAppointmentStatus error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi cập nhật trạng thái: ' . $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -1151,7 +1372,12 @@ class AdminController extends Controller
         // Phân trang
         $appointments = $query->paginate(20)->withQueryString();
 
-        return view('admin.appointment.today', compact('appointments', 'today'));
+        // Phân trang
+        $appointments = $query->paginate(20)->withQueryString();
+
+        $user = Auth::user();
+
+        return view('admin.appointment.today', compact('appointments', 'today', 'user'));
     }
 
     /**
@@ -1387,9 +1613,8 @@ class AdminController extends Controller
         $hoso->nguoiTiepNhan = $user->IDnguoiDung;
         $hoso->maTrangThai = 2; // Được tiếp nhận
 
-        // Tính ngày hẹn trả dựa trên Cách thức thực hiện
+        // Tính ngày hẹn trả dựa trên thời hạn của TTHC
         $cachThucHien = \App\Models\CachThucHien::where('maTTHC', $hoso->maTTHC)
-            ->where('kenh', $hoso->hinhThuc)
             ->first();
 
         if ($cachThucHien && $cachThucHien->thoiHan) {
@@ -1867,10 +2092,11 @@ class AdminController extends Controller
 
         $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
         
-        // Cập nhật trạng thái
-        $hoso->maTrangThai = 5; // Đã phê duyệt (chờ trả kết quả)
+        // Cập nhật trạng thái đã xử lý xong, chuyển về cán bộ một cửa để trả kết quả
+        $hoso->maTrangThai = 9; // Đã xử lý xong
         $hoso->nguoiDuyet = $user->IDnguoiDung;
         $hoso->ngayDuyet = now();
+        $hoso->ngayKetThucXuLy = now();
         
         // Lưu danh sách file kết quả (nếu có thay đổi từ frontend)
         if ($request->has('ketQuaFiles')) {
@@ -1885,18 +2111,19 @@ class AdminController extends Controller
         // Lưu ý kiến duyệt
         if ($request->filled('yKienDuyet')) {
             $hoso->yKienDuyet = $request->yKienDuyet;
-            $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo phê duyệt: " . $request->yKienDuyet;
+            $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo phê duyệt. Hồ sơ đã xử lý xong, chuyển về cán bộ một cửa để trả kết quả: " . $request->yKienDuyet;
         } else {
-            $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo đã phê duyệt.";
+            $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo đã phê duyệt. Hồ sơ đã xử lý xong, chuyển về cán bộ một cửa để trả kết quả.";
         }
 
         $hoso->save();
 
-        return back()->with('success', 'Đã phê duyệt hồ sơ.');
+        return back()->with('success', 'Đã phê duyệt hồ sơ. Hồ sơ đã chuyển về cán bộ một cửa để trả kết quả.');
     }
 
+
     /**
-     * Lãnh đạo trả lại hồ sơ cho cán bộ
+     * Lãnh đạo dừng xử lý hồ sơ
      */
     public function traLai(Request $request, $maHSXL)
     {
@@ -1906,9 +2133,9 @@ class AdminController extends Controller
 
         $user = Auth::user();
         
-        // Chỉ Lãnh đạo mới được trả lại
+        // Chỉ Lãnh đạo mới được dừng xử lý
         if ($user->vaiTro !== 'Lãnh đạo' && $user->vaiTro !== 'Quản trị viên') {
-            return back()->with('error', 'Chỉ Lãnh đạo mới được trả lại hồ sơ.');
+            return back()->with('error', 'Chỉ Lãnh đạo mới được dừng xử lý hồ sơ.');
         }
 
         $request->validate([
@@ -1917,12 +2144,101 @@ class AdminController extends Controller
 
         $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
         
-        // Trả lại hồ sơ cho cán bộ
-        $hoso->maTrangThai = 5; // Yêu cầu bổ sung
-        $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo yêu cầu: " . $request->input('lyDo');
+        // Cập nhật trạng thái dừng xử lý
+        $hoso->maTrangThai = 8; // Dừng xử lý
+        $hoso->nguoiDuyet = $user->IDnguoiDung;
+        $hoso->ngayDuyet = now();
+        $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo dừng xử lý hồ sơ: " . $request->input('lyDo');
         $hoso->save();
 
-        return back()->with('error', 'Đã trả lại hồ sơ cho cán bộ.');
+        // TODO: Gửi email thông báo cho công dân
+
+        return redirect()->route('admin.hosoxuly.cho-xuly')->with('success', 'Đã dừng xử lý hồ sơ.');
+    }
+
+    /**
+     * Cập nhật thông tin chung hồ sơ (cho trạng thái 11)
+     */
+    public function updateGeneralInfo(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+
+        // Cập nhật thông tin chính
+        $hoso->tenChuHoSo = $request->hoTen;
+        $hoso->email = $request->email;
+        $hoso->soDienThoai = $request->soDienThoai;
+
+        // Cập nhật dulieu JSON
+        $dulieu = json_decode($hoso->dulieu, true) ?? [];
+        $dulieu['hoTen'] = $request->hoTen;
+        $dulieu['ngaySinh'] = $request->ngaySinh;
+        $dulieu['gioiTinh'] = $request->gioiTinh;
+        $dulieu['cccd'] = $request->cccd;
+        $dulieu['ngayCap'] = $request->ngayCap;
+        $dulieu['noiCap'] = $request->noiCap;
+        $dulieu['email'] = $request->email;
+        $dulieu['soDienThoai'] = $request->soDienThoai;
+        $dulieu['diaChi'] = $request->diaChi;
+        
+        $hoso->dulieu = json_encode($dulieu, JSON_UNESCAPED_UNICODE);
+        $hoso->save();
+
+        return back()->with('success', 'Đã cập nhật thông tin chung.');
+    }
+
+    /**
+     * Upload file thành phần hồ sơ (cho trạng thái 11)
+     */
+    public function uploadComponentFile(Request $request, $maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $request->validate([
+            'file' => 'required|file|max:10240', // Max 10MB
+            'maThanhPhan' => 'required|string',
+        ]);
+
+        try {
+            $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+            
+            // Tìm giấy tờ tương ứng với thành phần (lấy cái đầu tiên nếu có nhiều)
+            $thanhPhan = DB::table('thanhphanhoso')
+                ->where('maTTHC', $hoso->maTTHC)
+                ->where('tenThanhPhan', $request->maThanhPhan) // Ở view sẽ gửi tên thành phần
+                ->first();
+
+            $maGiayTo = $thanhPhan ? $thanhPhan->maGiayTo : null;
+
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $originalName = $file->getClientOriginalName();
+                $fileName = time() . '_' . $originalName;
+                $path = $file->storeAs('public/hoso/' . $maHSXL, $fileName);
+                
+                // Lưu vào bảng tailieunop
+                DB::table('tailieunop')->insert([
+                    'maHSXL' => $maHSXL,
+                    'maGiayTo' => $maGiayTo,
+                    'tenTep' => $originalName,
+                    'duongDan' => 'hoso/' . $maHSXL . '/' . $fileName,
+                    'kichThuoc' => $file->getSize(),
+                    'ngayNop' => now(),
+                    'nguoiNop' => Auth::user()->IDnguoiDung
+                ]);
+
+                return back()->with('success', 'Đã tải lên tài liệu thành công.');
+            }
+
+            return back()->with('error', 'Vui lòng chọn file.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Lỗi khi tải file: ' . $e->getMessage());
+        }
     }
 
     /**

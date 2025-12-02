@@ -21,6 +21,7 @@ return new class extends Migration
                 'Đang xử lý',
                 'Hoàn thành',
                 'Đã hủy',
+                'Yêu cầu bổ sung giấy tờ',
                 'Không đến'
             ])->default('Đã đặt lịch');
 

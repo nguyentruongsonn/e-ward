@@ -45,7 +45,7 @@
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">THÔNG TIN & DỊCH VỤ</a>
                 <div class="dropdown-menu bg-light m-0">
                     <a href="{{ route('outstanding-service') }}" class="dropdown-item">DỊCH VỤ CÔNG NỔI BẬT</a>
-                    <a href="{{ route('404') }}" class="dropdown-item">TRA CỨU HỒ SƠ</a>
+                    <a href="{{ route('tracking') }}" class="dropdown-item">TRA CỨU HỒ SƠ</a>
                     <a href="{{ route('404') }}" class="dropdown-item">CÂU HỎI THƯỜNG GẶP</a>
                 </div>
             </div>

@@ -39,14 +39,20 @@
 
                             {{-- Cán bộ một cửa actions --}}
                             @if($user->vaiTro === 'Cán bộ một cửa' || $user->vaiTro === 'Quản trị viên')
-                                {{-- Tiếp nhận hồ sơ (status = 1: Chờ tiếp nhận) --}}
-                                @if($hoSo->maTrangThai == 1)
-                                    <form action="{{ route('admin.hosoxuly.tiepnhan-action', $hoSo->maHSXL) }}" method="POST" class="d-inline ml-2">
-                                        @csrf
-                                        <button type="submit" class="btn btn-primary btn-sm">
-                                            <i class="fa fa-check"></i> Tiếp nhận
+                                {{-- Tiếp nhận hồ sơ (status = 1 hoặc 11) --}}
+                                @if(in_array($hoSo->maTrangThai, [1, 11]))
+                                    @if($hoSo->maTrangThai == 11)
+                                        <button type="button" class="btn btn-primary btn-sm ml-2" onclick="$('#component-form').submit()">
+                                            <i class="fa fa-check"></i> Xác nhận hoàn thành
                                         </button>
-                                    </form>
+                                    @else
+                                        <form action="{{ route('admin.hosoxuly.tiepnhan-action', $hoSo->maHSXL) }}" method="POST" class="d-inline ml-2">
+                                            @csrf
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="fa fa-check"></i> Tiếp nhận
+                                            </button>
+                                        </form>
+                                    @endif
                                 @endif
 
                                 {{-- Chuyển thụ lý (status = 2: Đã tiếp nhận) --}}
@@ -102,7 +108,7 @@
                                         <i class="fa fa-undo"></i> Yêu cầu xử lý lại
                                     </button>
                                     <button type="button" class="btn btn-danger btn-sm ml-1" data-toggle="modal" data-target="#traLaiModal">
-                                        <i class="fa fa-times"></i> Trả lại
+                                        <i class="fa fa-times"></i> Dừng xử lý
                                     </button>
                                 @endif
                             @endif
@@ -204,7 +210,7 @@
                                 display: none; /* Hide old labels as text is now inside the box */
                             }
                             /* ====== FORM SECTION ====== */
-                            .form-section {
+                            .form-section, .info-section {
                                 border: 1px solid #eee;
                                 background: #fff;
                                 padding: 25px;
@@ -316,6 +322,93 @@
                         {{-- ========================== STEP 1: THÔNG TIN HỒ SƠ ========================== --}}
                         <div class="form-section" data-step="1">
                             <h5>Thông tin hồ sơ</h5>
+                            
+                            {{-- FORM CHỈNH SỬA CHO TRẠNG THÁI 11 (NHẬN TRỰC TIẾP) --}}
+                            @if($hoSo->maTrangThai == 11 && ($user->vaiTro === 'Cán bộ một cửa' || $user->vaiTro === 'Quản trị viên'))
+                                <form action="{{ route('admin.hosoxuly.update-general-info', $hoSo->maHSXL) }}" method="POST">
+                                    @csrf
+                                    
+                                    {{-- Group 1: Thông tin chủ hồ sơ --}}
+                                    <div class="col-12">
+                                        <h5 class="mt-4 mb-3" style="border-bottom: 1px solid #eee; padding-bottom: 5px; padding-top:10px;">Thông tin chủ hồ sơ</h5>
+                                    </div>
+                                    <div class="row g-3 mb-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Họ và tên <span class="text-danger">*</span></label>
+                                            <input type="text" name="hoTen" class="form-control" value="{{ $getValueByName('hoTen', $dulieu) ?? $hoSo->tenChuHoSo }}" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Ngày sinh <span class="text-danger">*</span></label>
+                                            <input type="date" name="ngaySinh" class="form-control" value="{{ $getValueByName('ngaySinh', $dulieu) }}" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Giới tính</label>
+                                            <select name="gioiTinh" class="form-control">
+                                                <option value="Nam" {{ ($getValueByName('gioiTinh', $dulieu) == 'Nam') ? 'selected' : '' }}>Nam</option>
+                                                <option value="Nữ" {{ ($getValueByName('gioiTinh', $dulieu) == 'Nữ') ? 'selected' : '' }}>Nữ</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Số CCCD/CMND <span class="text-danger">*</span></label>
+                                            <input type="text" name="cccd" class="form-control" value="{{ $getValueByName('cccd', $dulieu) }}" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Ngày cấp</label>
+                                            <input type="date" name="ngayCap" class="form-control" value="{{ $getValueByName('ngayCap', $dulieu) }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Nơi cấp</label>
+                                            <input type="text" name="noiCap" class="form-control" value="{{ $getValueByName('noiCap', $dulieu) }}" placeholder="Cục Cảnh sát ĐKQL cư trú...">
+                                        </div>
+                                    </div>
+
+                                    {{-- Group 2: Thông tin liên hệ --}}
+                                    <div class="col-12">
+                                        <h5 class="mt-4 mb-3" style="border-bottom: 1px solid #eee; padding-bottom: 5px; padding-top:30px;">Thông tin liên hệ</h5>
+                                    </div>
+                                    <div class="row g-3 mb-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Email</label>
+                                            <input type="email" name="email" class="form-control" value="{{ $getValueByName('email', $dulieu) ?? $hoSo->email }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Số điện thoại <span class="text-danger">*</span></label>
+                                            <input type="text" name="soDienThoai" class="form-control" value="{{ $getValueByName('soDienThoai', $dulieu) ?? $hoSo->soDienThoai }}" required>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Địa chỉ (Thường trú / Tạm trú) <span class="text-danger">*</span></label>
+                                            <input type="text" name="diaChi" class="form-control" value="{{ $getValueByName('diaChi', $dulieu) }}" required>
+                                        </div>
+                                    </div>
+
+                                    {{-- Group 3: Thông tin thủ tục --}}
+                                    <div class="col-12">
+                                        <h5 class="mt-4 mb-3" style="border-bottom: 1px solid #eee; padding-bottom: 5px; padding-top:30px;">Thông tin thủ tục</h5>
+                                    </div>
+                                    <div class="row g-3 mb-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Tên thủ tục hành chính</label>
+                                            <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                {{ $getValueByName('tenTTHC', $dulieu) }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Hình thức nộp</label>
+                                            <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                Nhận trực tiếp
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 mt-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-save"></i> Lưu thông tin
+                                        </button>
+                                    </div>
+                                </form>
+                                <hr>
+                            @endif
+
                             <div class="row">
                                 @php
                                     // Sử dụng cauHinhForm đã merge nếu có, nếu không thì dùng cauHinhForm gốc
@@ -398,6 +491,112 @@
                                             @endforeach
                                         @endif
                                     @endforeach
+                                @elseif(!empty($dulieu) && (isset($dulieu['hoTen']) || isset($dulieu['cccd'])))
+                                    {{-- Hiển thị thông tin cơ bản cho hồ sơ nhận trực tiếp --}}
+                                    <div class="col-12">
+                                        <h5 class="mt-4 mb-3" style="border-bottom: 1px solid #eee; padding-bottom: 5px; padding-top:10px;">Thông tin chủ hồ sơ</h5>
+                                    </div>
+                                    <div class="row g-3 mb-2">
+                                        @if(isset($dulieu['hoTen']))
+                                            <div class="col-md-6">
+                                                <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Họ và tên</label>
+                                                <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                    {{ $dulieu['hoTen'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @if(isset($dulieu['ngaySinh']))
+                                            <div class="col-md-3">
+                                                <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Ngày sinh</label>
+                                                <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                    {{ $dulieu['ngaySinh'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @if(isset($dulieu['gioiTinh']))
+                                            <div class="col-md-3">
+                                                <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Giới tính</label>
+                                                <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                    {{ $dulieu['gioiTinh'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @if(isset($dulieu['cccd']))
+                                            <div class="col-md-4">
+                                                <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Số CCCD/CMND</label>
+                                                <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                    {{ $dulieu['cccd'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @if(isset($dulieu['ngayCap']))
+                                            <div class="col-md-4">
+                                                <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Ngày cấp</label>
+                                                <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                    {{ $dulieu['ngayCap'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @if(isset($dulieu['noiCap']))
+                                            <div class="col-md-4">
+                                                <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Nơi cấp</label>
+                                                <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                    {{ $dulieu['noiCap'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="col-12">
+                                        <h5 class="mt-4 mb-3" style="border-bottom: 1px solid #eee; padding-bottom: 5px; padding-top:30px;">Thông tin liên hệ</h5>
+                                    </div>
+                                    <div class="row g-3 mb-2">
+                                        @if(isset($dulieu['email']))
+                                            <div class="col-md-6">
+                                                <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Email</label>
+                                                <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                    {{ $dulieu['email'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @if(isset($dulieu['soDienThoai']))
+                                            <div class="col-md-6">
+                                                <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Số điện thoại</label>
+                                                <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                    {{ $dulieu['soDienThoai'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @if(isset($dulieu['diaChi']))
+                                            <div class="col-md-12">
+                                                <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Địa chỉ (Thường trú / Tạm trú)</label>
+                                                <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                    {{ $dulieu['diaChi'] }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="col-12">
+                                        <h5 class="mt-4 mb-3" style="border-bottom: 1px solid #eee; padding-bottom: 5px; padding-top:30px;">Thông tin thủ tục</h5>
+                                    </div>
+                                    <div class="row g-3 mb-2">
+                                        <div class="col-md-12">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Tên thủ tục hành chính</label>
+                                            <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                @php
+                                                    $tthc = \App\Models\TTHC::find($hoSo->maTTHC);
+                                                @endphp
+                                                {{ $tthc ? $tthc->ten : 'N/A' }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label" style="color: #1A2A36; margin-bottom: 5px;">Hình thức nộp</label>
+                                            <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                                Nhận trực tiếp
+                                            </div>
+                                        </div>
+                                    </div>
                                 @else
                                     <div class="col-12">
                                         <p class="text-muted">Không có thông tin form để hiển thị.</p>
@@ -409,69 +608,97 @@
                         {{-- ========================== STEP 2: THÀNH PHẦN HỒ SƠ ========================== --}}
                         <div class="form-section" data-step="2" style="display: none;">
                             <h5>Thành phần hồ sơ</h5>
-                            @if($taiLieu && $taiLieu->count() > 0)
-                                <div class="accordion mt-3" id="thanhPhanHoSoAccordion">
-                                    @php $index = 0; @endphp
+
+                            @if($hoSo->maTrangThai == 11 && ($user->vaiTro === 'Cán bộ một cửa' || $user->vaiTro === 'Quản trị viên'))
+                                <form id="component-form" action="{{ route('admin.hosoxuly.tiepnhan-action', $hoSo->maHSXL) }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                            @endif
+
+                            @if($thanhPhanHoSos && $thanhPhanHoSos->count() > 0)
+                                <div class="mt-4">
+                                    @php $componentIndex = 0; @endphp
                                     @foreach($thanhPhanHoSos as $tenThanhPhan => $giayTos)
-                                        @php
-                                            $taiLieuGroup = $taiLieu->whereIn('maGiayTo', $giayTos->pluck('maGiayTo')->toArray());
-                                        @endphp
-                                        @if($taiLieuGroup->count() > 0)
-                                            <div class="accordion-item">
-                                                <h2 class="accordion-header" id="heading-{{ $index }}">
-                                                    <button class="accordion-button @if($index > 0) collapsed @endif" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $index }}" aria-expanded="{{ $index == 0 ? 'true' : 'false' }}">
-                                                        <strong>{{ $tenThanhPhan }}</strong>
-                                                        <span class="badge bg-primary rounded-pill ms-2">{{ $taiLieuGroup->count() }} tài liệu</span>
-                                                    </button>
-                                                </h2>
-                                                <div id="collapse-{{ $index }}" class="accordion-collapse collapse @if($index == 0) show @endif" aria-labelledby="heading-{{ $index }}">
-                                                    <div class="accordion-body p-0">
-                                                        <div class="table-responsive">
-                                                            <table class="table table-bordered table-sm align-middle text-dark mb-0">
-                                                                <thead class="table-light">
-                                                                    <tr class="text-center">
-                                                                        <th style="width: 50px;">STT</th>
-                                                                        <th>Tên giấy tờ</th>
-                                                                        <th>File</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    @foreach($taiLieuGroup as $idx => $tl)
-                                                                        @php
-                                                                            $giayTo = \Illuminate\Support\Facades\DB::table('giayto')->where('maGiayTo', $tl->maGiayTo)->first();
-                                                                        @endphp
-                                                                        <tr>
-                                                                            <td class="text-center">{{ $idx + 1 }}</td>
-                                                                            <td>{{ $giayTo->tenGiayTo ?? ($tl->tenTep ?? '-') }}</td>
-                                                                            <td>
-                                                                                @if($tl->duongDan)
-                                                                                    <a href="{{ asset('storage/' . $tl->duongDan) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                                                        <i class="fa fa-download"></i> Tải xuống
-                                                                                    </a>
-                                                                                    <small class="d-block text-muted mt-1">
-                                                                                        {{ $tl->tenTep ?? '' }}
-                                                                                        @if($tl->kichThuoc)
-                                                                                            ({{ number_format($tl->kichThuoc / 1024, 2) }} KB)
-                                                                                        @endif
-                                                                                    </small>
-                                                                                @else
-                                                                                    -
-                                                                                @endif
-                                                                            </td>
-                                                                        </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
+                                        <div class="card mb-3">
+                                            <div class="card-header bg-light">
+                                                <h6 class="mb-0">
+                                                    <i class="fa fa-folder-open text-primary"></i> {{ $tenThanhPhan }}
+                                                </h6>
+                                            </div>
+                                            <div class="card-body p-0">
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-hover mb-0">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th style="width: 50px;" class="text-center">STT</th>
+                                                                <th>Tên giấy tờ</th>
+                                                                <th style="width: 120px;" class="text-center">Số lượng</th>
+                                                                <th style="width: 150px;" class="text-center">Trạng thái</th>
+                                                                <th style="width: 250px;" class="text-center">File đính kèm</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach($giayTos as $idx => $giayTo)
+                                                                @php
+                                                                    // Tìm file đã upload cho giấy tờ này
+                                                                    $uploadedFile = $taiLieu ? $taiLieu->where('maGiayTo', $giayTo->maGiayTo)->first() : null;
+                                                                @endphp
+                                                                <tr>
+                                                                    <td class="text-center">{{ $idx + 1 }}</td>
+                                                                    <td>
+                                                                        <strong>{{ $giayTo->tenGiayTo }}</strong>
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        <small class="text-muted">
+                                                                            Chính: {{ $giayTo->soLuongBanChinh ?? 0 }} | 
+                                                                            Sao: {{ $giayTo->soLuongBanSao ?? 0 }}
+                                                                        </small>
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        @if($uploadedFile)
+                                                                            <span class="badge bg-success">
+                                                                                <i class="fa fa-check"></i> Đã nộp
+                                                                            </span>
+                                                                        @else
+                                                                            <span class="badge bg-warning text-dark">
+                                                                                <i class="fa fa-clock-o"></i> Chưa nộp
+                                                                            </span>
+                                                                        @endif
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        @if($hoSo->maTrangThai == 11 && ($user->vaiTro === 'Cán bộ một cửa' || $user->vaiTro === 'Quản trị viên'))
+                                                                            <input type="file" name="files[{{ $giayTo->maGiayTo }}]" class="form-control form-control-sm mb-2">
+                                                                        @endif
+
+                                                                        @if($uploadedFile && $uploadedFile->duongDan)
+                                                                            <div class="d-flex flex-column align-items-center">
+                                                                                <a href="{{ asset('storage/' . $uploadedFile->duongDan) }}" 
+                                                                                   target="_blank" 
+                                                                                   class="btn btn-sm btn-outline-primary mb-1" 
+                                                                                   title="{{ $uploadedFile->tenTep }}">
+                                                                                    <i class="fa fa-download"></i> Tải xuống
+                                                                                </a>
+                                                                                <small class="text-muted text-truncate" style="max-width: 180px;">
+                                                                                    {{ $uploadedFile->tenTep }}
+                                                                                </small>
+                                                                            </div>
+                                                                        @endif
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
-                                            @php $index++; @endphp
-                                        @endif
+                                        </div>
+                                        @php $componentIndex++; @endphp
                                     @endforeach
                                 </div>
                             @else
-                                <div class="alert alert-info text-center">Không có tài liệu nào đã nộp.</div>
+                                <p class="text-muted"><i class="fa fa-info-circle"></i> Không có thành phần hồ sơ nào được định nghĩa cho thủ tục này.</p>
+                            @endif
+
+                            @if($hoSo->maTrangThai == 11 && ($user->vaiTro === 'Cán bộ một cửa' || $user->vaiTro === 'Quản trị viên'))
+                                </form>
                             @endif
                         </div>
 
@@ -686,7 +913,7 @@
                                                 <ul class="list-group">
                                                     @foreach($files as $file)
                                                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                            <span><i class="fa fa-file"></i> {{ basename($file) }}</span>
+                                                            <span class="text-truncate d-inline-block" style="max-width: 250px; vertical-align: middle;" title="{{ basename($file) }}"><i class="fa fa-file"></i> {{ basename($file) }}</span>
                                                             @if($isReadOnly)
                                                                 <a href="{{ asset($file) }}" download class="btn btn-sm btn-light">
                                                                     <i class="fa fa-download"></i> Tải xuống
@@ -735,7 +962,7 @@
                                                 <ul class="list-group">
                                                     @foreach($kqFiles as $file)
                                                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                            <span><i class="fa fa-file-pdf-o text-danger"></i> {{ basename($file) }}</span>
+                                                            <span class="text-truncate d-inline-block" style="max-width: 250px; vertical-align: middle;" title="{{ basename($file) }}"><i class="fa fa-file-pdf-o text-danger"></i> {{ basename($file) }}</span>
                                                             @if($isReadOnly)
                                                                 <a href="{{ asset($file) }}" download class="btn btn-sm btn-light">
                                                                     <i class="fa fa-download"></i> Tải xuống
@@ -898,10 +1125,9 @@
                                                         </div>
                                                     @endforeach
                                                 @else
-                                                    <p class="text-muted text-center">Chưa có kết quả xử lý</p>
+
                                                 @endif
                                             @else
-                                                <p class="text-muted text-center">Chưa có kết quả xử lý</p>
                                             @endif
                                         </div>
                                     </div>
@@ -911,94 +1137,101 @@
 
                         <!-- Lịch sử hoạt động -->
                         @if($hoSo->ghiChu)
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h4 class="mb-4" style="color: #2c3e50; font-weight: 600; border-left: 4px solid #32C36C; padding-left: 15px;">
-                                        <i class="fa fa-history"></i> Lịch sử hoạt động
-                                    </h4>
+                            <div class="info-section">
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h4 class="mb-4" style="color: #2c3e50; font-weight: 600; border-left: 4px solid #32C36C; padding-left: 15px;">
+                                            <i class="fa fa-history"></i> Lịch sử hoạt động
+                                        </h4>
 
-                                    @php
-                                        // Parse the activity log
-                                        $activities = [];
-                                        $lines = explode("\n", $hoSo->ghiChu);
-                                        foreach ($lines as $line) {
-                                            $line = trim($line);
-                                            if (empty($line)) continue;
+                                        @php
+                                            // Parse the activity log
+                                            $activities = [];
+                                            $lines = explode("\n", $hoSo->ghiChu);
+                                            foreach ($lines as $line) {
+                                                $line = trim($line);
+                                                if (empty($line)) continue;
 
-                                            // Match pattern: [dd/mm/yyyy HH:ii] Activity description
-                                            if (preg_match('/^\[(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2})\]\s*(.+)$/', $line, $matches)) {
-                                                $activities[] = [
-                                                    'time' => $matches[1],
-                                                    'description' => $matches[2]
-                                                ];
-                                            } else {
-                                                // If no timestamp, add as a simple note
-                                                $activities[] = [
-                                                    'time' => null,
-                                                    'description' => $line
-                                                ];
+                                                // Match pattern: [dd/mm/yyyy HH:ii] Activity description
+                                                if (preg_match('/^\[(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2})\]\s*(.+)$/', $line, $matches)) {
+                                                    $activities[] = [
+                                                        'time' => $matches[1],
+                                                        'description' => $matches[2]
+                                                    ];
+                                                } else {
+                                                    // If no timestamp, add as a simple note
+                                                    $activities[] = [
+                                                        'time' => null,
+                                                        'description' => $line
+                                                    ];
+                                                }
                                             }
-                                        }
 
-                                        // Reverse to show newest first
-                                        $activities = array_reverse($activities);
-                                    @endphp
+                                            // Reverse to show newest first
+                                            $activities = array_reverse($activities);
+                                        @endphp
 
-                                    <div class="activity-timeline" style="position: relative; padding: 20px 0 20px 30px;">
-                                        <!-- Vertical Line -->
-                                        <div style="position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: #e9ecef;"></div>
+                                        <div class="activity-timeline" style="position: relative; padding: 20px 0 20px 30px;">
+                                            <!-- Vertical Line -->
+                                            <div style="position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: #e9ecef;"></div>
 
-                                        @foreach($activities as $index => $activity)
-                                            <div class="activity-item" style="position: relative; margin-bottom: 30px;">
-                                                <!-- Dot -->
-                                                <div style="
-                                                    position: absolute;
-                                                    left: -21px;
-                                                    top: 0;
-                                                    width: 14px;
-                                                    height: 14px;
-                                                    border-radius: 50%;
-                                                    background: {{ $index === 0 ? '#32C36C' : '#adb5bd' }};
-                                                    border: 3px solid #fff;
-                                                    box-shadow: 0 0 0 1px {{ $index === 0 ? '#32C36C' : '#adb5bd' }};
-                                                    z-index: 1;
-                                                "></div>
-
-                                                <!-- Content -->
-                                                <div class="activity-content" style="
-                                                    background: #fff;
-                                                    border-radius: 8px;
-                                                    padding: 0 15px;
-                                                ">
-                                                    @if($activity['time'])
-                                                        <div style="margin-bottom: 6px; display: flex; align-items: center;">
-                                                            <span style="
-                                                                font-size: 12px;
-                                                                font-weight: 600;
-                                                                color: {{ $index === 0 ? '#32C36C' : '#6c757d' }};
-                                                                background: {{ $index === 0 ? '#e8f5e9' : '#f8f9fa' }};
-                                                                padding: 2px 8px;
-                                                                border-radius: 4px;
-                                                            ">
-                                                                {{ $activity['time'] }}
-                                                            </span>
-                                                            @if($index === 0)
-                                                                <span class="badge badge-success ml-2" style="font-size: 10px;">Mới nhất</span>
-                                                            @endif
-                                                        </div>
-                                                    @endif
-
+                                            @foreach($activities as $index => $activity)
+                                                <div class="activity-item" style="position: relative; margin-bottom: 30px;">
+                                                    <!-- Dot -->
                                                     <div style="
-                                                        color: #2c3e50;
-                                                        font-size: 14px;
-                                                        line-height: 1.5;
-                                                        font-weight: {{ $index === 0 ? '500' : '400' }};
+                                                        position: absolute;
+                                                        left: -21px;
+                                                        top: 0;
+                                                        width: 14px;
+                                                        height: 14px;
+                                                        border-radius: 50%;
+                                                        background: {{ $index === 0 ? '#32C36C' : '#adb5bd' }};
+                                                        border: 3px solid #fff;
+                                                        box-shadow: 0 0 0 1px {{ $index === 0 ? '#32C36C' : '#adb5bd' }};
+                                                        z-index: 1;
+                                                    "></div>
+
+                                                    <!-- Content -->
+                                                    <div class="activity-content" style="
+                                                        background: #fff;
+                                                        border-radius: 8px;
+                                                        padding: 10px 15px;
+                                                        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                                                        border: 1px solid #e9ecef;
                                                     ">
-                                                        {{ $activity['description'] }}
+                                                        @if($activity['time'])
+                                                            <div style="margin-bottom: 6px; display: flex; align-items: center; flex-wrap: wrap;">
+                                                                <span style="
+                                                                    font-size: 12px;
+                                                                    font-weight: 600;
+                                                                    color: {{ $index === 0 ? '#32C36C' : '#6c757d' }};
+                                                                    background: {{ $index === 0 ? '#e8f5e9' : '#f8f9fa' }};
+                                                                    padding: 2px 8px;
+                                                                    border-radius: 4px;
+                                                                    margin-right: 8px;
+                                                                ">
+                                                                    {{ $activity['time'] }}
+                                                                </span>
+                                                                @if($index === 0)
+                                                                    <span class="badge badge-success" style="font-size: 10px;">Mới nhất</span>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+
+                                                        <div style="
+                                                            color: #2c3e50;
+                                                            font-size: 14px;
+                                                            line-height: 1.5;
+                                                            font-weight: {{ $index === 0 ? '500' : '400' }};
+                                                            word-break: break-word;
+                                                            overflow-wrap: break-word;
+                                                        ">
+                                                            {{ $activity['description'] }}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        @endforeach
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1006,13 +1239,15 @@
 
                         <!-- Thông tin trả -->
                         @if($hoSo->thongTinTra)
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h4 class="mb-3" style="color: #32C36C; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                                        <i class="fa fa-info"></i> Thông tin trả
-                                    </h4>
-                                    <div class="alert alert-warning">
-                                        {{ $hoSo->thongTinTra }}
+                            <div class="info-section">
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h4 class="mb-3" style="color: #32C36C; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                                            <i class="fa fa-info"></i> Thông tin trả
+                                        </h4>
+                                        <div class="alert alert-warning">
+                                            {{ $hoSo->thongTinTra }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1635,6 +1870,40 @@
                     <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
                     <button type="submit" class="btn btn-warning">
                         <i class="fa fa-send"></i> Gửi yêu cầu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Dừng xử lý hồ sơ -->
+<div class="modal fade" id="traLaiModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #d9534f; color: white;">
+                <h5 class="modal-title">
+                    <i class="fa fa-times-circle"></i> Dừng xử lý hồ sơ
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" style="color: white;">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('admin.hosoxuly.tralai', $hoSo->maHSXL) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="fa fa-exclamation-triangle"></i> Hồ sơ sẽ bị dừng xử lý. Hành động này sẽ cập nhật trạng thái hồ sơ thành "Dừng xử lý" (Trạng thái 8).
+                    </div>
+                    <div class="form-group">
+                        <label>Lý do dừng xử lý <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="lyDo" rows="5" required placeholder="Nhập lý do dừng xử lý hồ sơ..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa fa-times"></i> Xác nhận dừng xử lý
                     </button>
                 </div>
             </form>

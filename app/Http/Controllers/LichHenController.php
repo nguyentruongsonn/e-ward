@@ -184,7 +184,7 @@ class LichHenController extends Controller
         $qrCodeUrl = route('appointment.checkin', ['token' => $checkinToken]);
 
         // Tạo QR code image (sử dụng API hoặc library)
-        $qrCodeImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($qrCodeUrl);
+        $qrCodeImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($checkinToken);
 
         return response()->json([
             'success' => true,
@@ -431,4 +431,3 @@ class LichHenController extends Controller
         ]);
     }
 }
-
