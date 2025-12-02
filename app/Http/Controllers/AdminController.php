@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Nguoi;
 use App\Models\HoSoXuLy;
 use App\Models\CongDan;
@@ -373,6 +374,29 @@ class AdminController extends Controller
     }
 
     /**
+     * Đảm bảo mỗi tài khoản cán bộ đều có bản ghi trong bảng canbo
+     * để các chức năng xem/sửa/xóa hoạt động đúng.
+     */
+    private function ensureCanBoRecords()
+    {
+        $missingUsers = DB::table('nguoi')
+            ->whereIn('vaiTro', ['Cán bộ một cửa', 'Cán bộ thụ lý'])
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('canbo')
+                    ->whereColumn('canbo.IDnguoiDung', 'nguoi.IDnguoiDung');
+            })
+            ->pluck('IDnguoiDung');
+
+        foreach ($missingUsers as $userId) {
+            DB::table('canbo')->insert([
+                'IDnguoiDung' => $userId,
+                'maQuayLamViec' => null,
+            ]);
+        }
+    }
+
+    /**
      * Kiểm tra user có phải admin không
      */
     private function isAdmin($user = null)
@@ -397,6 +421,23 @@ class AdminController extends Controller
             ->exists();
 
         return $isQuanTriVien;
+    }
+
+    /**
+     * Kiểm tra user có phải Quản trị viên (super admin) hay không
+     * Dùng cho các chức năng chỉ dành riêng cho admin, ví dụ: CRUD TTHC, lĩnh vực, cấu hình hệ thống
+     */
+    private function isSuperAdmin($user = null)
+    {
+        if (!$user) {
+            $user = Auth::user();
+        }
+
+        if (!$user) {
+            return false;
+        }
+
+        return trim($user->vaiTro) === 'Quản trị viên';
     }
 
     /**
@@ -2408,18 +2449,248 @@ class AdminController extends Controller
     }
 
     /**
-     * Hiển thị danh sách cán bộ
+     * Xem chi tiết một công dân
      */
-    public function indexCanBo(Request $request)
+    public function showCongDan($id)
     {
-        // Kiểm tra quyền admin
         if (!$this->isAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
 
+        $congDan = DB::table('nguoi')
+            ->where('nguoi.IDnguoiDung', $id)
+            ->where('vaiTro', 'Công dân/ Tổ chức')
+            ->leftJoin('congdan', 'nguoi.IDnguoiDung', '=', 'congdan.IDnguoiDung')
+            ->select('nguoi.*', 'congdan.*')
+            ->first();
+
+        if (!$congDan) {
+            return redirect()->route('admin.users.congdan')
+                ->withErrors(['error' => 'Không tìm thấy công dân.']);
+        }
+
+        return view('admin.users.congdan_show', compact('congDan'));
+    }
+
+    /**
+     * Hiển thị form thêm công dân
+     */
+    public function createCongDan()
+    {
+        if (!$this->isSuperAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        return view('admin.users.congdan_create');
+    }
+
+    /**
+     * Lưu công dân mới
+     */
+    public function storeCongDan(Request $request)
+    {
+        if (!$this->isSuperAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $validated = $request->validate([
+            'hoTen' => 'required|string|max:255',
+            'email' => 'required|email|unique:nguoi,email',
+            'password' => 'required|string|min:6|confirmed',
+            'soDienThoai' => 'nullable|string|max:20',
+            'maCCCD' => 'required|string|max:20|unique:nguoi,maCCCD',
+            'gioiTinh' => 'nullable|string|max:20',
+            'ngaySinh' => 'nullable|date',
+            'queQuan' => 'nullable|string|max:255',
+            'noiThuongTru' => 'nullable|string|max:255',
+            'noiTamTru' => 'nullable|string|max:255',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $idNguoiDung = DB::table('nguoi')->insertGetId([
+                'maCCCD' => $validated['maCCCD'],
+                'hoTen' => $validated['hoTen'],
+                'gioiTinh' => $validated['gioiTinh'] ?? 'Không xác định',
+                'ngaySinh' => $validated['ngaySinh'] ?? null,
+                'queQuan' => $validated['queQuan'] ?? null,
+                'noiThuongTru' => $validated['noiThuongTru'] ?? null,
+                'noiTamTru' => $validated['noiTamTru'] ?? null,
+                'soDienThoai' => $validated['soDienThoai'] ?? null,
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'vaiTro' => 'Công dân/ Tổ chức',
+            ]);
+
+            DB::table('congdan')->insert([
+                'IDnguoiDung' => $idNguoiDung,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.users.congdan')
+                ->with('success', 'Thêm công dân mới thành công.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Lỗi tạo công dân mới', ['error' => $e->getMessage()]);
+
+            return back()->withErrors(['error' => 'Có lỗi xảy ra khi lưu công dân. Vui lòng thử lại sau.'])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Hiển thị form sửa công dân
+     */
+    public function editCongDan($id)
+    {
+        if (!$this->isSuperAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $congDan = DB::table('nguoi')
+            ->leftJoin('congdan', 'nguoi.IDnguoiDung', '=', 'congdan.IDnguoiDung')
+            ->where('nguoi.IDnguoiDung', $id)
+            ->select('nguoi.*', 'congdan.IDCD')
+            ->first();
+
+        if (!$congDan) {
+            return redirect()->route('admin.users.congdan')
+                ->withErrors(['error' => 'Không tìm thấy công dân.']);
+        }
+
+        return view('admin.users.congdan_edit', compact('congDan'));
+    }
+
+    /**
+     * Cập nhật công dân
+     */
+    public function updateCongDan(Request $request, $id)
+    {
+        if (!$this->isSuperAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $congDan = DB::table('congdan')->where('IDnguoiDung', $id)->first();
+        if (!$congDan) {
+            return redirect()->route('admin.users.congdan')
+                ->withErrors(['error' => 'Không tìm thấy công dân.']);
+        }
+
+        $validated = $request->validate([
+            'hoTen' => 'required|string|max:255',
+            'email' => 'required|email|unique:nguoi,email,' . $id . ',IDnguoiDung',
+            'password' => 'nullable|string|min:6|confirmed',
+            'soDienThoai' => 'nullable|string|max:20',
+            'maCCCD' => 'required|string|max:20|unique:nguoi,maCCCD,' . $id . ',IDnguoiDung',
+            'gioiTinh' => 'nullable|string|max:20',
+            'ngaySinh' => 'nullable|date',
+            'queQuan' => 'nullable|string|max:255',
+            'noiThuongTru' => 'nullable|string|max:255',
+            'noiTamTru' => 'nullable|string|max:255',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $updateData = [
+                'maCCCD' => $validated['maCCCD'],
+                'hoTen' => $validated['hoTen'],
+                'gioiTinh' => $validated['gioiTinh'] ?? 'Không xác định',
+                'ngaySinh' => $validated['ngaySinh'] ?? null,
+                'queQuan' => $validated['queQuan'] ?? null,
+                'noiThuongTru' => $validated['noiThuongTru'] ?? null,
+                'noiTamTru' => $validated['noiTamTru'] ?? null,
+                'soDienThoai' => $validated['soDienThoai'] ?? null,
+                'email' => $validated['email'],
+                'vaiTro' => 'Công dân/ Tổ chức',
+            ];
+
+            if (!empty($validated['password'])) {
+                $updateData['password'] = Hash::make($validated['password']);
+            }
+
+            DB::table('nguoi')
+                ->where('IDnguoiDung', $id)
+                ->update($updateData);
+
+            DB::commit();
+
+            return redirect()->route('admin.users.congdan')
+                ->with('success', 'Cập nhật công dân thành công.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Lỗi cập nhật công dân', ['error' => $e->getMessage()]);
+
+            return back()->withErrors(['error' => 'Có lỗi xảy ra khi cập nhật công dân. Vui lòng thử lại sau.'])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Xóa công dân
+     */
+    public function destroyCongDan($id)
+    {
+        if (!$this->isSuperAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $congDan = DB::table('congdan')->where('IDnguoiDung', $id)->first();
+        if (!$congDan) {
+            return redirect()->route('admin.users.congdan')
+                ->withErrors(['error' => 'Không tìm thấy công dân.']);
+        }
+
+        $hoSoCount = DB::table('hosoxuly')->where('IDCD', $congDan->IDCD)->count();
+        if ($hoSoCount > 0) {
+            return redirect()->route('admin.users.congdan')
+                ->withErrors(['error' => 'Không thể xóa công dân vì đang có ' . $hoSoCount . ' hồ sơ xử lý liên quan.']);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            DB::table('congdan')->where('IDnguoiDung', $id)->delete();
+            DB::table('nguoi')->where('IDnguoiDung', $id)->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.users.congdan')
+                ->with('success', 'Xóa công dân thành công.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Lỗi xóa công dân', ['error' => $e->getMessage()]);
+
+            return redirect()->route('admin.users.congdan')
+                ->withErrors(['error' => 'Có lỗi xảy ra khi xóa công dân. Vui lòng thử lại sau.']);
+        }
+    }
+
+    /**
+     * Hiển thị danh sách cán bộ
+     */
+    public function indexCanBo(Request $request)
+    {
+        // Chỉ tài khoản Quản trị viên mới được xem danh sách cán bộ
+        $user = Auth::user();
+        if (!$user || trim($user->vaiTro) !== 'Quản trị viên') {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        // Đảm bảo các tài khoản cán bộ đều có bản ghi trong bảng canbo để có thể thao tác
+        $this->ensureCanBoRecords();
+
         $query = DB::table('nguoi')
-            ->whereIn('vaiTro', ['Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo'])
+            ->whereIn('vaiTro', ['Cán bộ một cửa', 'Cán bộ thụ lý'])
             ->leftJoin('canbo', 'nguoi.IDnguoiDung', '=', 'canbo.IDnguoiDung')
             ->leftJoin('quaylamviec', 'canbo.maQuayLamViec', '=', 'quaylamviec.maQuayLamViec')
             ->select('nguoi.*', 'canbo.IDCB', 'canbo.maQuayLamViec', 'quaylamviec.tenQuayLamViec');
@@ -2443,6 +2714,254 @@ class AdminController extends Controller
         $canBos = $query->orderBy('nguoi.IDnguoiDung', 'desc')->paginate(20);
 
         return view('admin.users.canbo', compact('canBos'));
+    }
+
+    /**
+     * Hiển thị form thêm cán bộ
+     */
+    public function createCanBo()
+    {
+        $user = Auth::user();
+        if (!$user || trim($user->vaiTro) !== 'Quản trị viên') {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $quayLamViecs = DB::table('quaylamviec')->orderBy('maQuayLamViec')->get();
+
+        return view('admin.users.canbo_create', compact('quayLamViecs'));
+    }
+
+    /**
+     * Lưu thông tin cán bộ mới
+     */
+    public function storeCanBo(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || trim($user->vaiTro) !== 'Quản trị viên') {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $validated = $request->validate([
+            'hoTen' => 'required|string|max:255',
+            'email' => 'required|email|unique:nguoi,email',
+            'password' => 'required|string|min:6|confirmed',
+            'soDienThoai' => 'nullable|string|max:20',
+            'maCCCD' => 'required|string|max:20|unique:nguoi,maCCCD',
+            'vaiTro' => 'required|in:Cán bộ một cửa,Cán bộ thụ lý',
+            'maQuayLamViec' => 'nullable|exists:quaylamviec,maQuayLamViec',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // Tạo bản ghi trong bảng nguoi
+            $idNguoiDung = DB::table('nguoi')->insertGetId([
+                'maCCCD' => $validated['maCCCD'],
+                'hoTen' => $validated['hoTen'],
+                'gioiTinh' => $request->input('gioiTinh', 'Không xác định'),
+                'ngaySinh' => $request->input('ngaySinh'),
+                'queQuan' => $request->input('queQuan'),
+                'noiThuongTru' => $request->input('noiThuongTru'),
+                'noiTamTru' => $request->input('noiTamTru'),
+                'soDienThoai' => $validated['soDienThoai'] ?? null,
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'vaiTro' => $validated['vaiTro'],
+            ]);
+
+            // Nếu là cán bộ, lưu vào bảng canbo
+            if (in_array($validated['vaiTro'], ['Cán bộ một cửa', 'Cán bộ thụ lý'])) {
+                DB::table('canbo')->insert([
+                    'IDnguoiDung' => $idNguoiDung,
+                    'maQuayLamViec' => $validated['maQuayLamViec'],
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.users.canbo')
+                ->with('success', 'Thêm cán bộ mới thành công.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Lỗi tạo cán bộ mới', ['error' => $e->getMessage()]);
+
+            return back()->withErrors(['error' => 'Có lỗi xảy ra khi lưu cán bộ. Vui lòng thử lại sau.'])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Xem chi tiết một cán bộ
+     */
+    public function showCanBo($id)
+    {
+        $user = Auth::user();
+        if (!$user || trim($user->vaiTro) !== 'Quản trị viên') {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $canBo = DB::table('nguoi')
+            ->join('canbo', 'nguoi.IDnguoiDung', '=', 'canbo.IDnguoiDung')
+            ->leftJoin('quaylamviec', 'canbo.maQuayLamViec', '=', 'quaylamviec.maQuayLamViec')
+            ->where('canbo.IDCB', $id)
+            ->select('nguoi.*', 'canbo.*', 'quaylamviec.tenQuayLamViec')
+            ->first();
+
+        if (!$canBo) {
+            return redirect()->route('admin.users.canbo')
+                ->withErrors(['error' => 'Không tìm thấy cán bộ.']);
+        }
+
+        return view('admin.users.canbo_show', compact('canBo'));
+    }
+
+    /**
+     * Hiển thị form sửa cán bộ
+     */
+    public function editCanBo($id)
+    {
+        $user = Auth::user();
+        if (!$user || trim($user->vaiTro) !== 'Quản trị viên') {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $canBo = DB::table('nguoi')
+            ->join('canbo', 'nguoi.IDnguoiDung', '=', 'canbo.IDnguoiDung')
+            ->leftJoin('quaylamviec', 'canbo.maQuayLamViec', '=', 'quaylamviec.maQuayLamViec')
+            ->where('canbo.IDCB', $id)
+            ->select('nguoi.*', 'canbo.*', 'quaylamviec.tenQuayLamViec')
+            ->first();
+
+        if (!$canBo) {
+            return redirect()->route('admin.users.canbo')
+                ->withErrors(['error' => 'Không tìm thấy cán bộ.']);
+        }
+
+        $quayLamViecs = DB::table('quaylamviec')->orderBy('maQuayLamViec')->get();
+
+        return view('admin.users.canbo_edit', compact('canBo', 'quayLamViecs'));
+    }
+
+    /**
+     * Cập nhật thông tin cán bộ
+     */
+    public function updateCanBo(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user || trim($user->vaiTro) !== 'Quản trị viên') {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $canBo = DB::table('canbo')->where('IDCB', $id)->first();
+        if (!$canBo) {
+            return redirect()->route('admin.users.canbo')
+                ->withErrors(['error' => 'Không tìm thấy cán bộ.']);
+        }
+
+        $validated = $request->validate([
+            'hoTen' => 'required|string|max:255',
+            'email' => 'required|email|unique:nguoi,email,' . $canBo->IDnguoiDung . ',IDnguoiDung',
+            'password' => 'nullable|string|min:6|confirmed',
+            'soDienThoai' => 'nullable|string|max:20',
+            'maCCCD' => 'required|string|max:20|unique:nguoi,maCCCD,' . $canBo->IDnguoiDung . ',IDnguoiDung',
+            'vaiTro' => 'required|in:Cán bộ một cửa,Cán bộ thụ lý',
+            'maQuayLamViec' => 'nullable|exists:quaylamviec,maQuayLamViec',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // Cập nhật bảng nguoi
+            $updateNguoi = [
+                'maCCCD' => $validated['maCCCD'],
+                'hoTen' => $validated['hoTen'],
+                'gioiTinh' => $request->input('gioiTinh', 'Không xác định'),
+                'ngaySinh' => $request->input('ngaySinh'),
+                'queQuan' => $request->input('queQuan'),
+                'noiThuongTru' => $request->input('noiThuongTru'),
+                'noiTamTru' => $request->input('noiTamTru'),
+                'soDienThoai' => $validated['soDienThoai'] ?? null,
+                'email' => $validated['email'],
+                'vaiTro' => $validated['vaiTro'],
+            ];
+
+            if (!empty($validated['password'])) {
+                $updateNguoi['password'] = Hash::make($validated['password']);
+            }
+
+            DB::table('nguoi')
+                ->where('IDnguoiDung', $canBo->IDnguoiDung)
+                ->update($updateNguoi);
+
+            // Cập nhật bảng canbo
+            if (in_array($validated['vaiTro'], ['Cán bộ một cửa', 'Cán bộ thụ lý'])) {
+                DB::table('canbo')
+                    ->where('IDCB', $id)
+                    ->update([
+                        'maQuayLamViec' => $validated['maQuayLamViec'],
+                    ]);
+            } else {
+                // Nếu chuyển vai trò khác, xóa bản ghi trong bảng canbo
+                DB::table('canbo')
+                    ->where('IDCB', $id)
+                    ->delete();
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.users.canbo')
+                ->with('success', 'Cập nhật thông tin cán bộ thành công.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Lỗi cập nhật cán bộ', ['error' => $e->getMessage()]);
+
+            return back()->withErrors(['error' => 'Có lỗi xảy ra khi cập nhật cán bộ. Vui lòng thử lại sau.'])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Xóa cán bộ
+     */
+    public function destroyCanBo($id)
+    {
+        $user = Auth::user();
+        if (!$user || trim($user->vaiTro) !== 'Quản trị viên') {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $canBo = DB::table('canbo')->where('IDCB', $id)->first();
+        if (!$canBo) {
+            return redirect()->route('admin.users.canbo')
+                ->withErrors(['error' => 'Không tìm thấy cán bộ.']);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Xóa bản ghi trong bảng canbo
+            DB::table('canbo')->where('IDCB', $id)->delete();
+
+            // Xóa người dùng tương ứng
+            DB::table('nguoi')->where('IDnguoiDung', $canBo->IDnguoiDung)->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.users.canbo')
+                ->with('success', 'Xóa cán bộ thành công.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Lỗi xóa cán bộ', ['error' => $e->getMessage()]);
+
+            return redirect()->route('admin.users.canbo')
+                ->withErrors(['error' => 'Có lỗi xảy ra khi xóa cán bộ. Vui lòng thử lại sau.']);
+        }
     }
 
     // ==================== QUẢN LÝ LĨNH VỰC ====================
@@ -2474,7 +2993,7 @@ class AdminController extends Controller
      */
     public function createLinhVuc()
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isSuperAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
@@ -2487,7 +3006,7 @@ class AdminController extends Controller
      */
     public function storeLinhVuc(Request $request)
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isSuperAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
@@ -2509,7 +3028,7 @@ class AdminController extends Controller
      */
     public function editLinhVuc($id)
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isSuperAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
@@ -2529,7 +3048,7 @@ class AdminController extends Controller
      */
     public function updateLinhVuc(Request $request, $id)
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isSuperAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
@@ -2553,7 +3072,7 @@ class AdminController extends Controller
      */
     public function destroyLinhVuc($id)
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isSuperAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
@@ -2615,15 +3134,17 @@ class AdminController extends Controller
      */
     public function createTTHC()
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isSuperAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
 
         $linhVucs = DB::table('linhvuc')->orderBy('tenLinhVuc')->get();
         $quayLamViecs = DB::table('quaylamviec')->orderBy('maQuayLamViec')->get();
+        $doiTuongs = DB::table('doituongthuchien')->orderBy('tenDoiTuong')->get();
+        $giayTos = DB::table('giayto')->orderBy('tenGiayTo')->get();
 
-        return view('admin.tthc.create', compact('linhVucs', 'quayLamViecs'));
+        return view('admin.tthc.create', compact('linhVucs', 'quayLamViecs', 'doiTuongs', 'giayTos'));
     }
 
     /**
@@ -2631,7 +3152,7 @@ class AdminController extends Controller
      */
     public function storeTTHC(Request $request)
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isSuperAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
@@ -2647,23 +3168,195 @@ class AdminController extends Controller
             'yeuCauDieuKien' => 'required|string',
             'canCuPhapLy' => 'required|string',
             'ketQuaThucHien' => 'required|string|max:500',
+            'doiTuongThucHienThem' => 'nullable|array',
+            'doiTuongThucHienThem.*' => 'exists:doituongthuchien,maDoiTuong',
+            'cachThucHien' => 'nullable|array',
+            'cachThucHien.*.kenh' => 'nullable|string|max:255',
+            'cachThucHien.*.thoiHanGiaiQuyet' => 'nullable|string',
+            'cachThucHien.*.moTaPhiLePhi' => 'nullable|string',
+            'cachThucHien.*.thoiHan' => 'nullable|integer|min:0',
+            'cachThucHien.*.moTa' => 'nullable|string',
+            'lePhi' => 'nullable|array',
+            'lePhi.*.loaiLePhi' => 'nullable|string|max:255',
+            'lePhi.*.soTien' => 'nullable|numeric|min:0',
+            'lePhi.*.batBuoc' => 'nullable|in:Có,Không',
+            'lePhi.*.moTa' => 'nullable|string|max:2000',
+            'form_cau_hinh' => 'nullable|json',
+            'thanhPhanHoSo' => 'nullable|array',
+            'thanhPhanHoSo.*.tenThanhPhan' => 'nullable|string|max:500',
+            'thanhPhanHoSo.*.giayTo' => 'nullable|array',
+            'thanhPhanHoSo.*.giayTo.*.maGiayTo' => 'nullable|exists:giayto,maGiayTo',
+            'thanhPhanHoSo.*.giayTo.*.soLuongBanChinh' => 'nullable|integer|min:0',
+            'thanhPhanHoSo.*.giayTo.*.soLuongBanSao' => 'nullable|integer|min:0',
+        ], [
+            'form_cau_hinh.json' => 'Cấu hình form phải là chuỗi JSON hợp lệ.',
         ]);
 
-        DB::table('tthc')->insert([
-            'tenTTHC' => $validated['tenTTHC'],
-            'maLinhVuc' => $validated['maLinhVuc'],
-            'maQuayLamViec' => $validated['maQuayLamViec'] ?? null,
-            'trinhTuThucHien' => $validated['trinhTuThucHien'],
-            'doiTuongThucHien' => $validated['doiTuongThucHien'],
-            'coQuanThucHien' => $validated['coQuanThucHien'],
-            'trangThai' => $validated['trangThai'] ?? 'Chờ công khai',
-            'yeuCauDieuKien' => $validated['yeuCauDieuKien'],
-            'canCuPhapLy' => $validated['canCuPhapLy'],
-            'ketQuaThucHien' => $validated['ketQuaThucHien'],
-        ]);
+        $doiTuongBoSung = collect($request->input('doiTuongThucHienThem', []))
+            ->filter()
+            ->map(fn($id) => (int)$id)
+            ->unique()
+            ->values();
 
-        return redirect()->route('admin.tthc.index')
-            ->with('success', 'Thêm thủ tục hành chính thành công!');
+        $cachThucHienData = collect($request->input('cachThucHien', []))
+            ->map(function ($item) {
+                return [
+                    'kenh' => trim($item['kenh'] ?? ''),
+                    'thoiHanGiaiQuyet' => trim($item['thoiHanGiaiQuyet'] ?? ''),
+                    'moTaPhiLePhi' => trim($item['moTaPhiLePhi'] ?? ''),
+                    'thoiHan' => isset($item['thoiHan']) && $item['thoiHan'] !== '' ? (int)$item['thoiHan'] : null,
+                    'moTa' => trim($item['moTa'] ?? ''),
+                ];
+            })
+            ->filter(function ($item) {
+                return $item['kenh'] !== '' ||
+                    $item['thoiHanGiaiQuyet'] !== '' ||
+                    $item['moTaPhiLePhi'] !== '' ||
+                    $item['moTa'] !== '' ||
+                    $item['thoiHan'] !== null;
+            })
+            ->values();
+
+        foreach ($cachThucHienData as $item) {
+            if ($item['kenh'] === '') {
+                return back()->withErrors(['cachThucHien' => 'Vui lòng nhập tên kênh ở mỗi cách thực hiện.'])->withInput();
+            }
+        }
+        $cachThucHienData = $cachThucHienData->map(function ($item) {
+            $item['thoiHan'] = $item['thoiHan'] ?? 0;
+            return $item;
+        });
+
+        $lePhiData = collect($request->input('lePhi', []))
+            ->map(function ($item) {
+                return [
+                    'loaiLePhi' => trim($item['loaiLePhi'] ?? ''),
+                    'soTien' => isset($item['soTien']) && $item['soTien'] !== '' ? (float)$item['soTien'] : null,
+                    'batBuoc' => $item['batBuoc'] ?? null,
+                    'moTa' => trim($item['moTa'] ?? ''),
+                ];
+            })
+            ->filter(function ($item) {
+                return $item['loaiLePhi'] !== '' ||
+                    $item['soTien'] !== null ||
+                    $item['batBuoc'] ||
+                    $item['moTa'] !== '';
+            })
+            ->values();
+
+        foreach ($lePhiData as $item) {
+            if ($item['loaiLePhi'] === '') {
+                return back()->withErrors(['lePhi' => 'Mỗi dòng lệ phí phải có tên loại lệ phí.'])->withInput();
+            }
+            $item['soTien'] = $item['soTien'] ?? 0;
+        }
+
+        $thanhPhanData = collect($request->input('thanhPhanHoSo', []))
+            ->map(function ($item) {
+                $giayTo = collect($item['giayTo'] ?? [])
+                    ->map(function ($giay) {
+                        return [
+                            'maGiayTo' => $giay['maGiayTo'] ?? null,
+                            'soLuongBanChinh' => isset($giay['soLuongBanChinh']) && $giay['soLuongBanChinh'] !== '' ? (int)$giay['soLuongBanChinh'] : 0,
+                            'soLuongBanSao' => isset($giay['soLuongBanSao']) && $giay['soLuongBanSao'] !== '' ? (int)$giay['soLuongBanSao'] : 0,
+                        ];
+                    })
+                    ->filter(fn($giay) => !empty($giay['maGiayTo']))
+                    ->values()
+                    ->toArray();
+
+                return [
+                    'tenThanhPhan' => trim($item['tenThanhPhan'] ?? ''),
+                    'giayTo' => $giayTo,
+                ];
+            })
+            ->filter(fn($item) => $item['tenThanhPhan'] !== '')
+            ->values();
+
+        DB::beginTransaction();
+
+        try {
+            $maTTHC = DB::table('tthc')->insertGetId([
+                'tenTTHC' => $validated['tenTTHC'],
+                'maLinhVuc' => $validated['maLinhVuc'],
+                'maQuayLamViec' => $validated['maQuayLamViec'] ?? null,
+                'trinhTuThucHien' => $validated['trinhTuThucHien'],
+                'doiTuongThucHien' => $validated['doiTuongThucHien'],
+                'coQuanThucHien' => $validated['coQuanThucHien'],
+                'trangThai' => $validated['trangThai'] ?? 'Chờ công khai',
+                'yeuCauDieuKien' => $validated['yeuCauDieuKien'],
+                'canCuPhapLy' => $validated['canCuPhapLy'],
+                'ketQuaThucHien' => $validated['ketQuaThucHien'],
+            ]);
+
+            if ($doiTuongBoSung->isNotEmpty()) {
+                DB::table('thutucdoituong')->insert(
+                    $doiTuongBoSung->map(fn($id) => [
+                        'maTTHC' => $maTTHC,
+                        'maDoiTuong' => $id,
+                    ])->toArray()
+                );
+            }
+
+            foreach ($cachThucHienData as $item) {
+                DB::table('cachthuchien')->insert([
+                    'maTTHC' => $maTTHC,
+                    'kenh' => $item['kenh'],
+                    'thoiHanGiaiQuyet' => $item['thoiHanGiaiQuyet'] ?: null,
+                    'moTaPhiLePhi' => $item['moTaPhiLePhi'] ?: null,
+                    'thoiHan' => $item['thoiHan'] ?? 0,
+                    'moTa' => $item['moTa'] ?: null,
+                ]);
+            }
+
+            if ($lePhiData->isNotEmpty()) {
+                DB::table('lephi')->insert(
+                    $lePhiData->map(fn($item) => [
+                        'loaiLePhi' => $item['loaiLePhi'],
+                        'maTTHC' => $maTTHC,
+                        'soTien' => $item['soTien'] ?? 0,
+                        'batBuoc' => $item['batBuoc'] ?? null,
+                        'moTa' => $item['moTa'] ?: null,
+                    ])->toArray()
+                );
+            }
+
+            if ($request->filled('form_cau_hinh')) {
+                DB::table('formtructuyen')->insert([
+                    'maTTHC' => $maTTHC,
+                    'cauHinhForm' => $request->input('form_cau_hinh'),
+                ]);
+            }
+
+            foreach ($thanhPhanData as $item) {
+                $maThanhPhan = DB::table('thanhphanhoso')->insertGetId([
+                    'maTTHC' => $maTTHC,
+                    'tenThanhPhan' => $item['tenThanhPhan'],
+                ]);
+
+                if (!empty($item['giayTo'])) {
+                    DB::table('thanhphangiayto')->insert(
+                        collect($item['giayTo'])->map(fn($giay) => [
+                            'maThanhPhan' => $maThanhPhan,
+                            'maGiayTo' => $giay['maGiayTo'],
+                            'soLuongBanChinh' => $giay['soLuongBanChinh'] ?? 0,
+                            'soLuongBanSao' => $giay['soLuongBanSao'] ?? 0,
+                        ])->toArray()
+                    );
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.tthc.index')
+                ->with('success', 'Thêm thủ tục hành chính thành công!');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Lỗi tạo thủ tục hành chính', ['error' => $e->getMessage()]);
+
+            return back()->withErrors(['error' => 'Có lỗi xảy ra khi lưu thủ tục hành chính. Vui lòng thử lại.'])
+                ->withInput();
+        }
     }
 
     /**
@@ -2671,7 +3364,7 @@ class AdminController extends Controller
      */
     public function editTTHC($id)
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isSuperAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
@@ -2694,7 +3387,7 @@ class AdminController extends Controller
      */
     public function updateTTHC(Request $request, $id)
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isSuperAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
@@ -2736,7 +3429,7 @@ class AdminController extends Controller
      */
     public function destroyTTHC($id)
     {
-        if (!$this->isAdmin()) {
+        if (!$this->isSuperAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }

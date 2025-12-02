@@ -591,7 +591,7 @@ class ProfileController extends Controller
         $unreadCount = $this->getUnreadCount($IDCD);
 
         // Query lịch hẹn
-        $query = LichHen::where('IDCD', $IDCD)->with(['tthc']);
+        $query = LichHen::where('IDCD', $IDCD)->with(['tthc', 'quaylamviec']);
 
         // Filter theo trạng thái nếu có
         if ($request->filled('trang_thai')) {
@@ -655,7 +655,7 @@ class ProfileController extends Controller
         $page = $request->get('page', 2);
 
         // Xử lý tìm kiếm giống như method appointments
-        $query = LichHen::where('IDCD', $IDCD)->with(['tthc']);
+        $query = LichHen::where('IDCD', $IDCD)->with(['tthc', 'quaylamviec']);
 
         // Filter theo trạng thái nếu có
         if ($request->filled('trang_thai')) {
@@ -684,6 +684,100 @@ class ProfileController extends Controller
             'hasMore' => $appointments->hasMorePages(),
             'nextPage' => $appointments->hasMorePages() ? ($page + 1) : null,
         ]);
+    }
+
+    /**
+     * Hiển thị chi tiết một lịch hẹn của công dân
+     */
+    public function showAppointment($id)
+    {
+        $authUser = Auth::user();
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+            $user = $authUser->user;
+        } else {
+            $user = $authUser;
+            $nguoi = $user->nguoi;
+        }
+
+        if (!$nguoi || !$nguoi->congDan) {
+            abort(404, 'Không tìm thấy thông tin người dùng');
+        }
+
+        $congDan = $nguoi->congDan;
+        $IDCD = $congDan->IDCD;
+
+        // Chỉ cho xem lịch hẹn thuộc công dân hiện tại
+        $appointment = LichHen::with(['tthc', 'quaylamviec', 'congdan'])
+            ->where('IDCD', $IDCD)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Sidebar counters
+        $hoSoHoanThanh = HoSoXuLy::where('IDCD', $IDCD)->whereNotNull('ngayKetThucXuLy')->count();
+        $hoSoDangXuLy = HoSoXuLy::where('IDCD', $IDCD)->whereNull('ngayKetThucXuLy')->count();
+        $unreadCount = $this->getUnreadCount($IDCD);
+
+        return view('pages.appointment-detail', [
+            'user' => $user,
+            'nguoi' => $nguoi,
+            'appointment' => $appointment,
+            'hoSoHoanThanh' => $hoSoHoanThanh,
+            'hoSoDangXuLy' => $hoSoDangXuLy,
+            'unreadCount' => $unreadCount,
+        ]);
+    }
+
+    /**
+     * Hủy lịch hẹn (chỉ khi còn hiệu lực và thuộc về công dân hiện tại)
+     */
+    public function cancelAppointment(Request $request, $id)
+    {
+        $authUser = Auth::user();
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+        } else {
+            $user = $authUser;
+            $nguoi = $user->nguoi;
+        }
+
+        if (!$nguoi || !$nguoi->congDan) {
+            return redirect()->route('profile.appointments')
+                ->with('error', 'Không tìm thấy thông tin người dùng');
+        }
+
+        $congDan = $nguoi->congDan;
+        $IDCD = $congDan->IDCD;
+
+        /** @var LichHen|null $appointment */
+        $appointment = LichHen::where('IDCD', $IDCD)
+            ->where('id', $id)
+            ->first();
+
+        if (!$appointment) {
+            return redirect()->route('profile.appointments')
+                ->with('error', 'Không tìm thấy lịch hẹn');
+        }
+
+        // Chỉ cho phép hủy các lịch còn ở trạng thái "Đã đặt lịch" hoặc "Chờ đến"
+        if (!in_array($appointment->trangThai, ['Đã đặt lịch', 'Chờ đến'])) {
+            return redirect()->route('profile.appointments')
+                ->with('error', 'Chỉ có thể hủy các lịch hẹn chưa được xử lý.');
+        }
+
+        // Nếu thời gian hẹn đã qua thì không cho hủy
+        if ($appointment->thoiGianHen && $appointment->thoiGianHen->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
+            return redirect()->route('profile.appointments')
+                ->with('error', 'Không thể hủy lịch hẹn đã quá thời gian.');
+        }
+
+        $appointment->trangThai = 'Đã hủy';
+        // Xóa token checkin để không thể sử dụng QR cũ
+        $appointment->checkin_token = null;
+        $appointment->save();
+
+        return redirect()->route('profile.appointments')
+            ->with('success', 'Đã hủy lịch hẹn thành công.');
     }
 
     public function showPasswordChangeForm()

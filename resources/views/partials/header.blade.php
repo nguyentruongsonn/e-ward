@@ -204,8 +204,10 @@
 
                 <p class="text-center text-muted mt-3">
                     Chưa có tài khoản?
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal"
-                        class="text-decoration-none">
+                    <a href="{{ route('register') }}"
+                       class="text-decoration-none"
+                       onclick="window.location.href='{{ route('register') }}'; return true;"
+                       data-bs-dismiss="modal">
                         Đăng ký
                     </a>
                 </p>
