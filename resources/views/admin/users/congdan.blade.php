@@ -31,6 +31,16 @@
                             </form>
                         </div>
 
+                        <div class="row" style="margin-bottom: 15px;">
+                            <div class="col-sm-12 text-right">
+                                @if(auth()->user() && trim(auth()->user()->vaiTro) === 'Quản trị viên')
+                                    <a href="{{ route('admin.users.congdan.create') }}" class="btn btn-success">
+                                        <i class="fa fa-plus"></i> Thêm công dân
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+
                         <!-- Table -->
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
@@ -45,6 +55,7 @@
                                         <th>Ngày sinh</th>
                                         <th>Vai trò</th>
                                         <th>Mã công dân</th>
+                                        <th>Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -59,6 +70,29 @@
                                         <td>{{ $congDan->ngaySinh ? \Carbon\Carbon::parse($congDan->ngaySinh)->format('d/m/Y') : '-' }}</td>
                                         <td><span class="badge bg-info">{{ $congDan->vaiTro ?? '-' }}</span></td>
                                         <td>{{ $congDan->IDCD ?? '-' }}</td>
+                                        <td>
+                                            <a href="{{ route('admin.users.congdan.show', $congDan->IDnguoiDung) }}"
+                                               class="btn btn-xs btn-info"
+                                               title="Xem công dân">
+                                                <i class="fa fa-eye"></i>
+                                            </a>
+                                            @if(auth()->user() && trim(auth()->user()->vaiTro) === 'Quản trị viên')
+                                                <a href="{{ route('admin.users.congdan.edit', $congDan->IDnguoiDung) }}"
+                                                   class="btn btn-xs btn-primary"
+                                                   title="Sửa công dân">
+                                                    <i class="fa fa-pencil"></i>
+                                                </a>
+                                                <form action="{{ route('admin.users.congdan.destroy', $congDan->IDnguoiDung) }}"
+                                                      method="POST"
+                                                      style="display:inline-block;"
+                                                      onsubmit="return confirm('Bạn chắc chắn muốn xóa công dân này?');">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-xs btn-danger" title="Xóa công dân">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </td>
                                     </tr>
                                     @empty
                                     <tr>

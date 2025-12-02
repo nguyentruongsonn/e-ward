@@ -24,20 +24,12 @@ class AdminMiddleware
 
         $user = Auth::user();
 
-        // Kiểm tra vaiTro - cho phép: Quản trị viên, Cán bộ một cửa, Cán bộ thụ lý, Lãnh đạo
-        $allowedRoles = ['Quản trị viên', 'Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo'];
-        
-        if (!in_array($user->vaiTro, $allowedRoles)) {
-            // Nếu không phải 4 role trên, kiểm tra trong bảng quantrivien
-            $isQuanTriVien = DB::table('quantrivien')
-                ->where('IDnguoiDung', $user->IDnguoiDung)
-                ->exists();
-
-            if (!$isQuanTriVien) {
-                Auth::logout();
-                return redirect()->route('admin.login')
-                    ->withErrors(['error' => 'Bạn không có quyền truy cập trang quản trị.']);
-            }
+        // Chỉ chặn riêng vai trò "Công dân/ Tổ chức" không cho vào admin
+        // Các vai trò khác (Cán bộ một cửa, Cán bộ thụ lý, Lãnh đạo, Quản trị viên, ...) đều được phép.
+        if (trim($user->vaiTro) === 'Công dân/ Tổ chức') {
+            Auth::logout();
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Tài khoản Công dân/ Tổ chức không có quyền truy cập trang quản trị.']);
         }
 
         return $next($request);

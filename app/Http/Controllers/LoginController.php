@@ -70,8 +70,8 @@ class LoginController extends Controller
             return false;
         }
 
-        // Kiểm tra vaiTro trong bảng nguoi (bao gồm cả Cán bộ và Quản trị viên)
-        if (in_array($user->vaiTro, ['Quản trị viên', 'Cán bộ một cửa','Cán bộ thụ lý'])) {
+        // Kiểm tra vaiTro trong bảng nguoi (bao gồm Cán bộ và Quản trị viên)
+        if (in_array($user->vaiTro, ['Quản trị viên', 'Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo'])) {
             return true;
         }
 

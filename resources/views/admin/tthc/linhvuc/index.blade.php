@@ -28,9 +28,11 @@
 
                         <div class="row" style="margin-bottom: 20px;">
                             <div class="col-md-6">
-                                <a href="{{ route('admin.tthc.linhvuc.create') }}" class="btn btn-primary">
-                                    <i class="fa fa-plus"></i> Thêm lĩnh vực mới
-                                </a>
+                                @if(auth()->user() && trim(auth()->user()->vaiTro) === 'Quản trị viên')
+                                    <a href="{{ route('admin.tthc.linhvuc.create') }}" class="btn btn-primary">
+                                        <i class="fa fa-plus"></i> Thêm lĩnh vực mới
+                                    </a>
+                                @endif
                             </div>
                             <div class="col-md-6">
                                 <form method="GET" action="{{ route('admin.tthc.linhvuc.index') }}" class="form-inline pull-right">
@@ -63,15 +65,19 @@
                                         <td>{{ $linhVuc->maLinhVuc }}</td>
                                         <td>{{ $linhVuc->tenLinhVuc }}</td>
                                         <td>
-                                            <a href="{{ route('admin.tthc.linhvuc.edit', $linhVuc->maLinhVuc) }}" class="btn btn-sm btn-primary">
-                                                <i class="fa fa-edit"></i> Sửa
-                                            </a>
-                                            <form action="{{ route('admin.tthc.linhvuc.destroy', $linhVuc->maLinhVuc) }}" method="POST" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa lĩnh vực này?');">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="fa fa-trash"></i> Xóa
-                                                </button>
-                                            </form>
+                                            @if(auth()->user() && trim(auth()->user()->vaiTro) === 'Quản trị viên')
+                                                <a href="{{ route('admin.tthc.linhvuc.edit', $linhVuc->maLinhVuc) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-edit"></i> Sửa
+                                                </a>
+                                                <form action="{{ route('admin.tthc.linhvuc.destroy', $linhVuc->maLinhVuc) }}" method="POST" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa lĩnh vực này?');">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="fa fa-trash"></i> Xóa
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="text-muted">Chỉ xem</span>
+                                            @endif
                                         </td>
                                     </tr>
                                     @empty

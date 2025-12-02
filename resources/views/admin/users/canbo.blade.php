@@ -28,7 +28,6 @@
                                         <option value="">Tất cả vai trò</option>
                                         <option value="Cán bộ một cửa" {{ request('vaiTro') == 'Cán bộ một cửa' ? 'selected' : '' }}>Cán bộ một cửa</option>
                                         <option value="Cán bộ thụ lý" {{ request('vaiTro') == 'Cán bộ thụ lý' ? 'selected' : '' }}>Cán bộ thụ lý</option>
-                                        <option value="Lãnh đạo" {{ request('vaiTro') == 'Lãnh đạo' ? 'selected' : '' }}>Lãnh đạo</option>
                                     </select>
                                 </div>
                                 <button type="submit" class="btn btn-primary" style="margin-right: 10px; margin-bottom: 10px;">
@@ -38,6 +37,16 @@
                                     <i class="fa fa-refresh"></i> Xóa bộ lọc
                                 </a>
                             </form>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 15px;">
+                            <div class="col-sm-12 text-right">
+                                @if(auth()->user() && trim(auth()->user()->vaiTro) === 'Quản trị viên')
+                                    <a href="{{ url('admin/users/canbo/create') }}" class="btn btn-success">
+                                        <i class="fa fa-plus"></i> Thêm cán bộ
+                                    </a>
+                                @endif
+                            </div>
                         </div>
 
                         <!-- Table -->
@@ -53,6 +62,7 @@
                                         <th>Vai trò</th>
                                         <th>Quầy làm việc</th>
                                         <th>Mã cán bộ</th>
+                                        <th>Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -76,6 +86,33 @@
                                         </td>
                                         <td>{{ $canBo->tenQuayLamViec ?? 'Chưa phân quầy' }}</td>
                                         <td>{{ $canBo->IDCB ?? '-' }}</td>
+                                        <td>
+                                            @if(!empty($canBo->IDCB))
+                                                <a href="{{ route('admin.users.canbo.show', $canBo->IDCB) }}"
+                                                   class="btn btn-xs btn-info"
+                                                   title="Xem cán bộ">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                                @if(auth()->user() && trim(auth()->user()->vaiTro) === 'Quản trị viên')
+                                                    <a href="{{ route('admin.users.canbo.edit', $canBo->IDCB) }}"
+                                                       class="btn btn-xs btn-primary"
+                                                       title="Sửa cán bộ">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </a>
+                                                    <form action="{{ route('admin.users.canbo.destroy', $canBo->IDCB) }}"
+                                                          method="POST"
+                                                          style="display:inline-block;"
+                                                          onsubmit="return confirm('Bạn chắc chắn muốn xóa cán bộ này?');">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-xs btn-danger" title="Xóa cán bộ">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                     </tr>
                                     @empty
                                     <tr>

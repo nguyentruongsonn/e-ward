@@ -9,7 +9,13 @@
         <td>{{ $appointment->maLichHen }}</td>
         <td>{{ $appointment->tthc->tenTTHC ?? '-' }}</td>
         <td>{{ $appointment->thoiGianHen ? $appointment->thoiGianHen->format('d/m/Y H:i') : '-' }}</td>
-        <td>{{ $appointment->maQuayLamViec ?? 'Chưa phân quầy' }}</td>
+        <td>
+            @if($appointment->quaylamviec)
+                {{ $appointment->quaylamviec->tenQuayLamViec }} ({{ $appointment->maQuayLamViec }})
+            @else
+                {{ $appointment->maQuayLamViec ?? 'Chưa phân quầy' }}
+            @endif
+        </td>
         <td>{{ $appointment->soThuTu ?? '-' }}</td>
         <td>
             <span class="badge 
@@ -22,14 +28,33 @@
             </span>
         </td>
         <td>
-            @if($appointment->checkin_token)
-                <a href="{{ route('appointment.checkin', $appointment->checkin_token) }}" 
-                   class="btn btn-sm btn-outline-primary" 
-                   target="_blank"
-                   title="Xem QR code để cán bộ quét">
-                    <i class="fas fa-qrcode me-1"></i>Xem QR Code
+            <div class="d-flex flex-wrap gap-1">
+                <a href="{{ route('profile.appointments.show', $appointment->id) }}"
+                   class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye me-1"></i>Chi tiết
                 </a>
-            @endif
+
+                @if($appointment->checkin_token)
+                    <a href="{{ route('appointment.checkin', $appointment->checkin_token) }}"
+                       class="btn btn-sm btn-outline-primary"
+                       target="_blank"
+                       title="Xem QR code để cán bộ quét">
+                        <i class="fas fa-qrcode me-1"></i>QR Check-in
+                    </a>
+                @endif
+
+                @if(in_array($appointment->trangThai, ['Đã đặt lịch', 'Chờ đến']))
+                    <form action="{{ route('profile.appointments.cancel', $appointment->id) }}"
+                          method="POST"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này không?');"
+                          style="display: inline-block;">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-times me-1"></i>Hủy
+                        </button>
+                    </form>
+                @endif
+            </div>
         </td>
     </tr>
 @endforeach
