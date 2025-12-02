@@ -239,25 +239,3 @@
         });
     </script>
 @endif
-
-{{-- Script xử lý mở modal đăng nhập khi đăng nhập thất bại --}}
-@if (session('open_login_modal'))
-    <script>
-        // Đợi cho đến khi trang và các thư viện đã tải xong
-        document.addEventListener('DOMContentLoaded', function() {
-            // Sử dụng setTimeout để đảm bảo Bootstrap đã được khởi tạo
-            setTimeout(function() {
-                var loginModalElement = document.getElementById('loginModal');
-                if (loginModalElement && typeof bootstrap !== 'undefined') {
-                    var loginModal = new bootstrap.Modal(loginModalElement);
-                    loginModal.show();
-                } else if (loginModalElement) {
-                    // Fallback nếu Bootstrap chưa sẵn sàng, thử dùng jQuery
-                    if (typeof $ !== 'undefined') {
-                        $('#loginModal').modal('show');
-                    }
-                }
-            }, 100);
-        });
-    </script>
-@endif

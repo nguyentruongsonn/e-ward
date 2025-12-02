@@ -163,37 +163,6 @@ Route::prefix('admin')->group(function () {
         Route::get('/appointment/scan', [AdminController::class, 'showScanQR'])->name('admin.appointment.scan');
         Route::post('/appointment/checkin/{token}', [AdminController::class, 'processCheckin'])->name('admin.appointment.checkin');
         Route::post('/appointment/send-reminder', [AdminController::class, 'sendReminder'])->name('admin.appointment.send-reminder');
-        
-        // Quản lý người dùng
-        Route::get('/users/congdan', [AdminController::class, 'indexCongDan'])->name('admin.users.congdan');
-        Route::get('/users/canbo', [AdminController::class, 'indexCanBo'])->name('admin.users.canbo');
-        
-        // Quản lý thủ tục hành chính
-        Route::prefix('tthc')->group(function () {
-            // TTHC
-            Route::get('/', [AdminController::class, 'indexTTHC'])->name('admin.tthc.index');
-            Route::get('/create', [AdminController::class, 'createTTHC'])->name('admin.tthc.create');
-            Route::post('/store', [AdminController::class, 'storeTTHC'])->name('admin.tthc.store');
-            Route::get('/{id}/edit', [AdminController::class, 'editTTHC'])->name('admin.tthc.edit');
-            Route::post('/{id}/update', [AdminController::class, 'updateTTHC'])->name('admin.tthc.update');
-            Route::post('/{id}/delete', [AdminController::class, 'destroyTTHC'])->name('admin.tthc.destroy');
-            
-            // Lĩnh vực
-            Route::prefix('linhvuc')->group(function () {
-                Route::get('/', [AdminController::class, 'indexLinhVuc'])->name('admin.tthc.linhvuc.index');
-                Route::get('/create', [AdminController::class, 'createLinhVuc'])->name('admin.tthc.linhvuc.create');
-                Route::post('/store', [AdminController::class, 'storeLinhVuc'])->name('admin.tthc.linhvuc.store');
-                Route::get('/{id}/edit', [AdminController::class, 'editLinhVuc'])->name('admin.tthc.linhvuc.edit');
-                Route::post('/{id}/update', [AdminController::class, 'updateLinhVuc'])->name('admin.tthc.linhvuc.update');
-                Route::post('/{id}/delete', [AdminController::class, 'destroyLinhVuc'])->name('admin.tthc.linhvuc.destroy');
-            });
-        });
-        
-        // Quản lý thanh toán
-        Route::get('/payment/history', [AdminController::class, 'indexPaymentHistory'])->name('admin.payment.history');
-        Route::get('/payment/revenue', [AdminController::class, 'revenueReport'])->name('admin.payment.revenue');
-        Route::get('/payment/history/export', [AdminController::class, 'exportPaymentHistory'])->name('admin.payment.history.export');
-        Route::get('/payment/revenue/export', [AdminController::class, 'exportRevenueReport'])->name('admin.payment.revenue.export');
     });
 });
 
