@@ -345,6 +345,59 @@ class ProfileController extends Controller
         ]);
     }
 
+    /**
+     * Hiển thị hóa đơn cho một giao dịch thanh toán cụ thể
+     */
+    public function paymentInvoice($id)
+    {
+        $authUser = Auth::user();
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+            $user = $authUser->user;
+        } else {
+            $user = $authUser;
+            $nguoi = $user->nguoi;
+        }
+
+        if (!$nguoi) {
+            abort(404, 'Không tìm thấy thông tin người dùng');
+        }
+
+        $congDan = $nguoi->congDan ?? CongDan::create(['IDnguoiDung' => $nguoi->IDnguoiDung]);
+        $IDCD = $congDan->IDCD;
+
+        // Lấy giao dịch thuộc về công dân hiện tại
+        $payment = LichSuThanhToan::where('id', $id)
+            ->where('IDCD', $IDCD)
+            ->firstOrFail();
+
+        // Lấy thông tin hồ sơ nếu có
+        $hoSo = null;
+        $tthc = null;
+        if ($payment->maHSXL) {
+            $hoSo = DB::table('hosoxuly')->where('maHSXL', $payment->maHSXL)->first();
+            if ($hoSo) {
+                $tthc = DB::table('tthc')->where('maTTHC', $hoSo->maTTHC)->first();
+            }
+        }
+
+        // Sidebar counters
+        $hoSoHoanThanh = HoSoXuLy::where('IDCD', $IDCD)->whereNotNull('ngayKetThucXuLy')->count();
+        $hoSoDangXuLy = HoSoXuLy::where('IDCD', $IDCD)->whereNull('ngayKetThucXuLy')->count();
+        $unreadCount = $this->getUnreadCount($IDCD);
+
+        return view('pages.payment-invoice', [
+            'user' => $user,
+            'nguoi' => $nguoi,
+            'payment' => $payment,
+            'hoSo' => $hoSo,
+            'tthc' => $tthc,
+            'hoSoHoanThanh' => $hoSoHoanThanh,
+            'hoSoDangXuLy' => $hoSoDangXuLy,
+            'unreadCount' => $unreadCount,
+        ]);
+    }
+
     public function notifications(Request $request)
     {
         $authUser = Auth::user();

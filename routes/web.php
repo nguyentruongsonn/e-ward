@@ -69,6 +69,8 @@ Route::middleware('auth')->group(function () {
     // Payment history
     Route::get('/profile/payments', [ProfileController::class, 'payments'])
         ->name('profile.payments');
+    Route::get('/profile/payments/{id}/invoice', [ProfileController::class, 'paymentInvoice'])
+        ->name('profile.payments.invoice');
 
     // Notifications
     Route::get('/profile/notifications', [ProfileController::class, 'notifications'])
@@ -136,6 +138,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/hosoxuly/nhan-truc-tiep', [AdminController::class, 'indexHoSoNhanTrucTiep'])->name('admin.hosoxuly.nhan-truc-tiep');
         Route::get('/hosoxuly/all', [AdminController::class, 'indexAllHoSo'])->name('admin.hosoxuly.all');
         Route::get('/hosoxuly/{maHSXL}', [AdminController::class, 'showHoSo'])->name('admin.hosoxuly.show');
+        Route::get('/hosoxuly/{maHSXL}/confirmation', [AdminController::class, 'printConfirmation'])->name('admin.hosoxuly.confirmation');
+        Route::get('/hosoxuly/{maHSXL}/leader-transfer', [AdminController::class, 'printLeaderTransfer'])->name('admin.hosoxuly.leader-transfer');
         Route::post('/hosoxuly/{maHSXL}/trangthai', [AdminController::class, 'updateTrangThai'])->name('admin.hosoxuly.updateTrangThai');
         Route::post('/hosoxuly/{maHSXL}/send-mail', [AdminController::class, 'sendMailHoSo'])->name('admin.hosoxuly.send-mail');
         Route::post('/hosoxuly/{maHSXL}/add-mail-reply', [AdminController::class, 'addMailReply'])->name('admin.hosoxuly.add-mail-reply');
@@ -153,6 +157,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/hosoxuly/{maHSXL}/chuyen-thuly', [AdminController::class, 'chuyenThuLy'])->name('admin.hosoxuly.chuyen-thuly');
         Route::post('/hosoxuly/{maHSXL}/chuyen-lanhdao', [AdminController::class, 'chuyenLanhDao'])->name('admin.hosoxuly.chuyen-lanhdao');
         Route::post('/hosoxuly/{maHSXL}/pheduyet', [AdminController::class, 'pheDuyet'])->name('admin.hosoxuly.pheduyet');
+        Route::get('/hosoxuly/{maHSXL}/leader-approval', [AdminController::class, 'printLeaderApproval'])->name('admin.hosoxuly.leader-approval');
         Route::post('/hosoxuly/{maHSXL}/tralai', [AdminController::class, 'traLai'])->name('admin.hosoxuly.tralai');
         Route::post('/hosoxuly/{maHSXL}/tra-ketqua', [AdminController::class, 'traKetQua'])->name('admin.hosoxuly.tra-ketqua');
         Route::post('/hosoxuly/{maHSXL}/y-kien-xu-ly', [AdminController::class, 'yKienXuLy'])->name('admin.hosoxuly.y-kien-xu-ly');

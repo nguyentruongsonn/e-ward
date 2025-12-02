@@ -71,14 +71,12 @@
 										<td>{{ $trangThais->firstWhere('maTrangThai', $hoso->maTrangThai)->tenTrangThai ?? '-' }}</td>
 
 
-										<td>
-
-                                            <div class="dropdown">
-                                                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-hand"></i>ádasasd</a>
-                                                <ul class="dropdown-menu bg-light m-0">
-                                                    <li><a href="{{ route('admin.hosoxuly.show', $hoso->maHSXL) }}" class="dropdown-item">Xem chi tiết</a></li>
-                                                </ul>
-                                            </div>
+										<td class="text-center">
+                                            <a href="{{ route('admin.hosoxuly.show', $hoso->maHSXL) }}"
+                                               class="btn btn-xs btn-default"
+                                               title="Xem chi tiết hồ sơ">
+                                                <i class="fa fa-eye"></i>
+                                            </a>
 										</td>
 									</tr>
 									@empty
