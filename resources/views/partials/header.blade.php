@@ -76,14 +76,17 @@
                 }
                 $hoTen = $nguoi?->hoTen ?? ($user->email ?? 'Người dùng');
 
-                // Kiểm tra quyền admin
+                // Kiểm tra quyền admin/cán bộ giống logic trong LoginController::isAdmin
                 $isAdmin = false;
-                if ($nguoi && $nguoi->vaiTro === 'Quản trị viên') {
-                    $isAdmin = true;
-                } else {
-                    $isAdmin = DB::table('quantrivien')
-                        ->where('IDnguoiDung', $nguoi->IDnguoiDung ?? 0)
-                        ->exists();
+                if ($nguoi) {
+                    $adminRoles = ['Quản trị viên', 'Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo'];
+                    if (in_array(trim($nguoi->vaiTro ?? ''), $adminRoles, true)) {
+                        $isAdmin = true;
+                    } else {
+                        $isAdmin = DB::table('quantrivien')
+                            ->where('IDnguoiDung', $nguoi->IDnguoiDung ?? 0)
+                            ->exists();
+                    }
                 }
             @endphp
             {{-- Nếu đã đăng nhập --}}

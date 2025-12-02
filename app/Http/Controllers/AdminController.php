@@ -70,6 +70,86 @@ class AdminController extends Controller
         return redirect()->route('home');
     }
 
+    /**
+     * In giấy xác nhận tiếp nhận hồ sơ cho công dân
+     */
+    public function printConfirmation($maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $hoSo = HoSoXuLy::with(['tthc', 'congdan.nguoi'])->where('maHSXL', $maHSXL)->firstOrFail();
+
+        // Thông tin công dân/người nộp
+        $congDan = $hoSo->congdan ?? null;
+        $nguoi = $congDan->nguoi ?? null;
+
+        return view('admin.hosoxuly.confirmation', [
+            'hoSo' => $hoSo,
+            'tthc' => $hoSo->tthc,
+            'congDan' => $congDan,
+            'nguoi' => $nguoi,
+        ]);
+    }
+
+    /**
+     * In giấy xác nhận chuyển hồ sơ sang lãnh đạo (cho cán bộ thụ lý)
+     */
+    public function printLeaderTransfer($maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $user = Auth::user();
+        if ($user->vaiTro !== 'Cán bộ thụ lý' && $user->vaiTro !== 'Quản trị viên') {
+            return back()->with('error', 'Chỉ Cán bộ thụ lý mới được in giấy chuyển lãnh đạo.');
+        }
+
+        $hoSo = HoSoXuLy::with(['tthc', 'congdan.nguoi'])->where('maHSXL', $maHSXL)->firstOrFail();
+        $congDan = $hoSo->congdan ?? null;
+        $nguoi = $congDan->nguoi ?? null;
+
+        return view('admin.hosoxuly.leader-transfer', [
+            'hoSo' => $hoSo,
+            'tthc' => $hoSo->tthc,
+            'congDan' => $congDan,
+            'nguoi' => $nguoi,
+            'canBoThuLy' => $user,
+        ]);
+    }
+
+    /**
+     * In giấy xác nhận phê duyệt hồ sơ (cho Lãnh đạo)
+     */
+    public function printLeaderApproval($maHSXL)
+    {
+        if (!$this->isAdmin()) {
+            return redirect()->route('admin.login')
+                ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+
+        $user = Auth::user();
+        if ($user->vaiTro !== 'Lãnh đạo' && $user->vaiTro !== 'Quản trị viên') {
+            return back()->with('error', 'Chỉ Lãnh đạo mới được in giấy phê duyệt.');
+        }
+
+        $hoSo = HoSoXuLy::with(['tthc', 'congdan.nguoi'])->where('maHSXL', $maHSXL)->firstOrFail();
+        $congDan = $hoSo->congdan ?? null;
+        $nguoi = $congDan->nguoi ?? null;
+
+        return view('admin.hosoxuly.leader-approval', [
+            'hoSo' => $hoSo,
+            'tthc' => $hoSo->tthc,
+            'congDan' => $congDan,
+            'nguoi' => $nguoi,
+            'lanhDao' => $user,
+        ]);
+    }
+
     public function dashboard()
     {
         // Kiểm tra quyền admin

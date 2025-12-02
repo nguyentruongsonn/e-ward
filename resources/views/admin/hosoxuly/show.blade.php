@@ -78,6 +78,15 @@
                                         </button>
                                     </form>
                                 @endif
+
+                                {{-- In giấy xác nhận tiếp nhận hồ sơ --}}
+                                @if($hoSo->maTrangThai >= 1)
+                                    <a href="{{ route('admin.hosoxuly.confirmation', $hoSo->maHSXL) }}"
+                                       target="_blank"
+                                       class="btn btn-default btn-sm ml-2">
+                                        <i class="fa fa-print"></i> In giấy xác nhận
+                                    </a>
+                                @endif
                             @endif
 
                             {{-- Cán bộ thụ lý actions --}}
@@ -87,6 +96,15 @@
                                     <button type="button" class="btn btn-warning btn-sm ml-2" data-toggle="modal" data-target="#chuyenLanhDaoModal">
                                         <i class="fa fa-check-square-o"></i> Chuyển lãnh đạo
                                     </button>
+                                @endif
+
+                                {{-- In giấy xác nhận chuyển lãnh đạo khi hồ sơ đã ở trạng thái chờ lãnh đạo duyệt (maTrangThai = 4) --}}
+                                @if($hoSo->maTrangThai == 4)
+                                    <a href="{{ route('admin.hosoxuly.leader-transfer', $hoSo->maHSXL) }}"
+                                       target="_blank"
+                                       class="btn btn-default btn-sm ml-2">
+                                        <i class="fa fa-print"></i> In giấy chuyển lãnh đạo
+                                    </a>
                                 @endif
 
                                 {{-- Yêu cầu bổ sung giấy tờ --}}
@@ -110,6 +128,15 @@
                                     <button type="button" class="btn btn-danger btn-sm ml-1" data-toggle="modal" data-target="#traLaiModal">
                                         <i class="fa fa-times"></i> Dừng xử lý
                                     </button>
+                                @endif
+
+                                {{-- In giấy xác nhận phê duyệt khi hồ sơ đã được xử lý xong (maTrangThai = 9) --}}
+                                @if($hoSo->maTrangThai == 9)
+                                    <a href="{{ route('admin.hosoxuly.leader-approval', $hoSo->maHSXL) }}"
+                                       target="_blank"
+                                       class="btn btn-default btn-sm ml-2">
+                                        <i class="fa fa-print"></i> In giấy phê duyệt
+                                    </a>
                                 @endif
                             @endif
                         </div>

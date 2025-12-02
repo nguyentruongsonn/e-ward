@@ -95,6 +95,51 @@
     .form-control.is-invalid, .form-select.is-invalid {
         border-color: #dc3545;
     }
+
+    /* ====== PRINT STYLES FOR RECEIPT / INVOICE ====== */
+    @media print {
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            font-size: 13px;
+        }
+
+        header, nav, footer, .navbar, .breadcrumb, .step-wizard,
+        .btn, .chat-toggle-button, .back-to-top, .chatbot-container,
+        .footer {
+            display: none !important;
+        }
+
+        main, .container, .form-section, .print-invoice-wrapper {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .print-invoice-wrapper {
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .invoice-card {
+            border: 1px solid #000 !important;
+        }
+
+        .invoice-header {
+            border-bottom: 1px solid #000 !important;
+        }
+
+        .invoice-title {
+            font-size: 18px !important;
+        }
+
+        .signature-name {
+            color: #c0392b !important;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+    }
 </style>
 
 <div class="container py-4">
@@ -444,25 +489,167 @@
         {{-- ========================== STEP 4: HOÀN THÀNH (GIỮ NGUYÊN) ========================== --}}
         <div class="form-section hidden" data-step="4">
             @if(isset($isSuccess) && $isSuccess)
-                <div class="text-center mb-4">
-                    <div class="mb-3"><i class="fa fa-check-circle text-color" style="font-size: 64px;"></i></div>
-                    <h3 class="text-color mb-3">Nộp hồ sơ thành công!</h3>
-                    <p class="text-muted">Mã hồ sơ của bạn: <strong class="text-dark">{{ $maHSXL ?? '' }}</strong></p>
-                </div>
-                <div class="card mb-4">
-                    <div class="card-header bg-color text-white"><h5 class="mb-0 text-white">Thông tin người nộp</h5></div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3"><strong>Họ tên:</strong> {{ $hoSo->tenChuHoSo ?? ($dulieu['ho_ten'] ?? ($nguoiInfo->hoTen ?? '—')) }}</div>
-                            <div class="col-md-6 mb-3"><strong>Ngày sinh:</strong> {{ $dulieu['ngay_sinh'] ?? ($nguoiInfo->ngaySinh ?? '—') }}</div>
-                            <div class="col-md-6 mb-3"><strong>Số điện thoại:</strong> {{ $hoSo->soDienThoai ?? ($dulieu['so_dien_thoai'] ?? ($nguoiInfo->soDienThoai ?? '—')) }}</div>
-                            <div class="col-md-6 mb-3"><strong>Địa chỉ:</strong> {{ $dulieu['dia_chi'] ?? ($nguoiInfo->noiThuongTru ?? '—') }}</div>
-                            
+                <div class="print-invoice-wrapper">
+                    <div class="card mb-4 invoice-card">
+                        <div class="card-body pb-2 invoice-header">
+                            <div class="row">
+                                <div class="col-7">
+                                    <h6 class="mb-1 text-uppercase" style="color:#c0392b; font-weight:700;">
+                                        ỦY BAN NHÂN DÂN PHƯỜNG ABC
+                                    </h6>
+                                    <h6 class="mb-1 text-uppercase" style="font-weight:700;">
+                                        BỘ PHẬN MỘT CỬA
+                                    </h6>
+                                    <small class="text-muted d-block">
+                                        Địa chỉ: ......................................................................
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        Điện thoại: ..................................................................
+                                    </small>
+                                </div>
+                                <div class="col-5 text-end">
+                                    <h6 class="mb-1 text-uppercase" style="font-weight:700;">
+                                        CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+                                    </h6>
+                                    <small class="text-muted d-block">
+                                        Độc lập - Tự do - Hạnh phúc
+                                    </small>
+                                    <hr class="my-2">
+                                    <h6 class="mb-1 text-uppercase" style="color:#c0392b; font-weight:700;">
+                                        HÓA ĐƠN THU LỆ PHÍ
+                                    </h6>
+                                    <small class="text-muted d-block">
+                                        (Dịch vụ công trực tuyến)
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        Số: ............... /HĐ-LP
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <small>
+                                    Ngày {{ now()->format('d') }} tháng {{ now()->format('m') }} năm {{ now()->format('Y') }}
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="card-body pt-3">
+                            <div class="text-center mb-3">
+                                <h4 class="mb-1 fw-bold invoice-title text-uppercase">
+                                    PHIẾU TIẾP NHẬN HỒ SƠ VÀ THU LỆ PHÍ
+                                </h4>
+                                <small class="text-muted">
+                                    Mã hồ sơ: <strong>{{ $maHSXL ?? ($hoSo->maHSXL ?? '') }}</strong>
+                                </small>
+                            </div>
+
+                            <p class="mb-1"><strong>I. Thông tin người nộp</strong></p>
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-2">
+                                    <strong>Họ tên:</strong>
+                                    {{ $hoSo->tenChuHoSo ?? ($dulieu['ho_ten'] ?? ($nguoiInfo->hoTen ?? '—')) }}
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <strong>Ngày sinh:</strong>
+                                    {{ $dulieu['ngay_sinh'] ?? ($nguoiInfo->ngaySinh ?? '—') }}
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <strong>Số điện thoại:</strong>
+                                    {{ $hoSo->soDienThoai ?? ($dulieu['so_dien_thoai'] ?? ($nguoiInfo->soDienThoai ?? '—')) }}
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <strong>Địa chỉ:</strong>
+                                    {{ $dulieu['dia_chi'] ?? ($nguoiInfo->noiThuongTru ?? '—') }}
+                                </div>
+                            </div>
+
+                            {{-- Thông tin thanh toán / hóa đơn --}}
+                @php
+                    $tongThanhToan = 0;
+                    if (!empty($lePhiChiTiet)) {
+                        foreach ($lePhiChiTiet as $item) {
+                            $tongThanhToan += $item['thanhTien'] ?? 0;
+                        }
+                    } else {
+                        $tongThanhToan = $hoSo->lePhi ?? 0;
+                    }
+                @endphp
+
+                @if($tongThanhToan > 0)
+                            <p class="mb-1"><strong>II. Thông tin lệ phí</strong></p>
+
+                            @if(!empty($lePhiChiTiet))
+                                <div class="table-responsive mb-2">
+                                    <table class="table table-bordered mb-2">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Loại lệ phí</th>
+                                                <th class="text-center" style="width: 80px;">SL</th>
+                                                <th class="text-end" style="width: 120px;">Đơn giá</th>
+                                                <th class="text-end" style="width: 140px;">Thành tiền</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($lePhiChiTiet as $item)
+                                                <tr>
+                                                    <td>{{ $item['loaiLePhi'] ?? '' }}</td>
+                                                    <td class="text-center">{{ $item['soLuong'] ?? 0 }}</td>
+                                                    <td class="text-end">
+                                                        {{ isset($item['mucLePhi']) ? number_format($item['mucLePhi'], 0, ',', '.') : '0' }}
+                                                    </td>
+                                                    <td class="text-end">
+                                                        {{ isset($item['thanhTien']) ? number_format($item['thanhTien'], 0, ',', '.') : '0' }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="3" class="text-end">Tổng cộng</th>
+                                                <th class="text-end text-danger">
+                                                    {{ number_format($tongThanhToan, 0, ',', '.') }} đ
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            @else
+                                <p class="mb-2">
+                                    <strong>Số tiền đã thanh toán:</strong>
+                                    <span class="text-danger">{{ number_format($tongThanhToan, 0, ',', '.') }} đ</span>
+                                </p>
+                            @endif
+                        @endif
+
+                        <div class="row mt-4">
+                            <div class="col-4 text-center">
+                                <strong>Người nộp tiền</strong><br>
+                                <small class="text-muted">(Ký, ghi rõ họ tên)</small>
+                            </div>
+                            <div class="col-4"></div>
+                            <div class="col-4 text-center">
+                                <strong>Cán bộ tiếp nhận</strong><br>
+                                <small class="text-muted d-block">(Ký, ghi rõ họ tên)</small>
+                                {{-- Chữ ký dạng viết tay --}}
+                                <div style="margin-top:24px;">
+                                    <span class="signature-name"
+                                          style="display:inline-block;font-size:20px;font-family:'Segoe Script','Brush Script MT',cursive;color:#c0392b;">
+                                        P. Trung Nghĩa
+                                    </span>
+                                </div>
+                                {{-- Họ tên in rõ nét dưới chữ ký --}}
+                                <div>
+                                    <small class="text-muted">(Phạm Trung Nghĩa)</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-center gap-3 mb-4">
-                    <button type="button" class="btn btn-info" onclick="window.print()"><i class="fa fa-print"></i> In phiếu</button>
+
+                <div class="d-flex justify-content-center gap-3 mb-4 no-print">
+                    <button type="button" class="btn btn-info" onclick="window.print()">
+                        <i class="fa fa-print"></i> In phiếu / hóa đơn
+                    </button>
                     <a href="{{ route('home') }}" class="btn btn-color"><i class="fa fa-check"></i> Đồng ý</a>
                 </div>
             @else

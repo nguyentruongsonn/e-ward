@@ -532,6 +532,7 @@
                                                 <th>Ngày GD</th>
                                                 <th>Số tiền</th>
                                                 <th>Trạng thái</th>
+                                                <th>Thao tác</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -544,6 +545,13 @@
                                                     <td>{{ $gd->soTien !== null ? number_format($gd->soTien, 0, ',', '.') . ' đ' : '-' }}
                                                     </td>
                                                     <td>{{ $gd->trangThai ?? '-' }}</td>
+                                                    <td class="text-center">
+                                                        <a href="{{ route('profile.payments.invoice', $gd->id) }}"
+                                                           class="btn btn-sm btn-outline-primary"
+                                                           target="_blank">
+                                                            <i class="fa fa-print me-1"></i> In hóa đơn
+                                                        </a>
+                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
