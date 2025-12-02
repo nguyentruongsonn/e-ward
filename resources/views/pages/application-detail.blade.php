@@ -409,6 +409,108 @@ hr {
                                     @endforeach
                                 @endif
                             @endforeach
+                        @elseif(!empty($dulieu) && (isset($dulieu['hoTen']) || isset($dulieu['cccd'])))
+                            {{-- Hiển thị thông tin cơ bản cho hồ sơ nhận trực tiếp --}}
+                            <h6 class="mt-4 mb-3 text-primary border-bottom pb-2">Thông tin chủ hồ sơ</h6>
+                            <div class="row mb-3">
+                                @if(isset($dulieu['hoTen']))
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Họ và tên</label>
+                                            <div class="form-control-plaintext bg-light p-2 rounded">{{ $dulieu['hoTen'] }}</div>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if(isset($dulieu['ngaySinh']))
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Ngày sinh</label>
+                                            <div class="form-control-plaintext bg-light p-2 rounded">{{ $dulieu['ngaySinh'] }}</div>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if(isset($dulieu['gioiTinh']))
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Giới tính</label>
+                                            <div class="form-control-plaintext bg-light p-2 rounded">{{ $dulieu['gioiTinh'] }}</div>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if(isset($dulieu['cccd']))
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Số CCCD/CMND</label>
+                                            <div class="form-control-plaintext bg-light p-2 rounded">{{ $dulieu['cccd'] }}</div>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if(isset($dulieu['ngayCap']))
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Ngày cấp</label>
+                                            <div class="form-control-plaintext bg-light p-2 rounded">{{ $dulieu['ngayCap'] }}</div>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if(isset($dulieu['noiCap']))
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Nơi cấp</label>
+                                            <div class="form-control-plaintext bg-light p-2 rounded">{{ $dulieu['noiCap'] }}</div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <h6 class="mt-4 mb-3 text-primary border-bottom pb-2">Thông tin liên hệ</h6>
+                            <div class="row mb-3">
+                                @if(isset($dulieu['email']))
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Email</label>
+                                            <div class="form-control-plaintext bg-light p-2 rounded">{{ $dulieu['email'] }}</div>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if(isset($dulieu['soDienThoai']))
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Số điện thoại</label>
+                                            <div class="form-control-plaintext bg-light p-2 rounded">{{ $dulieu['soDienThoai'] }}</div>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if(isset($dulieu['diaChi']))
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Địa chỉ (Thường trú / Tạm trú)</label>
+                                            <div class="form-control-plaintext bg-light p-2 rounded">{{ $dulieu['diaChi'] }}</div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <h6 class="mt-4 mb-3 text-primary border-bottom pb-2">Thông tin thủ tục</h6>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Tên thủ tục hành chính</label>
+                                        <div class="form-control-plaintext bg-light p-2 rounded">
+                                            @php
+                                                $tthc = \App\Models\TTHC::find($hoSo->maTTHC);
+                                            @endphp
+                                            {{ $tthc ? $tthc->ten : 'N/A' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Hình thức nộp</label>
+                                        <div class="form-control-plaintext bg-light p-2 rounded">Nhận trực tiếp</div>
+                                    </div>
+                                </div>
+                            </div>
                         @else
                             <p class="text-muted">Không có thông tin form để hiển thị.</p>
                         @endif
