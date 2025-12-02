@@ -28,6 +28,11 @@ Route::view('/about', 'pages.about')->name('about');
 Route::view('/contact', 'pages.contact')->name('contact');
 Route::get('/danh-gia-dich-vu', [App\Http\Controllers\PublicServiceController::class, 'ratings'])->name('service.ratings');
 Route::get('/danh-gia-dich-vu/{maTTHC}', [App\Http\Controllers\PublicServiceController::class, 'showProcedureRatings'])->name('service.ratings.detail');
+
+// Public tracking routes
+Route::get('/tra-cuu-ho-so', [App\Http\Controllers\PublicController::class, 'trackingForm'])->name('tracking');
+Route::post('/tra-cuu-ho-so', [App\Http\Controllers\PublicController::class, 'trackingSearch'])->name('tracking.search');
+
 Route::view('/chatbot', 'pages.chatbot')->name('chatbot');
 Route::view('/history', 'pages.history')->name('history');
 Route::view('/register', 'pages.register')->name('register');
@@ -117,6 +122,8 @@ Route::prefix('admin')->group(function () {
         
         // Quản lý hồ sơ
         Route::get('/hosoxuly', [AdminController::class, 'indexHoSo'])->name('admin.hosoxuly.index');
+        Route::get('/hosoxuly/nhan-truc-tiep', [AdminController::class, 'indexHoSoNhanTrucTiep'])->name('admin.hosoxuly.nhan-truc-tiep');
+        Route::get('/hosoxuly/all', [AdminController::class, 'indexAllHoSo'])->name('admin.hosoxuly.all');
         Route::get('/hosoxuly/{maHSXL}', [AdminController::class, 'showHoSo'])->name('admin.hosoxuly.show');
         Route::post('/hosoxuly/{maHSXL}/trangthai', [AdminController::class, 'updateTrangThai'])->name('admin.hosoxuly.updateTrangThai');
         Route::post('/hosoxuly/{maHSXL}/send-mail', [AdminController::class, 'sendMailHoSo'])->name('admin.hosoxuly.send-mail');
@@ -128,6 +135,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/hosoxuly-yeu-cau-bo-sung', [AdminController::class, 'indexHoSoYeuCauBoSung'])->name('admin.hosoxuly.danh-sach-yeu-cau-bo-sung');
         Route::get('/hosoxuly-da-xu-ly-xong', [AdminController::class, 'indexHoSoDaXuLyXong'])->name('admin.hosoxuly.da-xu-ly-xong');
         Route::get('/hosoxuly-da-tra-ket-qua', [AdminController::class, 'indexHoSoDaTraKetQua'])->name('admin.hosoxuly.da-tra-ket-qua');
+        Route::get('/hosoxuly-tat-ca', [AdminController::class, 'indexAllHoSo'])->name('admin.hosoxuly.all');
         
         // Workflow actions
         Route::post('/hosoxuly/{maHSXL}/tiepnhan', [AdminController::class, 'tiepNhanHoSo'])->name('admin.hosoxuly.tiepnhan-action');
@@ -155,6 +163,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/appointment/scan', [AdminController::class, 'showScanQR'])->name('admin.appointment.scan');
         Route::post('/appointment/checkin/{token}', [AdminController::class, 'processCheckin'])->name('admin.appointment.checkin');
         Route::post('/appointment/send-reminder', [AdminController::class, 'sendReminder'])->name('admin.appointment.send-reminder');
+        Route::post('/appointment/{id}/update-status', [AdminController::class, 'updateAppointmentStatus'])->name('admin.appointment.update-status');
+        Route::post('/hosoxuly/{maHSXL}/update-general-info', [AdminController::class, 'updateGeneralInfo'])->name('admin.hosoxuly.update-general-info');
+        Route::post('/hosoxuly/{maHSXL}/upload-component', [AdminController::class, 'uploadComponentFile'])->name('admin.hosoxuly.upload-component');
     });
 });
 

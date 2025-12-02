@@ -119,6 +119,7 @@
                     <ul class="sub">
                         @if($user->vaiTro === 'Cán bộ một cửa' || $user->vaiTro === 'Quản trị viên')
                             <li><a href="{{ route('admin.hosoxuly.index') }}" class="{{ request()->routeIs('admin.hosoxuly.index') ? 'active' : '' }}">Hồ sơ chờ tiếp nhận</a></li>
+                            <li><a href="{{ route('admin.hosoxuly.nhan-truc-tiep') }}" class="{{ request()->routeIs('admin.hosoxuly.nhan-truc-tiep') ? 'active' : '' }}">Hồ sơ nhận trực tiếp</a></li>
                         @endif
                         @if($user->vaiTro === 'Cán bộ thụ lý' || $user->vaiTro === 'Quản trị viên')
                             <li><a href="{{ route('admin.hosoxuly.tiepnhan') }}" class="{{ request()->routeIs('admin.hosoxuly.tiepnhan') ? 'active' : '' }}">Hồ sơ đã tiếp nhận</a></li>
@@ -129,6 +130,7 @@
                         <li><a href="{{ route('admin.hosoxuly.danh-sach-yeu-cau-bo-sung') }}" class="{{ request()->routeIs('admin.hosoxuly.danh-sach-yeu-cau-bo-sung') ? 'active' : '' }}">Hồ sơ yêu cầu bổ sung</a></li>
                         <li><a href="{{ route('admin.hosoxuly.da-xu-ly-xong') }}" class="{{ request()->routeIs('admin.hosoxuly.da-xu-ly-xong') ? 'active' : '' }}">Hồ sơ đã xử lý xong</a></li>
                         <li><a href="{{ route('admin.hosoxuly.da-tra-ket-qua') }}" class="{{ request()->routeIs('admin.hosoxuly.da-tra-ket-qua') ? 'active' : '' }}">Hồ sơ đã trả kết quả</a></li>
+                        <li><a href="{{ route('admin.hosoxuly.all') }}" class="{{ request()->routeIs('admin.hosoxuly.all') ? 'active' : '' }}">Danh sách tất cả hồ sơ</a></li>
                     </ul>
                 </li>
 

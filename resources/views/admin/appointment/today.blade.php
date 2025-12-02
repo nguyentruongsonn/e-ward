@@ -57,6 +57,9 @@
                                         <th>Quầy</th>
                                         <th>Số thứ tự</th>
                                         <th>Trạng thái</th>
+                                        @if(in_array($user->vaiTro, ['Cán bộ một cửa', 'Quản trị viên']))
+                                        <th>Cập nhật TT</th>
+                                        @endif
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
@@ -105,16 +108,26 @@
                                         </td>
                                         <td>{{ $appointment->soThuTu ?? '-' }}</td>
                                         <td>
-                                            <span class="badge 
-                                                @if($appointment->trangThai == 'Hoàn thành') bg-success
-                                                @elseif($appointment->trangThai == 'Đang xử lý') bg-info
-                                                @elseif($appointment->trangThai == 'Chờ đến') bg-warning
-                                                @elseif($appointment->trangThai == 'Đã hủy' || $appointment->trangThai == 'Không đến') bg-danger
-                                                @else bg-secondary
-                                                @endif">
+                                            <span class="badge bg-{{ $appointment->trangThai == 'Đã đặt lịch' ? 'primary' : ($appointment->trangThai == 'Hoàn thành' ? 'success' : ($appointment->trangThai == 'Đã hủy' ? 'danger' : 'warning')) }}">
                                                 {{ $appointment->trangThai }}
                                             </span>
                                         </td>
+                                        @if(in_array($user->vaiTro, ['Cán bộ một cửa', 'Quản trị viên']))
+                                        <td>
+                                            <select class="form-control form-control-sm status-update-select" 
+                                                    data-appointment-id="{{ $appointment->id }}"
+                                                    data-current-status="{{ $appointment->trangThai }}"
+                                                    style="width: 160px; font-size: 11px;">
+                                                <option value="Đã đặt lịch" {{ $appointment->trangThai == 'Đã đặt lịch' ? 'selected' : '' }}>Đã đặt lịch</option>
+                                                <option value="Chờ đến" {{ $appointment->trangThai == 'Chờ đến' ? 'selected' : '' }}>Chờ đến</option>
+                                                <option value="Đang xử lý" {{ $appointment->trangThai == 'Đang xử lý' ? 'selected' : '' }}>Đang xử lý</option>
+                                                <option value="Hoàn thành" {{ $appointment->trangThai == 'Hoàn thành' ? 'selected' : '' }}>Hoàn thành</option>
+                                                <option value="Yêu cầu bổ sung giấy tờ" {{ $appointment->trangThai == 'Yêu cầu bổ sung giấy tờ' ? 'selected' : '' }}>Yêu cầu bổ sung</option>
+                                                <option value="Đã hủy" {{ $appointment->trangThai == 'Đã hủy' ? 'selected' : '' }}>Đã hủy</option>
+                                                <option value="Không đến" {{ $appointment->trangThai == 'Không đến' ? 'selected' : '' }}>Không đến</option>
+                                            </select>
+                                        </td>
+                                        @endif
                                         <td>
                                             @if($appointment->checkin_token)
                                                 <a href="{{ route('admin.appointment.scan', ['token' => $appointment->checkin_token]) }}" 
@@ -139,7 +152,7 @@
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="10" class="text-center">Không có lịch hẹn nào hôm nay</td>
+                                        <td colspan="{{ in_array($user->vaiTro, ['Cán bộ một cửa', 'Quản trị viên']) ? '11' : '10' }}" class="text-center">Không có lịch hẹn nào hôm nay</td>
                                     </tr>
                                     @endforelse
                                 </tbody>
@@ -162,6 +175,73 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Cập nhật trạng thái lịch hẹn
+    document.querySelectorAll('.status-update-select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            const appointmentId = this.getAttribute('data-appointment-id');
+            const currentStatus = this.getAttribute('data-current-status');
+            const newStatus = this.value;
+            
+            if (newStatus === currentStatus) {
+                return; // No change
+            }
+            
+            let confirmMsg = `Bạn có chắc muốn cập nhật trạng thái từ "${currentStatus}" sang "${newStatus}"?`;
+            if (newStatus === 'Hoàn thành') {
+                confirmMsg += '\n\nLưu ý: Hệ thống sẽ tự động tạo hồ sơ xử lý (trạng thái Nhận trực tiếp) sau khi cập nhật.';
+            }
+            
+            if (!confirm(confirmMsg)) {
+                this.value = currentStatus; // Revert to original
+                return;
+            }
+            
+            const select = this;
+            select.disabled = true;
+            
+            fetch(`/admin/appointment/${appointmentId}/update-status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    trangThai: newStatus
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    select.setAttribute('data-current-status', newStatus);
+                    let alertMsg = data.message;
+                    if (data.hoSoCreated) {
+                        alertMsg += `\n\nBạn có muốn xem hồ sơ vừa tạo (${data.maHSXL})?`;
+                        if (confirm(alertMsg)) {
+                            window.location.href = data.hoSoUrl;
+                        } else {
+                            window.location.reload();
+                        }
+                    } else {
+                        alert(alertMsg);
+                        window.location.reload();
+                    }
+                } else {
+                    alert('Lỗi: ' + (data.message || 'Không thể cập nhật trạng thái'));
+                    select.value = currentStatus;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi cập nhật trạng thái');
+                select.value = currentStatus;
+            })
+            .finally(() => {
+                select.disabled = false;
+            });
+        });
+    });
+
     // Gửi mail nhắc hẹn
     document.querySelectorAll('.btn-send-reminder').forEach(function(btn) {
         btn.addEventListener('click', function() {

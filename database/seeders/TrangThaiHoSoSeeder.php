@@ -54,6 +54,10 @@ class TrangThaiHoSoSeeder extends Seeder
             [
                 'maTrangThai'=>10,
                 'tenTrangThai'=>'Đã trả kết quả'
+            ],
+                        [
+                'maTrangThai'=>11,
+                'tenTrangThai'=>'Nhận trực tiếp'
             ]
         ]);
     }
