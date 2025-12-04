@@ -223,6 +223,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/payment/revenue', [AdminController::class, 'revenueReport'])->name('admin.payment.revenue');
         Route::get('/payment/history/export', [AdminController::class, 'exportPaymentHistory'])->name('admin.payment.history.export');
         Route::get('/payment/revenue/export', [AdminController::class, 'exportRevenueReport'])->name('admin.payment.revenue.export');
+
+        // API debug: danh sách user đang cache trong Redis
+        Route::get('/redis-users', [AdminController::class, 'cachedUsers'])->name('admin.redis-users');
     });
 });
 

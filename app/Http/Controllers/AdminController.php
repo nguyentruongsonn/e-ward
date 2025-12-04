@@ -15,6 +15,8 @@ use App\Models\LichHen;
 use App\Models\TTHC;
 use App\Models\TrangThaiHoSo;
 use Carbon\Carbon;
+use App\Services\WebCacheService;
+use App\Services\UserRedisService;
 
 class AdminController extends Controller
 {
@@ -150,7 +152,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function dashboard()
+    public function dashboard(WebCacheService $cache)
     {
         // Kiểm tra quyền admin
         if (!$this->isAdmin()) {
@@ -161,79 +163,16 @@ class AdminController extends Controller
         // Tự động cập nhật lại IDCD cho các hồ sơ có IDCD = 0 hoặc 1 (do bug cũ)
         $this->fixHoSoWithWrongIDCD();
 
-        // Thống kê tổng quan
-        $stats = [
-            'total_hoso' => HoSoXuLy::count(),
-            'hoso_moi' => HoSoXuLy::whereDate('ngayTiepNhan', today())->count(),
-            'total_congdan' => CongDan::count(),
-            'total_lichhen' => LichHen::count(),
-            'lichhen_hom_nay' => LichHen::whereDate('thoiGianHen', today())->count(),
-            'total_tthc' => TTHC::count(),
-        ];
-
-        // Hồ sơ theo tháng (12 tháng gần nhất)
-        $hososByMonth = HoSoXuLy::selectRaw('DATE_FORMAT(ngayTiepNhan, "%Y-%m") as month, COUNT(*) as total')
-            ->whereNotNull('ngayTiepNhan')
-            ->where('ngayTiepNhan', '>=', now()->subMonths(11)->startOfMonth())
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->pluck('total', 'month')
-            ->toArray();
-
-        // Chuẩn hóa đủ 12 tháng (nếu tháng nào không có hồ sơ thì = 0)
-        $monthlyLabels = [];
-        $monthlyValues = [];
-        for ($i = 11; $i >= 0; $i--) {
-            $date = now()->subMonths($i);
-            $key = $date->format('Y-m');
-            $monthlyLabels[] = $date->format('m/Y');
-            $monthlyValues[] = (int) ($hososByMonth[$key] ?? 0);
-        }
-
-        // Hồ sơ theo từng trạng thái chi tiết (kể cả trạng thái chưa có hồ sơ, để luôn có đủ màu trong chart)
-        $hososByStatus = DB::table('trangthaihoso')
-            ->leftJoin('hosoxuly', 'hosoxuly.maTrangThai', '=', 'trangthaihoso.maTrangThai')
-            ->select('trangthaihoso.tenTrangThai as name', DB::raw('COUNT(hosoxuly.maHSXL) as total'))
-            ->groupBy('trangthaihoso.maTrangThai', 'trangthaihoso.tenTrangThai')
-            ->orderBy('trangthaihoso.maTrangThai')
-            ->get();
-
-        // Lịch hẹn 7 ngày gần nhất
-        $appointmentsByDay = LichHen::selectRaw('DATE(thoiGianHen) as date, COUNT(*) as total')
-            ->where('thoiGianHen', '>=', now()->subDays(6)->startOfDay())
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->pluck('total', 'date')
-            ->toArray();
-
-        $appointmentLabels = [];
-        $appointmentValues = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i)->toDateString();
-            $appointmentLabels[] = \Carbon\Carbon::parse($date)->format('d/m');
-            $appointmentValues[] = (int) ($appointmentsByDay[$date] ?? 0);
-        }
-
-        // Doanh thu 7 ngày gần nhất (nếu có module thanh toán)
-        $revenueByDay = DB::table('lichsuthanhtoan')
-            ->selectRaw('DATE(ngayGD) as date, SUM(soTien) as total')
-            ->where('trangThai', 'Thành công')
-            ->where('ngayGD', '>=', now()->subDays(6)->startOfDay())
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->pluck('total', 'date')
-            ->toArray();
-
-        $revenueLabels = [];
-        $revenueValues = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i)->toDateString();
-            $revenueLabels[] = \Carbon\Carbon::parse($date)->format('d/m');
-            $revenueValues[] = (float) ($revenueByDay[$date] ?? 0);
-        }
+        // Thống kê và biểu đồ dashboard (cache Redis 60 giây)
+        $dashboard = $cache->getAdminDashboardStats();
+        $stats = $dashboard['stats'];
+        $monthlyLabels = $dashboard['monthlyLabels'];
+        $monthlyValues = $dashboard['monthlyValues'];
+        $hososByStatus = $dashboard['hososByStatus'];
+        $appointmentLabels = $dashboard['appointmentLabels'];
+        $appointmentValues = $dashboard['appointmentValues'];
+        $revenueLabels = $dashboard['revenueLabels'];
+        $revenueValues = $dashboard['revenueValues'];
 
         // Hồ sơ mới nhất - Dùng Eloquent với model đã config đúng primary key VARCHAR
         // Model đã có: public $incrementing = false; và protected $keyType = 'string';
@@ -273,6 +212,26 @@ class AdminController extends Controller
             'appointmentValues' => $appointmentValues,
             'revenueLabels' => $revenueLabels,
             'revenueValues' => $revenueValues,
+        ]);
+    }
+
+    /**
+     * API: Tìm kiếm tất cả users đang được lưu trong Redis (hash 'users')
+     * Dùng để test, trả về JSON.
+     */
+    public function cachedUsers(Request $request, UserRedisService $userRedis)
+    {
+        if (!$this->isAdmin()) {
+            abort(403, 'Không có quyền xem danh sách user cache');
+        }
+
+        $q = (string) $request->query('q', '');
+        $users = $userRedis->searchCachedUsers($q);
+
+        return response()->json([
+            'query' => $q,
+            'count' => count($users),
+            'data'  => $users,
         ]);
     }
 

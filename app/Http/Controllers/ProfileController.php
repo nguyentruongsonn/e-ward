@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 use App\Models\HoSoXuLy;
 use App\Models\CongDan;
 use App\Models\TTHC;
@@ -16,9 +18,13 @@ use App\Models\LichHen;
 use App\Models\PasswordChangeOtp;
 use App\Mail\PasswordChangeOtpMail;
 use Carbon\Carbon;
+use App\Services\WebCacheService;
+use App\Models\TrangThaiHoSo;
 
 class ProfileController extends Controller
 {
+    private const REDIS_CACHE_STORE = 'redis_db0';
+
     /**
      * Helper method to get unread notification count
      */
@@ -27,7 +33,7 @@ class ProfileController extends Controller
         return ThongBao::where('IDCD', $IDCD)->where('is_read', false)->count();
     }
 
-    public function index(Request $request)
+    public function index(Request $request, WebCacheService $cache)
     {
         $authUser = Auth::user();
         
@@ -58,16 +64,33 @@ class ProfileController extends Controller
         }
         
         $IDCD = $congDan->IDCD;
-        
-        // Đếm số hồ sơ đã hoàn thành (có ngayKetThucXuLy không null)
-        $hoSoHoanThanh = HoSoXuLy::where('IDCD', $IDCD)
-            ->whereNotNull('ngayKetThucXuLy')
-            ->count();
-        
-        // Đếm số hồ sơ đang xử lý (chưa có ngayKetThucXuLy)
-        $hoSoDangXuLy = HoSoXuLy::where('IDCD', $IDCD)
-            ->whereNull('ngayKetThucXuLy')
-            ->count();
+
+        // Lưu lịch sử tìm kiếm hồ sơ của user lên Redis (tối đa 20 lần gần nhất)
+        if ($request->filled('ten_dich_vu') || $request->filled('ma_ho_so') || $request->filled('trang_thai')) {
+            $historyKey = "profile:{$IDCD}:search-history";
+            $entry = [
+                'ten_dich_vu' => $request->input('ten_dich_vu'),
+                'ma_ho_so'    => $request->input('ma_ho_so'),
+                'trang_thai'  => $request->input('trang_thai'),
+                'at'          => now()->toDateTimeString(),
+            ];
+            // Lưu dạng JSON để dễ xem trên Another Redis
+            Redis::lpush($historyKey, json_encode($entry, JSON_UNESCAPED_UNICODE));
+            // Giữ tối đa 20 bản ghi gần nhất
+            Redis::ltrim($historyKey, 0, 19);
+        }
+
+        $redisCache = Cache::store(self::REDIS_CACHE_STORE);
+
+        // Danh sách trạng thái hồ sơ (cache 1 giờ để dùng cho filter)
+        $trangThaiList = $redisCache->remember('trangthaihoso:all', 3600, function () {
+            return TrangThaiHoSo::orderBy('maTrangThai')->get();
+        });
+
+        // Lấy số liệu tổng quan từ Redis (cache 5 phút)
+        $summary = $cache->getCitizenSummary($IDCD);
+        $hoSoHoanThanh = $summary['hoSoHoanThanh'] ?? 0;
+        $hoSoDangXuLy = $summary['hoSoDangXuLy'] ?? 0;
         
         // Xử lý tìm kiếm
         $query = HoSoXuLy::where('IDCD', $IDCD)->with(['tthc', 'trangThai']);
@@ -91,10 +114,27 @@ class ProfileController extends Controller
                 $query->where('maTrangThai', $request->trang_thai);
             }
         }
-        
-        // Hiển thị 5 hồ sơ mỗi trang
-        $hoSoList = $query->orderBy('ngayTiepNhan', 'desc')->paginate(5)->withQueryString();
-        $unreadCount = $this->getUnreadCount($IDCD);
+
+        // Cache kết quả tìm kiếm hồ sơ theo bộ lọc + page trong Redis (5 phút)
+        $page = (int) $request->input('page', 1);
+        $cacheKey = sprintf(
+            'profile:%d:services:%s',
+            $IDCD,
+            md5(json_encode([
+                'ten_dich_vu' => $request->input('ten_dich_vu'),
+                'ma_ho_so'    => $request->input('ma_ho_so'),
+                'trang_thai'  => $request->input('trang_thai'),
+                'page'        => $page,
+            ]))
+        );
+
+        $hoSoList = $redisCache->remember($cacheKey, 300, function () use ($query) {
+            return $query
+                ->orderBy('ngayTiepNhan', 'desc')
+                ->paginate(5)
+                ->withQueryString();
+        });
+        $unreadCount = $summary['unreadCount'] ?? $this->getUnreadCount($IDCD);
         
         // Kiểm tra quyền admin
         $isAdmin = false;
@@ -114,11 +154,12 @@ class ProfileController extends Controller
             'hoSoList' => $hoSoList,
             'unreadCount' => $unreadCount,
             'activePage' => 'services',
+            'trangThaiList' => $trangThaiList,
             'isAdmin' => $isAdmin,
         ]);
     }
 
-    public function identityInfo()
+    public function identityInfo(WebCacheService $cache)
     {
         $authUser = Auth::user();
         
@@ -146,17 +187,12 @@ class ProfileController extends Controller
         }
         
         $IDCD = $congDan->IDCD;
-        
-        // Đếm số hồ sơ
-        $hoSoHoanThanh = HoSoXuLy::where('IDCD', $IDCD)
-            ->whereNotNull('ngayKetThucXuLy')
-            ->count();
-        
-        $hoSoDangXuLy = HoSoXuLy::where('IDCD', $IDCD)
-            ->whereNull('ngayKetThucXuLy')
-            ->count();
-        
-        $unreadCount = $this->getUnreadCount($IDCD);
+
+        // Lấy số liệu tổng quan từ Redis (cache 5 phút)
+        $summary = $cache->getCitizenSummary($IDCD);
+        $hoSoHoanThanh = $summary['hoSoHoanThanh'] ?? 0;
+        $hoSoDangXuLy = $summary['hoSoDangXuLy'] ?? 0;
+        $unreadCount = $summary['unreadCount'] ?? $this->getUnreadCount($IDCD);
         
         return view('pages.profile', [
             'user' => $user,

@@ -398,12 +398,14 @@
                                         <select class="form-select profile-form-control" id="trang_thai"
                                             name="trang_thai">
                                             <option value="">-- Chọn trạng thái hồ sơ --</option>
-                                            <option value="dang_xu_ly"
-                                                {{ request('trang_thai') == 'dang_xu_ly' ? 'selected' : '' }}>Đang xử lý
-                                            </option>
-                                            <option value="da_hoan_thanh"
-                                                {{ request('trang_thai') == 'da_hoan_thanh' ? 'selected' : '' }}>Đã hoàn
-                                                thành</option>
+                                            @if (!empty($trangThaiList))
+                                                @foreach ($trangThaiList as $trangThai)
+                                                    <option value="{{ $trangThai->maTrangThai }}"
+                                                        {{ (string) request('trang_thai') === (string) $trangThai->maTrangThai ? 'selected' : '' }}>
+                                                        {{ $trangThai->tenTrangThai }}
+                                                    </option>
+                                                @endforeach
+                                            @endif
                                         </select>
                                     </div>
                                 </div>

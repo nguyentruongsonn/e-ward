@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\UserRedisService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -9,6 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class LoginController extends Controller
 {
+    public function __construct(private UserRedisService $userRedis)
+    {
+    }
+
     public function login(Request $request)
     {
         $validated = $request->validate([
@@ -25,6 +30,9 @@ class LoginController extends Controller
             $request->session()->regenerate();
             
             $user = Auth::user();
+
+            // Push thông tin đăng nhập lên Redis để tái sử dụng nhanh
+            $this->userRedis->storeAuthenticatedUser($user, $request);
             
             // Kiểm tra nếu là admin thì redirect về admin dashboard
             if ($this->isAdmin($user)) {
@@ -49,6 +57,8 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        $this->userRedis->forget();
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
