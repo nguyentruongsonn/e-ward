@@ -249,9 +249,25 @@ hr {
                         <h4 class="mb-0">
                             <i class="fa fa-file-text-o"></i> {{ $hoSo->maHSXL }}
                         </h4>
-                        <a href="{{ route('profile') }}" class="btn btn-light btn-sm">
-                            <i class="fa fa-arrow-left"></i> Quay lại
-                        </a>
+                        <div class="d-flex gap-2">
+                            @php
+                                // Chỉ cho phép dừng xử lý nếu trạng thái không phải "Đã xử lý xong" (9) hoặc "Đã trả kết quả" (10)
+                                $canStop = !in_array($hoSo->maTrangThai, [9, 10]);
+                            @endphp
+                            @if($canStop)
+                                <form action="{{ route('profile.hoso.stop', $hoSo->maHSXL) }}" method="POST" 
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn dừng xử lý hồ sơ này không?');"
+                                      style="display: inline-block;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-warning btn-sm">
+                                        <i class="fa fa-stop"></i> Dừng xử lý
+                                    </button>
+                                </form>
+                            @endif
+                            <a href="{{ route('profile') }}" class="btn btn-light btn-sm">
+                                <i class="fa fa-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -286,7 +302,24 @@ hr {
                                 <strong><i class="fa fa-info-circle"></i> Trạng thái</strong>
                                 <hr style="margin: 5px 0; border-top-color: #faebcc;">
                                 <p><i class="fa fa-tasks"></i> Trạng thái hiện tại:
-                                    <span class=" badge-{{ $hoSo->maTrangThai == 10 ? 'success' : ($hoSo->maTrangThai == 5 ? 'warning' : 'info') }}">
+                                    @php
+                                        // Áp dụng màu giống như admin dashboard
+                                        $badgeClass = match($hoSo->maTrangThai) {
+                                            1 => 'bg-warning',        // Chờ tiếp nhận - vàng
+                                            2 => 'bg-info',           // Được tiếp nhận - xanh dương
+                                            3 => 'bg-danger',         // Không được tiếp nhận - đỏ
+                                            4 => 'bg-primary',        // Đang xử lý - xanh dương đậm
+                                            5 => 'bg-warning',        // Yêu cầu bổ sung giấy tờ - vàng
+                                            6 => 'bg-info',           // Hồ sơ đã bổ sung giấy tờ - xanh dương
+                                            7 => 'bg-danger',         // Công dân yêu cầu rút hồ sơ - đỏ
+                                            8 => 'bg-danger',         // Dừng xử lý - đỏ
+                                            9 => 'bg-success',        // Đã xử lý xong - xanh lá
+                                            10 => 'bg-success',       // Đã trả kết quả - xanh lá
+                                            11 => 'bg-warning',       // Nhận trực tiếp - vàng
+                                            default => 'bg-secondary'
+                                        };
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }}">
                                         {{ $hoSo->trangThai->tenTrangThai ?? 'Không xác định' }}
                                     </span>
                                 </p>

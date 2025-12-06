@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 use App\Models\Nguoi;
 use App\Models\HoSoXuLy;
 use App\Models\CongDan;
@@ -466,6 +468,30 @@ class AdminController extends Controller
      * Kiểm tra user có phải Quản trị viên (super admin) hay không
      * Dùng cho các chức năng chỉ dành riêng cho admin, ví dụ: CRUD TTHC, lĩnh vực, cấu hình hệ thống
      */
+    /**
+     * Xóa cache liên quan đến hồ sơ khi cập nhật trạng thái
+     */
+    private function clearHoSoCache($IDCD)
+    {
+        try {
+            $redisCache = Cache::store('redis_db0');
+            
+            // Xóa cache summary của công dân
+            $summaryKey = "user:{$IDCD}:summary";
+            $redisCache->forget($summaryKey);
+            
+            // Xóa tất cả cache danh sách hồ sơ của công dân này
+            $pattern = "profile:{$IDCD}:services:*";
+            $keys = Redis::keys($pattern);
+            if (!empty($keys)) {
+                Redis::del($keys);
+            }
+        } catch (\Exception $e) {
+            // Log lỗi nhưng không throw để không ảnh hưởng đến flow chính
+            Log::warning('Lỗi khi xóa cache hồ sơ: ' . $e->getMessage());
+        }
+    }
+
     private function isSuperAdmin($user = null)
     {
         if (!$user) {
@@ -520,12 +546,20 @@ class AdminController extends Controller
 
         // Filter theo trạng thái
         // Nếu có filter ngày, cho phép xem tất cả trạng thái nếu không chọn
-        // Nếu không có filter ngày, mặc định chỉ hiển thị hồ sơ chờ tiếp nhận (maTrangThai = 1)
+        // Nếu không có filter ngày, mặc định hiển thị hồ sơ chờ tiếp nhận (maTrangThai = 1) 
+        // và yêu cầu rút hồ sơ chưa được tiếp nhận (maTrangThai = 7 và chưa có ngayTiepNhan)
         if ($request->filled('maTrangThai')) {
             $query->where('maTrangThai', $request->maTrangThai);
         } elseif (!$hasDateFilter) {
             // Chỉ áp dụng filter mặc định khi KHÔNG có filter ngày
-            $query->where('maTrangThai', 1);
+            // Hiển thị hồ sơ chờ tiếp nhận (1) và yêu cầu rút hồ sơ chưa được tiếp nhận (7, chưa có ngayTiepNhan)
+            $query->where(function($q) {
+                $q->where('maTrangThai', 1)
+                  ->orWhere(function($q2) {
+                      $q2->where('maTrangThai', 7)
+                         ->whereNull('ngayTiepNhan');
+                  });
+            });
         }
 
         // Sắp xếp
@@ -627,7 +661,14 @@ class AdminController extends Controller
             ->whereNotNull('maHSXL')
             ->where('maHSXL', '!=', '0')
             ->where('maHSXL', '!=', '')
-            ->where('maTrangThai', 2); // Đã tiếp nhận
+            ->where(function($q) {
+                // Hiển thị hồ sơ đã tiếp nhận (2) hoặc hồ sơ yêu cầu rút nhưng đã được tiếp nhận (7 với ngayTiepNhan)
+                $q->where('maTrangThai', 2)
+                  ->orWhere(function($q2) {
+                      $q2->where('maTrangThai', 7)
+                         ->whereNotNull('ngayTiepNhan');
+                  });
+            });
 
         // Filter theo tìm kiếm
         if ($request->filled('search')) {
@@ -668,7 +709,14 @@ class AdminController extends Controller
             ->whereNotNull('maHSXL')
             ->where('maHSXL', '!=', '0')
             ->where('maHSXL', '!=', '')
-            ->where('maTrangThai', 4); // Đang xử lý (chờ lãnh đạo duyệt)
+            ->where(function($q) {
+                // Hiển thị hồ sơ đang xử lý (4) hoặc hồ sơ yêu cầu rút đang ở lãnh đạo (7 với maTrangThai_backup = 4)
+                $q->where('maTrangThai', 4)
+                  ->orWhere(function($q2) {
+                      $q2->where('maTrangThai', 7)
+                         ->where('maTrangThai_backup', 4);
+                  });
+            });
 
         // Filter theo tìm kiếm
         if ($request->filled('search')) {
@@ -1168,6 +1216,9 @@ class AdminController extends Controller
 
             $hoso->save();
 
+            // Xóa cache liên quan đến hồ sơ này
+            $this->clearHoSoCache($hoso->IDCD);
+
             $trangThai = TrangThaiHoSo::find($request->maTrangThai);
 
             return response()->json([
@@ -1296,6 +1347,13 @@ class AdminController extends Controller
         $query->orderBy('thoiGianHen', 'asc');
 
         // Phân trang
+        // Tự động cập nhật trạng thái "Không đến" cho các lịch hẹn đã quá thời gian mà chưa check-in
+        $now = \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
+        LichHen::whereIn('trangThai', ['Đã đặt lịch', 'Chờ đến'])
+            ->where('thoiGianHen', '<', $now)
+            ->whereNull('checkin_time')
+            ->update(['trangThai' => 'Không đến']);
+
         $appointments = $query->paginate(20)->withQueryString();
 
         $user = Auth::user();
@@ -1430,6 +1488,13 @@ class AdminController extends Controller
 
         // Tự động gửi mail nhắc cho lịch hẹn < 24h (chỉ gửi 1 lần)
         $this->autoSendReminders();
+
+        // Tự động cập nhật trạng thái "Không đến" cho các lịch hẹn đã quá thời gian mà chưa check-in
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
+        LichHen::whereIn('trangThai', ['Đã đặt lịch', 'Chờ đến'])
+            ->where('thoiGianHen', '<', $now)
+            ->whereNull('checkin_time')
+            ->update(['trangThai' => 'Không đến']);
 
         // Query lịch hẹn hôm nay
         $today = Carbon::now('Asia/Ho_Chi_Minh')->toDateString();
@@ -1713,6 +1778,9 @@ class AdminController extends Controller
 
         $hoso->save();
 
+        // Xóa cache liên quan đến hồ sơ này
+        $this->clearHoSoCache($hoso->IDCD);
+
         return back()->with('success', 'Đã tiếp nhận hồ sơ thành công.');
     }
 
@@ -1739,6 +1807,9 @@ class AdminController extends Controller
         $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Đã chuyển sang cán bộ thụ lý.";
         $hoso->save();
 
+        // Xóa cache liên quan đến hồ sơ này
+        $this->clearHoSoCache($hoso->IDCD);
+
         return back()->with('success', 'Đã chuyển hồ sơ sang cán bộ thụ lý.');
     }
 
@@ -1764,6 +1835,9 @@ class AdminController extends Controller
         $hoso->maTrangThai = 10; // Đã trả kết quả
         $hoso->ngayTra = now()->toDateString();
         $hoso->save();
+
+        // Xóa cache liên quan đến hồ sơ này
+        $this->clearHoSoCache($hoso->IDCD);
 
         return back()->with('success', 'Đã trả kết quả cho công dân.');
     }
@@ -2160,6 +2234,9 @@ class AdminController extends Controller
 
         $hoso->save();
 
+        // Xóa cache liên quan đến hồ sơ này
+        $this->clearHoSoCache($hoso->IDCD);
+
         return back()->with('success', 'Đã chuyển hồ sơ sang lãnh đạo.');
     }
 
@@ -2212,9 +2289,9 @@ class AdminController extends Controller
 
 
     /**
-     * Lãnh đạo dừng xử lý hồ sơ
+     * Cán bộ dừng xử lý hồ sơ (khi công dân yêu cầu rút)
      */
-    public function traLai(Request $request, $maHSXL)
+    public function dungXuLy($maHSXL)
     {
         if (!$this->isAdmin()) {
             return redirect()->route('admin.login');
@@ -2222,27 +2299,22 @@ class AdminController extends Controller
 
         $user = Auth::user();
         
-        // Chỉ Lãnh đạo mới được dừng xử lý
-        if ($user->vaiTro !== 'Lãnh đạo' && $user->vaiTro !== 'Quản trị viên') {
-            return back()->with('error', 'Chỉ Lãnh đạo mới được dừng xử lý hồ sơ.');
-        }
-
-        $request->validate([
-            'lyDo' => 'required|string|max:1000',
-        ]);
-
         $hoso = HoSoXuLy::where('maHSXL', $maHSXL)->firstOrFail();
+        
+        // Chỉ cho phép dừng khi trạng thái là "Công dân yêu cầu rút hồ sơ" (7)
+        if ($hoso->maTrangThai != 7) {
+            return back()->with('error', 'Chỉ có thể dừng xử lý hồ sơ khi công dân đã yêu cầu rút.');
+        }
         
         // Cập nhật trạng thái dừng xử lý
         $hoso->maTrangThai = 8; // Dừng xử lý
-        $hoso->nguoiDuyet = $user->IDnguoiDung;
-        $hoso->ngayDuyet = now();
-        $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo dừng xử lý hồ sơ: " . $request->input('lyDo');
+        $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] " . $user->vaiTro . " xác nhận dừng xử lý hồ sơ theo yêu cầu của công dân.";
         $hoso->save();
 
-        // TODO: Gửi email thông báo cho công dân
+        // Xóa cache liên quan đến hồ sơ này
+        $this->clearHoSoCache($hoso->IDCD);
 
-        return redirect()->route('admin.hosoxuly.cho-xuly')->with('success', 'Đã dừng xử lý hồ sơ.');
+        return back()->with('success', 'Đã dừng xử lý hồ sơ thành công.');
     }
 
     /**
@@ -2408,6 +2480,9 @@ class AdminController extends Controller
         $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Lãnh đạo yêu cầu xử lý lại: " . $request->noiDung;
         $hoso->save();
 
+        // Xóa cache liên quan đến hồ sơ này
+        $this->clearHoSoCache($hoso->IDCD);
+
         return back()->with('success', 'Đã gửi yêu cầu xử lý lại cho cán bộ thụ lý.');
     }
 
@@ -2457,6 +2532,9 @@ class AdminController extends Controller
         $hoso->maTrangThai = 5; // Yêu cầu bổ sung
         $hoso->ghiChu = ($hoso->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Yêu cầu bổ sung giấy tờ: " . implode(', ', $giayToNames);
         $hoso->save();
+
+        // Xóa cache liên quan đến hồ sơ này
+        $this->clearHoSoCache($hoso->IDCD);
 
         // TODO: Send email to citizen
         // Mail::to($hoso->email)->send(new DocumentSupplementRequest($hoso, $giayToNames, $ghiChu));

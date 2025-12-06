@@ -43,7 +43,14 @@
                     </a>
                 @endif
 
-                @if(in_array($appointment->trangThai, ['Đã đặt lịch', 'Chờ đến']))
+                @php
+                    // Chỉ cho phép hủy khi: trạng thái đúng VÀ chưa tới giờ hẹn
+                    $now = \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
+                    $thoiGianHen = $appointment->thoiGianHen ? \Carbon\Carbon::parse($appointment->thoiGianHen)->setTimezone('Asia/Ho_Chi_Minh') : null;
+                    $canCancel = in_array($appointment->trangThai, ['Đã đặt lịch', 'Chờ đến']) &&
+                                 $thoiGianHen && $thoiGianHen->gt($now);
+                @endphp
+                @if($canCancel)
                     <form action="{{ route('profile.appointments.cancel', $appointment->id) }}"
                           method="POST"
                           onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này không?');"

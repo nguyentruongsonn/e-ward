@@ -62,6 +62,16 @@
                                     </button>
                                 @endif
 
+                                {{-- Dừng xử lý (khi công dân yêu cầu rút hồ sơ - trạng thái 7) --}}
+                                @if($hoSo->maTrangThai == 7)
+                                    <form action="{{ route('admin.hosoxuly.dung-xuly', $hoSo->maHSXL) }}" method="POST" class="d-inline ml-2">
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn dừng xử lý hồ sơ này không?');">
+                                            <i class="fa fa-stop"></i> Dừng xử lý
+                                        </button>
+                                    </form>
+                                @endif
+
                                 {{-- Yêu cầu bổ sung giấy tờ --}}
                                 @if(in_array($hoSo->maTrangThai, [1, 2]) && !in_array($hoSo->maTrangThai, [9, 10]))
                                     <button type="button" class="btn btn-info btn-sm ml-2" data-toggle="modal" data-target="#yeuCauBoSungModal">
@@ -107,6 +117,16 @@
                                     </a>
                                 @endif
 
+                                {{-- Dừng xử lý (khi công dân yêu cầu rút hồ sơ - trạng thái 7) --}}
+                                @if($hoSo->maTrangThai == 7)
+                                    <form action="{{ route('admin.hosoxuly.dung-xuly', $hoSo->maHSXL) }}" method="POST" class="d-inline ml-2">
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn dừng xử lý hồ sơ này không?');">
+                                            <i class="fa fa-stop"></i> Dừng xử lý
+                                        </button>
+                                    </form>
+                                @endif
+
                                 {{-- Yêu cầu bổ sung giấy tờ --}}
                                 @if(in_array($hoSo->maTrangThai, [2, 4]) && !in_array($hoSo->maTrangThai, [9, 10]))
                                     <button type="button" class="btn btn-info btn-sm ml-2" data-toggle="modal" data-target="#yeuCauBoSungModal">
@@ -117,6 +137,16 @@
 
                             {{-- Lãnh đạo actions --}}
                             @if($user->vaiTro === 'Lãnh đạo' || $user->vaiTro === 'Quản trị viên')
+                                {{-- Dừng xử lý (khi công dân yêu cầu rút hồ sơ - trạng thái 7) --}}
+                                @if($hoSo->maTrangThai == 7)
+                                    <form action="{{ route('admin.hosoxuly.dung-xuly', $hoSo->maHSXL) }}" method="POST" class="d-inline ml-2">
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn dừng xử lý hồ sơ này không?');">
+                                            <i class="fa fa-stop"></i> Dừng xử lý
+                                        </button>
+                                    </form>
+                                @endif
+
                                 {{-- Phê duyệt (status = 4: Đang xử lý) --}}
                                 @if($hoSo->maTrangThai == 4 && !$hoSo->nguoiDuyet)
                                     <button type="button" class="btn btn-success btn-sm ml-2" data-toggle="modal" data-target="#pheDuyetModal">
@@ -124,9 +154,6 @@
                                     </button>
                                     <button type="button" class="btn btn-warning btn-sm ml-1" data-toggle="modal" data-target="#yeuCauXuLyLaiModal">
                                         <i class="fa fa-undo"></i> Yêu cầu xử lý lại
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm ml-1" data-toggle="modal" data-target="#traLaiModal">
-                                        <i class="fa fa-times"></i> Dừng xử lý
                                     </button>
                                 @endif
 
@@ -1796,33 +1823,6 @@
     </div>
 </div>
 
-<!-- Modal Trả lại -->
-<div class="modal fade" id="traLaiModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Trả lại hồ sơ</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <form action="{{ route('admin.hosoxuly.tralai', $hoSo->maHSXL) }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Lý do trả lại <span class="text-danger">*</span></label>
-                        <textarea class="form-control" name="lyDo" rows="4" required placeholder="Nhập lý do trả lại hồ sơ..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-danger">Xác nhận trả lại</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <!-- Modal Ký số điện tử -->
 <div class="modal fade" id="signFileModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -1904,39 +1904,6 @@
     </div>
 </div>
 
-<!-- Modal Dừng xử lý hồ sơ -->
-<div class="modal fade" id="traLaiModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header" style="background: #d9534f; color: white;">
-                <h5 class="modal-title">
-                    <i class="fa fa-times-circle"></i> Dừng xử lý hồ sơ
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" style="color: white;">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <form action="{{ route('admin.hosoxuly.tralai', $hoSo->maHSXL) }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="alert alert-danger">
-                        <i class="fa fa-exclamation-triangle"></i> Hồ sơ sẽ bị dừng xử lý. Hành động này sẽ cập nhật trạng thái hồ sơ thành "Dừng xử lý" (Trạng thái 8).
-                    </div>
-                    <div class="form-group">
-                        <label>Lý do dừng xử lý <span class="text-danger">*</span></label>
-                        <textarea class="form-control" name="lyDo" rows="5" required placeholder="Nhập lý do dừng xử lý hồ sơ..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fa fa-times"></i> Xác nhận dừng xử lý
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 
 @push('scripts')

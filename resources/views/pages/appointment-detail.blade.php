@@ -139,8 +139,11 @@
                             @endif
 
                             @php
+                                // Chỉ cho phép hủy khi: trạng thái đúng VÀ chưa tới giờ hẹn
+                                $now = \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
+                                $thoiGianHen = $appointment->thoiGianHen ? \Carbon\Carbon::parse($appointment->thoiGianHen)->setTimezone('Asia/Ho_Chi_Minh') : null;
                                 $canCancel = in_array($appointment->trangThai, ['Đã đặt lịch', 'Chờ đến']) &&
-                                    (!$appointment->thoiGianHen || $appointment->thoiGianHen->gte(\Carbon\Carbon::now('Asia/Ho_Chi_Minh')));
+                                             $thoiGianHen && $thoiGianHen->gt($now);
                             @endphp
 
                             @if($canCancel)

@@ -3,60 +3,51 @@
         <div class="container py-5">
             <div class="row g-5">
                 <div class="col-lg-3 col-md-6">
-                    <h5 class="text-white mb-4">ĐỊA CHỈ</h5>
-                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>12 Nguyễn Văn Bảo, P.1, Q.Gò Vấp</p>
+                    <h5 class="text-white mb-4">THÔNG TIN LIÊN HỆ</h5>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Ủy ban nhân dân Phường ABC</p>
                     <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
-                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>abc@gmail.com</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>contact@phuongabc.gov.vn</p>
+                    <p class="mb-2"><i class="far fa-clock me-3"></i>Thứ 2 - Chủ nhật: 07:30 - 17:00</p>
                     <div class="d-flex pt-2">
-                        <a class="btn btn-square btn-outline-light btn-social" href="#"><i
-                                class="fab fa-twitter"></i></a>
-                        <a class="btn btn-square btn-outline-light btn-social" href="#"><i
+                        <a class="btn btn-square btn-outline-light btn-social" href="#" title="Facebook"><i
                                 class="fab fa-facebook-f"></i></a>
-                        <a class="btn btn-square btn-outline-light btn-social" href="#"><i
+                        <a class="btn btn-square btn-outline-light btn-social" href="#" title="Zalo"><i
                                 class="fab fa-youtube"></i></a>
-                        <a class="btn btn-square btn-outline-light btn-social" href="#"><i
-                                class="fab fa-linkedin-in"></i></a>
+                        <a class="btn btn-square btn-outline-light btn-social" href="#" title="Email"><i
+                                class="fa fa-envelope"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <h5 class="text-white mb-4">LINK</h5>
+                    <h5 class="text-white mb-4">DỊCH VỤ CÔNG</h5>
+                    <a class="btn btn-link" href="{{ route('services') }}">Danh sách dịch vụ</a>
+                    <a class="btn btn-link" href="{{ route('outstanding-service') }}">Dịch vụ nổi bật</a>
+                    <a class="btn btn-link" href="{{ route('tracking') }}">Tra cứu hồ sơ</a>
+                    <a class="btn btn-link" href="{{ route('service.ratings') }}">Đánh giá dịch vụ</a>
+                    <a class="btn btn-link" href="{{ route('support.guide') }}">Hướng dẫn sử dụng</a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="text-white mb-4">THÔNG TIN</h5>
                     <a class="btn btn-link" href="{{ route('support.about') }}">Giới thiệu</a>
-                    <a class="btn btn-link" href="{{ route('contact') }}">Liên hệ</a>
-                    <a class="btn btn-link" href="{{ route('services') }}">Dịch vụ công</a>
-                    <a class="btn btn-link" href="{{ route('support.terms') }}">Điều khoản sử dụng</a>
+                    <a class="btn btn-link" href="{{ route('support.notice') }}">Thông báo</a>
                     <a class="btn btn-link" href="{{ route('support.faq') }}">Câu hỏi thường gặp</a>
+                    <a class="btn btn-link" href="{{ route('support.terms') }}">Điều khoản sử dụng</a>
+                    <a class="btn btn-link" href="{{ route('contact') }}">Liên hệ</a>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <h5 class="text-white mb-4">SÂN BÓNG</h5>
-                    <div class="row g-2">
-                        <div class="col-4">
-                            <img class="img-fluid rounded" src="{{ asset('img/field1.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid rounded" src="{{ asset('img/field2.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid rounded" src="{{ asset('img/field3.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid rounded" src="{{ asset('img/field4.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid rounded" src="{{ asset('img/field5.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid rounded" src="{{ asset('img/field6.jpg') }}" alt="">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h5 class="text-white mb-4">PHẢN HỒI</h5>
-                    <p></p>
-                    <div class="position-relative mx-auto" style="max-width: 400px;">
-                        <input class="form-control border-0 w-100 py-3 ps-4 pe-5" type="text" placeholder="Email">
-                        <button type="button" class="btn text-white py-2 position-absolute top-0 end-0 mt-2 me-2"
-                            style="background-color: #7e0001;">Đăng nhập</button>
-                    </div>
+                    <h5 class="text-white mb-4">HỖ TRỢ</h5>
+                    <p class="mb-2">Nếu bạn cần hỗ trợ, vui lòng liên hệ:</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-2"></i>Hotline: 1900-xxxx</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-2"></i>Email: support@phuongabc.gov.vn</p>
+                    <p class="mb-2"><i class="far fa-clock me-2"></i>Thời gian: 7:30 - 17:00 (T2-CN)</p>
+                    @auth
+                        <a href="{{ route('profile') }}" class="btn btn-sm btn-primary mt-2">
+                            <i class="fa fa-user me-1"></i> Tài khoản của tôi
+                        </a>
+                    @else
+                        <button type="button" class="btn btn-sm btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="fa fa-sign-in-alt me-1"></i> Đăng nhập
+                        </button>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -64,11 +55,10 @@
             <div class="copyright">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        &copy; <a href="#">AAAA</a>
+                        &copy; {{ date('Y') }} <a href="{{ route('home') }}" class="text-white">Ủy ban nhân dân Phường ABC</a>. Tất cả các quyền được bảo lưu.
                     </div>
                     <div class="col-md-6 text-center text-md-end">
-
-                        HỆ THỐNG QUẢN LÝ CHO THUÊ SÂN BÓNG
+                        <span class="text-white">HỆ THỐNG QUẢN LÝ THỦ TỤC HÀNH CHÍNH TRỰC TUYẾN - E-WARD</span>
                     </div>
                 </div>
             </div>
