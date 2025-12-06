@@ -508,20 +508,24 @@ class AdminController extends Controller
             });
         }
 
-        // Filter theo trạng thái
-        if ($request->filled('maTrangThai')) {
-            $query->where('maTrangThai', $request->maTrangThai);
-        } else {
-            // Mặc định chỉ hiển thị hồ sơ chờ tiếp nhận (maTrangThai = 1)
-            $query->where('maTrangThai', 1);
-        }
-
         // Filter theo ngày tiếp nhận
+        $hasDateFilter = $request->filled('ngayTiepNhan_from') || $request->filled('ngayTiepNhan_to');
+        
         if ($request->filled('ngayTiepNhan_from')) {
             $query->whereDate('ngayTiepNhan', '>=', $request->ngayTiepNhan_from);
         }
         if ($request->filled('ngayTiepNhan_to')) {
             $query->whereDate('ngayTiepNhan', '<=', $request->ngayTiepNhan_to);
+        }
+
+        // Filter theo trạng thái
+        // Nếu có filter ngày, cho phép xem tất cả trạng thái nếu không chọn
+        // Nếu không có filter ngày, mặc định chỉ hiển thị hồ sơ chờ tiếp nhận (maTrangThai = 1)
+        if ($request->filled('maTrangThai')) {
+            $query->where('maTrangThai', $request->maTrangThai);
+        } elseif (!$hasDateFilter) {
+            // Chỉ áp dụng filter mặc định khi KHÔNG có filter ngày
+            $query->where('maTrangThai', 1);
         }
 
         // Sắp xếp
@@ -1253,10 +1257,6 @@ class AdminController extends Controller
         // Tự động gửi mail nhắc cho lịch hẹn < 24h (chỉ gửi 1 lần)
         $this->autoSendReminders();
 
-        // Chỉ hiển thị lịch hẹn có ngày SAU ngày hiện tại (tương lai)
-        $now = Carbon::now('Asia/Ho_Chi_Minh');
-        $query->whereDate('thoiGianHen', '>', $now->toDateString());
-
         // Filter theo tìm kiếm
         if ($request->filled('search')) {
             $search = $request->search;
@@ -1276,11 +1276,20 @@ class AdminController extends Controller
         }
 
         // Filter theo ngày hẹn
+        $hasDateFilter = $request->filled('from_date') || $request->filled('to_date');
+        
         if ($request->filled('from_date')) {
             $query->whereDate('thoiGianHen', '>=', $request->from_date);
         }
         if ($request->filled('to_date')) {
             $query->whereDate('thoiGianHen', '<=', $request->to_date);
+        }
+
+        // Chỉ hiển thị lịch hẹn tương lai nếu KHÔNG có filter ngày
+        // Nếu có filter ngày, cho phép xem cả quá khứ
+        if (!$hasDateFilter) {
+            $now = Carbon::now('Asia/Ho_Chi_Minh');
+            $query->whereDate('thoiGianHen', '>', $now->toDateString());
         }
 
         // Sắp xếp: lịch hẹn gần nhất lên đầu (tăng dần theo thời gian)
@@ -2482,7 +2491,7 @@ class AdminController extends Controller
             });
         }
 
-        $congDans = $query->orderBy('nguoi.IDnguoiDung', 'desc')->paginate(20);
+        $congDans = $query->orderBy('nguoi.IDnguoiDung', 'desc')->paginate(20)->withQueryString();
 
         return view('admin.users.congdan', compact('congDans'));
     }
@@ -2718,9 +2727,9 @@ class AdminController extends Controller
      */
     public function indexCanBo(Request $request)
     {
-        // Chỉ tài khoản Quản trị viên mới được xem danh sách cán bộ
+        // Quản trị viên và Lãnh đạo được xem danh sách cán bộ
         $user = Auth::user();
-        if (!$user || trim($user->vaiTro) !== 'Quản trị viên') {
+        if (!$user || !in_array(trim($user->vaiTro), ['Quản trị viên', 'Lãnh đạo'])) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
         }
@@ -2750,7 +2759,7 @@ class AdminController extends Controller
             $query->where('nguoi.vaiTro', $request->vaiTro);
         }
 
-        $canBos = $query->orderBy('nguoi.IDnguoiDung', 'desc')->paginate(20);
+        $canBos = $query->orderBy('nguoi.IDnguoiDung', 'desc')->paginate(20)->withQueryString();
 
         return view('admin.users.canbo', compact('canBos'));
     }
@@ -3022,7 +3031,7 @@ class AdminController extends Controller
             $query->where('tenLinhVuc', 'LIKE', "%{$search}%");
         }
 
-        $linhVucs = $query->orderBy('maLinhVuc', 'desc')->paginate(20);
+        $linhVucs = $query->orderBy('maLinhVuc', 'desc')->paginate(20)->withQueryString();
 
         return view('admin.tthc.linhvuc.index', compact('linhVucs'));
     }
@@ -3162,7 +3171,7 @@ class AdminController extends Controller
             $query->where('tthc.trangThai', $request->trangThai);
         }
 
-        $tthcs = $query->orderBy('tthc.maTTHC', 'desc')->paginate(20);
+        $tthcs = $query->orderBy('tthc.maTTHC', 'desc')->paginate(20)->withQueryString();
         $linhVucs = DB::table('linhvuc')->orderBy('tenLinhVuc')->get();
 
         return view('admin.tthc.index', compact('tthcs', 'linhVucs'));
@@ -3539,7 +3548,7 @@ class AdminController extends Controller
             $query->whereDate('lichsuthanhtoan.ngayGD', '<=', $request->to_date);
         }
 
-        $payments = $query->orderBy('lichsuthanhtoan.ngayGD', 'desc')->paginate(20);
+        $payments = $query->orderBy('lichsuthanhtoan.ngayGD', 'desc')->paginate(20)->withQueryString();
 
         // Thống kê nhanh
         $stats = [

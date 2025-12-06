@@ -19,6 +19,9 @@ use App\Http\Controllers\PaymentController;
 Route::get('/outstanding-service', [OutstandingServiceController::class, 'index'])->name('outstanding-service');
 Route::get('/outstanding-service/{id}', [OutstandingServiceController::class, 'show'])->name('outstanding-service.show');
 
+// Danh sách dịch vụ công khai
+Route::get('/dich-vu', [App\Http\Controllers\PublicController::class, 'services'])->name('services');
+
 Route::view('/', 'pages.home')->name('home');
 
 // Webhook để nhận email reply từ công dân (không cần auth)

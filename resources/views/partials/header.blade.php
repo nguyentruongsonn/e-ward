@@ -44,9 +44,10 @@
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">THÔNG TIN & DỊCH VỤ</a>
                 <div class="dropdown-menu bg-light m-0">
+                    <a href="{{ route('services') }}" class="dropdown-item">DANH SÁCH DỊCH VỤ</a>
                     <a href="{{ route('outstanding-service') }}" class="dropdown-item">DỊCH VỤ CÔNG NỔI BẬT</a>
                     <a href="{{ route('tracking') }}" class="dropdown-item">TRA CỨU HỒ SƠ</a>
-                    <a href="{{ route('404') }}" class="dropdown-item">CÂU HỎI THƯỜNG GẶP</a>
+                    <a href="{{ route('support.faq') }}" class="dropdown-item">CÂU HỎI THƯỜNG GẶP</a>
                 </div>
             </div>
             <a href="{{ route('service.ratings') }}" class="nav-item nav-link">ĐÁNH GIÁ DỊCH VỤ</a>
