@@ -92,6 +92,13 @@ class ProfileController extends Controller
         $hoSoHoanThanh = $summary['hoSoHoanThanh'] ?? 0;
         $hoSoDangXuLy = $summary['hoSoDangXuLy'] ?? 0;
         
+        // Tự động cập nhật trạng thái cho các hồ sơ có ngayTiepNhan nhưng vẫn ở trạng thái "Chờ tiếp nhận" (1) hoặc "Nhận trực tiếp" (11)
+        // Nếu đã có ngayTiepNhan thì trạng thái phải là "Được tiếp nhận" (2)
+        HoSoXuLy::where('IDCD', $IDCD)
+            ->whereNotNull('ngayTiepNhan')
+            ->whereIn('maTrangThai', [1, 11])
+            ->update(['maTrangThai' => 2]);
+
         // Xử lý tìm kiếm
         $query = HoSoXuLy::where('IDCD', $IDCD)->with(['tthc', 'trangThai']);
         
@@ -330,6 +337,59 @@ class ProfileController extends Controller
             'hoSoDangXuLy',
             'unreadCount'
         ));
+    }
+
+    /**
+     * Công dân dừng xử lý hồ sơ
+     */
+    public function stopHoSo(Request $request, $maHSXL)
+    {
+        $authUser = Auth::user();
+        if ($authUser instanceof \App\Models\Nguoi) {
+            $nguoi = $authUser;
+        } else {
+            $user = $authUser;
+            $nguoi = $user->nguoi;
+        }
+
+        if (!$nguoi || !$nguoi->congDan) {
+            return redirect()->route('profile')
+                ->with('error', 'Không tìm thấy thông tin người dùng');
+        }
+
+        $congDan = $nguoi->congDan;
+        $IDCD = $congDan->IDCD;
+
+        // Tìm hồ sơ thuộc về công dân này
+        $hoSo = HoSoXuLy::where('IDCD', $IDCD)
+            ->where('maHSXL', $maHSXL)
+            ->first();
+
+        if (!$hoSo) {
+            return redirect()->route('profile')
+                ->with('error', 'Không tìm thấy hồ sơ');
+        }
+
+        // Không cho phép dừng nếu trạng thái là "Đã xử lý xong" (9) hoặc "Đã trả kết quả" (10)
+        if (in_array($hoSo->maTrangThai, [9, 10])) {
+            return redirect()->route('profile.hoso.show', $maHSXL)
+                ->with('error', 'Không thể dừng xử lý hồ sơ đã xử lý xong hoặc đã trả kết quả.');
+        }
+
+        // Lưu trạng thái trước đó để biết hồ sơ đang ở cán bộ nào
+        $hoSo->maTrangThai_backup = $hoSo->maTrangThai;
+        
+        // Cập nhật trạng thái thành "Công dân yêu cầu rút hồ sơ" (7)
+        // Cán bộ sẽ xem và cập nhật thành "Dừng xử lý" (8) sau đó
+        $hoSo->maTrangThai = 7;
+        $hoSo->ghiChu = ($hoSo->ghiChu ?? '') . "\n[" . now()->format('d/m/Y H:i') . "] Công dân yêu cầu dừng xử lý hồ sơ.";
+        $hoSo->save();
+
+        // Xóa cache liên quan đến hồ sơ này
+        $this->clearHoSoCache($hoSo->IDCD);
+
+        return redirect()->route('profile.hoso.show', $maHSXL)
+            ->with('success', 'Đã gửi yêu cầu dừng xử lý hồ sơ thành công.');
     }
 
     public function payments(Request $request)
@@ -618,6 +678,12 @@ class ProfileController extends Controller
         $IDCD = $congDan->IDCD;
         $page = $request->get('page', 2);
 
+        // Tự động cập nhật trạng thái cho các hồ sơ có ngayTiepNhan nhưng vẫn ở trạng thái "Chờ tiếp nhận" (1) hoặc "Nhận trực tiếp" (11)
+        HoSoXuLy::where('IDCD', $IDCD)
+            ->whereNotNull('ngayTiepNhan')
+            ->whereIn('maTrangThai', [1, 11])
+            ->update(['maTrangThai' => 2]);
+
         // Xử lý tìm kiếm giống như method index
         $query = HoSoXuLy::where('IDCD', $IDCD)->with(['tthc', 'trangThai']);
 
@@ -695,9 +761,16 @@ class ProfileController extends Controller
             $query->whereDate('thoiGianHen', '<=', $request->to_date);
         }
 
-        // Sắp xếp: lịch hẹn gần nhất lên đầu (càng gần càng hiện đầu)
-        // Sắp xếp tăng dần theo thoiGianHen (gần nhất trước)
-        $appointments = $query->orderBy('thoiGianHen', 'asc')->paginate(5)->withQueryString();
+        // Tự động cập nhật trạng thái "Không đến" cho các lịch hẹn đã quá thời gian mà chưa check-in
+        $now = \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
+        LichHen::where('IDCD', $IDCD)
+            ->whereIn('trangThai', ['Đã đặt lịch', 'Chờ đến'])
+            ->where('thoiGianHen', '<', $now)
+            ->whereNull('checkin_time')
+            ->update(['trangThai' => 'Không đến']);
+
+        // Sắp xếp: lịch hẹn mới nhất lên đầu (giảm dần theo thời gian)
+        $appointments = $query->orderBy('thoiGianHen', 'desc')->paginate(5)->withQueryString();
 
         // Kiểm tra quyền admin
         $isAdmin = false;
@@ -759,8 +832,16 @@ class ProfileController extends Controller
             $query->whereDate('thoiGianHen', '<=', $request->to_date);
         }
 
-        // Sắp xếp: lịch hẹn gần nhất lên đầu (càng gần càng hiện đầu)
-        $appointments = $query->orderBy('thoiGianHen', 'asc')
+        // Tự động cập nhật trạng thái "Không đến" cho các lịch hẹn đã quá thời gian mà chưa check-in
+        $now = \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
+        LichHen::where('IDCD', $IDCD)
+            ->whereIn('trangThai', ['Đã đặt lịch', 'Chờ đến'])
+            ->where('thoiGianHen', '<', $now)
+            ->whereNull('checkin_time')
+            ->update(['trangThai' => 'Không đến']);
+
+        // Sắp xếp: lịch hẹn mới nhất lên đầu (giảm dần theo thời gian)
+        $appointments = $query->orderBy('thoiGianHen', 'desc')
             ->paginate(5, ['*'], 'page', $page);
 
         // Trả về HTML để append vào bảng
@@ -854,15 +935,16 @@ class ProfileController extends Controller
                 ->with('error', 'Chỉ có thể hủy các lịch hẹn chưa được xử lý.');
         }
 
-        // Nếu thời gian hẹn đã qua thì không cho hủy
-        if ($appointment->thoiGianHen && $appointment->thoiGianHen->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
+        // Chỉ cho phép hủy khi chưa tới giờ hẹn
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
+        if ($appointment->thoiGianHen && $appointment->thoiGianHen->lte($now)) {
             return redirect()->route('profile.appointments')
-                ->with('error', 'Không thể hủy lịch hẹn đã quá thời gian.');
+                ->with('error', 'Không thể hủy lịch hẹn đã tới hoặc quá thời gian.');
         }
 
         $appointment->trangThai = 'Đã hủy';
-        // Xóa token checkin để không thể sử dụng QR cũ
-        $appointment->checkin_token = null;
+        // Không cần xóa token vì trạng thái "Đã hủy" đã đủ để ngăn sử dụng
+        // Token vẫn giữ nguyên để tránh lỗi NOT NULL constraint
         $appointment->save();
 
         return redirect()->route('profile.appointments')
@@ -1277,5 +1359,29 @@ class ProfileController extends Controller
             'hoSoDangXuLy' => $hoSoDangXuLy,
             'unreadCount' => $unreadCount
         ]);
+    }
+
+    /**
+     * Xóa cache liên quan đến hồ sơ khi cập nhật trạng thái
+     */
+    private function clearHoSoCache($IDCD)
+    {
+        try {
+            $redisCache = Cache::store('redis_db0');
+            
+            // Xóa cache summary của công dân
+            $summaryKey = "user:{$IDCD}:summary";
+            $redisCache->forget($summaryKey);
+            
+            // Xóa tất cả cache danh sách hồ sơ của công dân này
+            $pattern = "profile:{$IDCD}:services:*";
+            $keys = Redis::keys($pattern);
+            if (!empty($keys)) {
+                Redis::del($keys);
+            }
+        } catch (\Exception $e) {
+            // Log lỗi nhưng không throw để không ảnh hưởng đến flow chính
+            \Log::warning('Lỗi khi xóa cache hồ sơ: ' . $e->getMessage());
+        }
     }
 }

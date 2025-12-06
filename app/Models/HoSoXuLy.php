@@ -43,6 +43,7 @@ class HoSoXuLy extends Model
         'yKienXuLy',
         'duongdanfileykien',
         'duongdanfileketqua',
+        'maTrangThai_backup',
     ];
 
     protected $casts = [
