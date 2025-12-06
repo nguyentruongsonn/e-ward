@@ -20,11 +20,11 @@
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h5 class="text-white mb-4">LINK</h5>
-                    <a class="btn btn-link" href="#">Giới thiệu</a>
-                    <a class="btn btn-link" href="#">Liên hệ</a>
-                    <a class="btn btn-link" href="#">Sân bóng</a>
-                    <a class="btn btn-link" href="#">Chính sách</a>
-                    <a class="btn btn-link" href="#">Hỗ trợ</a>
+                    <a class="btn btn-link" href="{{ route('support.about') }}">Giới thiệu</a>
+                    <a class="btn btn-link" href="{{ route('contact') }}">Liên hệ</a>
+                    <a class="btn btn-link" href="{{ route('services') }}">Dịch vụ công</a>
+                    <a class="btn btn-link" href="{{ route('support.terms') }}">Điều khoản sử dụng</a>
+                    <a class="btn btn-link" href="{{ route('support.faq') }}">Câu hỏi thường gặp</a>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h5 class="text-white mb-4">SÂN BÓNG</h5>

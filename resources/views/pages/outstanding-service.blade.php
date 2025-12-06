@@ -4,8 +4,8 @@
 @section('content')
 <div class="container-fluid page-header pt-5">
     <div class="container py-5">
-        <form class="d-flex wow fadeInUp" data-wow-delay="0.3s" role="search">
-            <input class="form-control me-2" type="search" placeholder="Nhập từ khóa tìm kiếm" aria-label="Search">
+        <form class="d-flex wow fadeInUp" data-wow-delay="0.3s" role="search" action="{{ route('services') }}" method="GET">
+            <input class="form-control me-2" type="search" name="search" placeholder="Nhập từ khóa tìm kiếm" aria-label="Search" value="{{ request('search') }}">
             <button class="btn btn-color" type="submit">TÌM KIẾM</button>
         </form>
         <!-- <nav aria-label="breadcrumb" class="mt-3">

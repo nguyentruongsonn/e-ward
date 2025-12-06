@@ -187,8 +187,10 @@
                             @if($user->vaiTro === 'Quản trị viên')
                                 <li><a href="{{ route('admin.users.congdan.create') }}" class="{{ request()->routeIs('admin.users.congdan.create') ? 'active' : '' }}">Thêm công dân</a></li>
                             @endif
-                            @if($user->vaiTro === 'Quản trị viên')
+                            @if(in_array($user->vaiTro, ['Quản trị viên', 'Lãnh đạo']))
                                 <li><a href="{{ route('admin.users.canbo') }}" class="{{ request()->routeIs('admin.users.canbo') ? 'active' : '' }}">Danh sách cán bộ</a></li>
+                            @endif
+                            @if($user->vaiTro === 'Quản trị viên')
                                 <li><a href="{{ url('admin/users/canbo/create') }}" class="{{ request()->is('admin/users/canbo/create') ? 'active' : '' }}">Thêm cán bộ</a></li>
                             @endif
                         </ul>

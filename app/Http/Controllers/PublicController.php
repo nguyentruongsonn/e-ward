@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\HoSoXuLy;
 use App\Models\TTHC;
 
@@ -54,5 +55,35 @@ class PublicController extends Controller
         }
 
         return view('pages.tracking', compact('hoSo', 'tenChuHoSo'));
+    }
+
+    /**
+     * Display public list of TTHC services
+     */
+    public function services(Request $request)
+    {
+        $query = DB::table('tthc')
+            ->leftJoin('linhvuc', 'tthc.maLinhVuc', '=', 'linhvuc.maLinhVuc')
+            ->select('tthc.*', 'linhvuc.tenLinhVuc')
+            ->where('tthc.trangThai', 'Công khai'); // Chỉ hiển thị dịch vụ công khai
+
+        // Filter theo tìm kiếm
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('tthc.tenTTHC', 'LIKE', "%{$search}%")
+                  ->orWhere('linhvuc.tenLinhVuc', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Filter theo lĩnh vực
+        if ($request->filled('maLinhVuc')) {
+            $query->where('tthc.maLinhVuc', $request->maLinhVuc);
+        }
+
+        $tthcs = $query->orderBy('tthc.tenTTHC', 'asc')->paginate(20)->withQueryString();
+        $linhVucs = DB::table('linhvuc')->orderBy('tenLinhVuc')->get();
+
+        return view('pages.services', compact('tthcs', 'linhVucs'));
     }
 }
