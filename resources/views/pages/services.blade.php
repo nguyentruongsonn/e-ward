@@ -63,19 +63,7 @@
                                     </div>
                                 @endif
                             </div>
-                            @auth
-                                <div>
-                                    <a href="{{ route('nop-ho-so.show', $tthc->maTTHC) }}" class="btn btn-sm btn-primary">
-                                        <i class="fa fa-paper-plane me-1"></i> Nộp hồ sơ
-                                    </a>
-                                </div>
-                            @else
-                                <div>
-                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
-                                        <i class="fa fa-paper-plane me-1"></i> Nộp hồ sơ
-                                    </button>
-                                </div>
-                            @endauth
+
                         </div>
                     </div>
                 </div>

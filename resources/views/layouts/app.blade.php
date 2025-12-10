@@ -38,6 +38,7 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="base-url" content="{{ url('/') }}">
     <link rel="stylesheet" href="{{ asset('css/support.css') }}">
 
     @stack('styles')
