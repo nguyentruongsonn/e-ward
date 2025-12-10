@@ -60,7 +60,6 @@ class ThanhPhanHoSoSeeder extends Seeder
                 'tenThanhPhan'=>'* Lưu ý'
             ],
             [
-
                 'maTTHC'=>1,
                 'tenThanhPhan'=>'Bao gồm'
             ],
