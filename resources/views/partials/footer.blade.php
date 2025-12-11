@@ -40,7 +40,7 @@
                     <p class="mb-2"><i class="fa fa-envelope me-2"></i>Email: support@phuongabc.gov.vn</p>
                     <p class="mb-2"><i class="far fa-clock me-2"></i>Thời gian: 7:30 - 17:00 (T2-CN)</p>
                     @auth
-                        <a href="{{ route('profile') }}" class="btn btn-sm btn-primary mt-2">
+                        <a href="{{ route('profile') }}" class="btn btn-sm btn-color mt-2">
                             <i class="fa fa-user me-1"></i> Tài khoản của tôi
                         </a>
                     @else

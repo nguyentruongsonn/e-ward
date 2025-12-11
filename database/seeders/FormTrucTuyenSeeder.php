@@ -732,9 +732,9 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Ngày tháng năm sinh',
                                 'columns' => [
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nu', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nu', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nu', 'type' => 'number', 'col' => 4,'required' => true,],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nu', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 31],
+                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nu', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 12],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nu', 'type' => 'number', 'col' => 4,'required' => true,'min' => 1900,'max' => date('Y')],
                                 ]
                             ],
                             [
@@ -897,10 +897,10 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Ngày tháng năm sinh',
                                 'columns' => [
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nam', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nam', 'type' => 'number', 'col' => 4],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nam', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 31],
+                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nam', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 12],
                                     ['label' => 'Năm sinh', 'name' => 'nam_sinh_nam', 'type' => 'number', 'col' => 4,
-                                'required' => true,],
+                                'required' => true,'min' => 1900,'max' => date('Y'),],
                                 ]
                             ],
                             [
@@ -1292,10 +1292,10 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Ngày tháng năm sinh',
                                 'columns' => [
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 31],
+                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 12],
                                     ['label' => 'Năm sinh', 'name' => 'nam_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4,
-                                'required' => true,],
+                                'required' => true,'min' => 1900,'max' => date('Y'),],
                                 ]
                             ],
                             [
@@ -1459,10 +1459,10 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Ngày tháng năm sinh',
                                 'columns' => [
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_me', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_me', 'type' => 'number', 'col' => 4],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_me', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 31],
+                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_me', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 12],
                                     ['label' => 'Năm sinh', 'name' => 'nam_sinh_me', 'type' => 'number', 'col' => 4,
-                                'required' => true,],
+                                'required' => true,'min' => 1900,'max' => date('Y'),],
                                 ]
                             ],
                             [
@@ -1578,9 +1578,10 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Ngày tháng năm sinh',
                                 'columns' => [
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_cha', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_cha', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_cha', 'type' => 'number', 'col' => 4,],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_cha', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 31],
+                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_cha', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 12],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_cha', 'type' => 'number', 'col' => 4,
+                                'required' => true,'min' => 1900,'max' => date('Y'),],
                                 ]
                             ],
                             [
@@ -2175,10 +2176,10 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Ngày tháng năm sinh',
                                 'columns' => [
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 31],
+                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 12],
                                     ['label' => 'Năm sinh', 'name' => 'nam_sinh_nam_nguoi_duoc_dk', 'type' => 'number', 'col' => 4,
-                                'required' => true,],
+                                'required' => true,'min' => 1900,'max' => date('Y'),],
                                 ]
                             ],
                             [
@@ -2342,10 +2343,10 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Ngày tháng năm sinh',
                                 'columns' => [
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_me', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_me', 'type' => 'number', 'col' => 4],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_me', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 31],
+                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_me', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 12],
                                     ['label' => 'Năm sinh', 'name' => 'nam_sinh_me', 'type' => 'number', 'col' => 4,
-                                'required' => true,],
+                                'required' => true,'min' => 1900,'max' => date('Y'),],
                                 ]
                             ],
                             [
@@ -2460,10 +2461,10 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Ngày tháng năm sinh',
                                 'columns' => [
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_cha', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_cha', 'type' => 'number', 'col' => 4],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_cha', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 31],
+                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_cha', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 12],
                                     ['label' => 'Năm sinh', 'name' => 'nam_sinh_cha', 'type' => 'number', 'col' => 4,
-                                'required' => true,],
+                                'required' => true,'min' => 1900,'max' => date('Y'),],
                                 ]
                             ],
                             [
@@ -3450,9 +3451,9 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Ngày tháng năm sinh',
                                 'columns' => [
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nguoi_yeu_cau', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nguoi_yeu_cau', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nguoi_yeu_cau', 'type' => 'number', 'col' => 4,'required' => true,],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nguoi_yeu_cau', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 31],
+                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nguoi_yeu_cau', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 12],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nguoi_yeu_cau', 'type' => 'number', 'col' => 4,'required' => true,'min' => 1900,'max' => date('Y'),],
                                 ]
                             ],
 
@@ -3524,9 +3525,9 @@ class FormTrucTuyenSeeder extends Seeder
                                 'type' => 'row',
                                 'title' => 'Ngày tháng năm sinh',
                                 'columns' => [
-                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nguoi_duoc_cap', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nguoi_duoc_cap', 'type' => 'number', 'col' => 4],
-                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nguoi_duoc_cap', 'type' => 'number', 'col' => 4,'required' => true,],
+                                    ['label' => 'Ngày sinh', 'name' => 'ngay_sinh_nguoi_duoc_cap', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 31],
+                                    ['label' => 'Tháng sinh', 'name' => 'thang_sinh_nguoi_duoc_cap', 'type' => 'number', 'col' => 4,'min' => 1,'max' => 12],
+                                    ['label' => 'Năm sinh', 'name' => 'nam_sinh_nguoi_duoc_cap', 'type' => 'number', 'col' => 4,'required' => true,'min' => 1900,'max' => date('Y'),],
                                 ]
                             ],
                             [

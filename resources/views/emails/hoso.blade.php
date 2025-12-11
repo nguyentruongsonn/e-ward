@@ -14,7 +14,7 @@
             padding: 20px;
         }
         .header {
-            background: #32C36C;
+            background: #007bff;
             color: white;
             padding: 20px;
             text-align: center;
@@ -29,7 +29,7 @@
             background: white;
             padding: 15px;
             margin: 15px 0;
-            border-left: 4px solid #32C36C;
+            border-left: 4px solid #007bff;
             border-radius: 4px;
         }
         .footer {

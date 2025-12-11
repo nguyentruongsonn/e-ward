@@ -109,6 +109,10 @@ Route::middleware('auth')->group(function () {
 
     // Ratings history
     Route::get('/profile/ratings', [ProfileController::class, 'showRatings'])->name('profile.ratings');
+    
+    // Mark all notifications as read
+    Route::post('/notifications/mark-read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])
+        ->name('notifications.mark-read');
 });
 
 // Dev-only: quick mail test endpoint

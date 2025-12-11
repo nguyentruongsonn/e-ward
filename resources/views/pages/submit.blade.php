@@ -289,61 +289,54 @@
         {{-- ========================== STEP 2: THÀNH PHẦN HỒ SƠ (GIỮ NGUYÊN) ========================== --}}
         <div class="form-section hidden" data-step="2">
             <h5>Thành phần hồ sơ</h5>
-            <div class="accordion mt-3" id="thanhPhanHoSoAccordion">
-                @php $hasRequiredFiles = false; @endphp
-                @forelse($thanhPhanHoSos as $tenThanhPhan => $giayTos)
-                    @php
-                        $requiredGiayTos = $giayTos->filter(function ($tp) {
-                            return ($tp->soLuongBanChinh ?? 0) >= 1 || ($tp->soLuongBanSao ?? 0) >= 1;
-                        });
-                    @endphp
-                    @if($requiredGiayTos->isNotEmpty())
-                        @php $hasRequiredFiles = true; @endphp
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="heading-{{ $loop->index }}">
-                                <button class="accordion-button @if(!$loop->first) collapsed @endif" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $loop->index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse-{{ $loop->index }}">
-                                    <strong>{{ $tenThanhPhan }}</strong>
-                                    <span class="badge bg-color rounded-pill ms-2">{{ $requiredGiayTos->count() }} giấy tờ cần nộp</span>
-                                </button>
-                            </h2>
-                            <div id="collapse-{{ $loop->index }}" class="accordion-collapse collapse @if($loop->first) show @endif" aria-labelledby="heading-{{ $loop->index }}" data-bs-parent="#thanhPhanHoSoAccordion">
-                                <div class="accordion-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table-service-cth table-bordered table-sm align-middle text-dark mb-0">
-                                            <thead class="dark">
-                                                <tr class="text-center">
-                                                    <th style="width: 50px;">STT</th>
-                                                    <th>Tên giấy tờ</th>
-                                                    <th style="width: 100px;">Bản chính</th>
-                                                    <th style="width: 100px;">Bản sao</th>
-                                                    <th style="width: 30%;">Nộp file</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($requiredGiayTos as $index => $tp)
-                                                    <tr>
-                                                        <td class="text-center">{{ $index + 1 }}</td>
-                                                        <td>{{ $tp->tenGiayTo }}</td>
-                                                        <td class="text-center"><span class="badge bg-success">{{ $tp->soLuongBanChinh }}</span></td>
-                                                        <td class="text-center">@if($tp->soLuongBanSao) <span class="badge bg-info">{{ $tp->soLuongBanSao }}</span> @else <span class="text-muted">—</span> @endif</td>
-                                                        <td><input type="file" name="taiLieu[{{ $tp->maGiayTo }}][]" class="form-control form-control-sm" multiple ></td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                @empty
-                    @php $hasRequiredFiles = false; @endphp
-                @endforelse
+            
+            @php 
+                $allDocuments = collect();
+                foreach($thanhPhanHoSos as $tenThanhPhan => $giayTos) {
+                    $requiredGiayTos = $giayTos->filter(function ($tp) {
+                        return ($tp->soLuongBanChinh ?? 0) >= 1 || ($tp->soLuongBanSao ?? 0) >= 1;
+                    });
+                    foreach($requiredGiayTos as $doc) {
+                        $doc->thanhPhanName = $tenThanhPhan;
+                        $allDocuments->push($doc);
+                    }
+                }
+            @endphp
 
-                @if(!$hasRequiredFiles)
-                    <div class="alert alert-success text-center">✅ Không có giấy tờ nào cần nộp trực tuyến.</div>
-                @endif
-            </div>
+            @if($allDocuments->isNotEmpty())
+                <div class="table-responsive mt-3">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="bg-color">
+                            <tr class="text-center">
+                                <th class="text-white" style="width: 50px;">STT</th>
+                                <th class="text-white">Tên giấy tờ</th>
+                                <th class="text-white" style="width: 100px;">Bản chính</th>
+                                <th class="text-white" style="width: 100px;">Bản sao</th>
+                                <th class="text-white" style="width: 35%;">Nộp file</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($allDocuments as $index => $tp)
+                                <tr>
+                                    <td class="text-center">{{ $index + 1 }}</td>
+                                    <td>
+                                        {{ $tp->tenGiayTo }}
+                                        @if($tp->yeuCau === 'Bắt buộc')
+                                            <span class="badge bg-danger ms-2">Bắt buộc</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center"><span class="badge bg-success">{{ $tp->soLuongBanChinh }}</span></td>
+                                    <td class="text-center">@if($tp->soLuongBanSao) <span class="badge bg-info">{{ $tp->soLuongBanSao }}</span> @else <span class="text-muted">—</span> @endif</td>
+                                    <td><input type="file" name="taiLieu[{{ $tp->maGiayTo }}][]" class="form-control form-control-sm document-upload" data-yeucau="{{ $tp->yeuCau }}" @if($tp->yeuCau === 'Bắt buộc') required @endif multiple ></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="alert alert-success text-center mt-3">✅ Không có giấy tờ nào cần nộp trực tuyến.</div>
+            @endif
+
             <div class="d-flex justify-content-between mt-4">
                 <button type="button" class="btn btn-secondary prev-step">Quay lại</button>
                 <button type="button" class="btn btn-color next-step">Tiếp tục</button>
@@ -470,16 +463,9 @@
                     <label class="" for="xacNhanThongTin">Tôi chắc chắn rằng các thông tin khai báo trên là đúng sự thật.</label>
                 </div>
             </div>
-            <div class="mt-5 mb-1">
-                <h5>Đăng ký thông tin hoàn tiền</h5>
-                <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label">Số tài khoản</label><input type="text" name="so_tai_khoan" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label">Chủ tài khoản</label><input type="text" name="chu_tai_khoan" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label">Tên ngân hàng</label><input type="text" name="ten_ngan_hang" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label">Địa chỉ đơn vị hưởng thụ</label><input type="text" name="dia_chi_don_vi_huong_thu" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label">Chi nhánh ngân hàng</label><input type="text" name="chi_nhanh_ngan_hang" class="form-control"></div>
-                </div>
-            </div>
+
+
+
             <div class="d-flex justify-content-between mt-4">
                 <button type="button" class="btn btn-secondary prev-step">Quay lại</button>
                 <div><button type="button" class="btn btn-color" id="btnSubmitHoSo">Nộp hồ sơ</button></div>
@@ -625,22 +611,23 @@
                             <div class="col-4 text-center">
                                 <strong>Người nộp tiền</strong><br>
                                 <small class="text-muted">(Ký, ghi rõ họ tên)</small>
+                                {{-- Chữ ký dạng viết tay --}}
+                                <div style="margin-top:24px;">
+                                    <span class="signature-name"
+                                          style="display:inline-block;font-size:20px;font-family:'Segoe Script','Brush Script MT',cursive;color:#c0392b;">
+                                        {{ $hoSo->nguoiNop->hoTen ?? '' }}
+                                    </span>
+                                </div>
+                                {{-- Họ tên in rõ nét dưới chữ ký --}}
+                                <div>
+                                    <small class="text-muted">({{ $hoSo->nguoiNop->hoTen ?? '' }})</small>
+                                </div>
                             </div>
                             <div class="col-4"></div>
                             <div class="col-4 text-center">
                                 <strong>Cán bộ tiếp nhận</strong><br>
                                 <small class="text-muted d-block">(Ký, ghi rõ họ tên)</small>
-                                {{-- Chữ ký dạng viết tay --}}
-                                <div style="margin-top:24px;">
-                                    <span class="signature-name"
-                                          style="display:inline-block;font-size:20px;font-family:'Segoe Script','Brush Script MT',cursive;color:#c0392b;">
-                                        P. Trung Nghĩa
-                                    </span>
-                                </div>
-                                {{-- Họ tên in rõ nét dưới chữ ký --}}
-                                <div>
-                                    <small class="text-muted">(Phạm Trung Nghĩa)</small>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -699,19 +686,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const requiredInputs = currentSection.querySelectorAll("[required]");
         let isValid = true;
+        let missingFiles = [];
 
         requiredInputs.forEach(input => {
-            if (!input.checkValidity()) {
-                input.classList.add('is-invalid');
-                isValid = false;
+            // Special handling for file inputs
+            if (input.type === 'file' && input.hasAttribute('required')) {
+                if (input.files.length === 0) {
+                    input.classList.add('is-invalid');
+                    isValid = false;
+                    // Get the document name from the row
+                    const row = input.closest('tr');
+                    if (row) {
+                        const docName = row.querySelector('td:nth-child(2)')?.textContent || 'Giấy tờ';
+                        missingFiles.push(docName);
+                    }
+                } else {
+                    input.classList.remove('is-invalid');
+                }
             } else {
-                input.classList.remove('is-invalid');
+                if (!input.checkValidity()) {
+                    input.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                }
             }
         });
 
         if (!isValid) {
-            // Hiển thị thông báo lỗi mặc định của trình duyệt cho trường không hợp lệ đầu tiên
-            form.reportValidity();
+            if (step === 2 && missingFiles.length > 0) {
+                alert('Vui lòng tải lên các giấy tờ bắt buộc sau:\n\n' + missingFiles.map((doc, i) => `${i + 1}. ${doc}`).join('\n'));
+            } else {
+                // Hiển thị thông báo lỗi mặc định của trình duyệt cho trường không hợp lệ đầu tiên
+                form.reportValidity();
+            }
         }
 
         return isValid;
@@ -730,6 +738,15 @@ document.addEventListener("DOMContentLoaded", function () {
             // Chỉ chuyển step khi step hiện tại hợp lệ
             if (validateStep(currentStep) && currentStep < totalSteps) {
                 currentStep++;
+                showStep(currentStep);
+            }
+        });
+    });
+
+    document.querySelectorAll(".prev-step").forEach(btn => {
+        btn.addEventListener("click", () => {
+            if (currentStep > 1) {
+                currentStep--;
                 showStep(currentStep);
             }
         });
@@ -892,7 +909,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ========== KIỂM TRA THANH TOÁN VỚI CASSO API ==========
-    const api_key = 'AK_CS.1f57ef80bd2d11f0a73fcb966f33aa53.ZbCZFwFUAE2cm31dPyfnRq9k3FVcCLTPPiYCrS4wNt8xQ9DeKu1v75GM5Q6MMQlnggRcZulM';
+    const api_key = 'AK_CS.56fde8b0d69411f0b4b251e5c21af78a.boRC5ZRLptvCZt2bXXMmD2znXfS1WBIoPYOd3AyUtjbCKhpxVcYa4u7m0IolgEWMlBMdAb7p';
     const api_get_paid = 'https://oauth.casso.vn/v2/transactions';
 
     let paymentCheckInterval = null;

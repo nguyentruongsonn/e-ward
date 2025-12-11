@@ -50,6 +50,13 @@ class AdminController extends Controller
             // Kiểm tra quyền admin
             if ($this->isAdmin($user)) {
                 $request->session()->regenerate();
+                
+                // Redirect Checkin role to scan page
+                if (trim($user->vaiTro) === 'Checkin') {
+                    return redirect()->route('admin.appointment.scan')
+                        ->with('success', 'Đăng nhập thành công!');
+                }
+                
                 return redirect()->route('admin.dashboard')
                     ->with('success', 'Đăng nhập thành công!');
             } else {
@@ -160,6 +167,12 @@ class AdminController extends Controller
         if (!$this->isAdmin()) {
             return redirect()->route('admin.login')
                 ->withErrors(['error' => 'Bạn không có quyền truy cập.']);
+        }
+        
+        // Redirect Checkin role to scan page
+        $user = Auth::user();
+        if (trim($user->vaiTro) === 'Checkin') {
+            return redirect()->route('admin.appointment.scan');
         }
 
         // Tự động cập nhật lại IDCD cho các hồ sơ có IDCD = 0 hoặc 1 (do bug cũ)
@@ -450,8 +463,8 @@ class AdminController extends Controller
             return false;
         }
 
-        // Kiểm tra vaiTro trong bảng nguoi - cho phép 4 role
-        $allowedRoles = ['Quản trị viên', 'Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo'];
+        // Kiểm tra vaiTro trong bảng nguoi - cho phép 5 role (including Checkin)
+        $allowedRoles = ['Quản trị viên', 'Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo', 'Checkin'];
         if (in_array($user->vaiTro, $allowedRoles)) {
             return true;
         }

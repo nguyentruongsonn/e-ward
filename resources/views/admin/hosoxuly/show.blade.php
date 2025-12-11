@@ -275,7 +275,7 @@
                             .form-section h5 {
                                 font-size: 18px;
                                 font-weight: 600;
-                                color: #32C36C;
+                                color: #007bff;
                                 border-bottom: 1px solid #eee;
                                 padding-bottom: 5px;
                                 margin-bottom: 20px;
@@ -853,7 +853,7 @@
                             @elseif($hoSo->lePhi > 0)
                                 <div class="mb-4">
                                     <h6>Tổng lệ phí</h6>
-                                    <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; font-size: 18px; font-weight: bold; color: #32C36C;">
+                                    <div class="form-control-plaintext" style="min-height: 38px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; font-size: 18px; font-weight: bold; color: #007bff;">
                                         {{ number_format($hoSo->lePhi, 0, ',', '.') }} VNĐ
                                     </div>
                                 </div>
@@ -1110,7 +1110,7 @@
                                             }
                                             .file-signed-badge {
                                                 display: inline-block;
-                                                background: #32C36C;
+                                                background: #007bff;
                                                 color: white;
                                                 padding: 2px 8px;
                                                 border-radius: 3px;
@@ -1120,70 +1120,6 @@
                                             }
                                         </style>
 
-                                        <div id="ketQuaFilesList">
-                                            @if($hoSo->duongdanfileketqua)
-                                                @php
-                                                    $filesKetQua = json_decode($hoSo->duongdanfileketqua, true) ?? [];
-                                                    $fileSignatures = json_decode($hoSo->file_signatures ?? '{}', true);
-                                                    $user = Auth::user();
-                                                @endphp
-                                                @if(count($filesKetQua) > 0)
-                                                    @foreach($filesKetQua as $index => $file)
-                                                        @php
-                                                            $isSigned = isset($fileSignatures[$file]);
-                                                            $signedBy = $isSigned ? $fileSignatures[$file]['signed_by'] ?? null : null;
-                                                            $signedAt = $isSigned ? $fileSignatures[$file]['signed_at'] ?? null : null;
-                                                        @endphp
-                                                        <div class="file-item" style="padding: 10px; background: #f9f9f9; margin-bottom: 5px; border-radius: 3px; display: flex; align-items: center; justify-content: space-between;">
-                                                            <div style="flex: 1;">
-                                                                <i class="fa fa-file-pdf-o text-danger"></i>
-                                                                <a href="{{ asset($file) }}" target="_blank">{{ basename($file) }}</a>
-                                                                @if($isSigned)
-                                                                    <span class="file-signed-badge">
-                                                                        <i class="fa fa-check-circle"></i> Đã ký số
-                                                                    </span>
-                                                                    @if($signedAt)
-                                                                        <small class="text-muted" style="margin-left: 8px;">
-                                                                            <i class="fa fa-clock-o"></i> {{ \Carbon\Carbon::parse($signedAt)->format('d/m/Y H:i') }}
-                                                                        </small>
-                                                                    @endif
-                                                                @endif
-                                                            </div>
-                                                            <div class="file-actions-dropdown">
-                                                                <button class="file-actions-btn" onclick="toggleFileMenu(event, {{ $index }})">
-                                                                    <i class="fa fa-ellipsis-v"></i>
-                                                                </button>
-                                                                <div class="file-actions-menu" id="file-menu-{{ $index }}">
-                                                                    <a href="{{ asset($file) }}" target="_blank">
-                                                                        <i class="fa fa-eye"></i> Xem file
-                                                                    </a>
-                                                                    <a href="{{ asset($file) }}" download>
-                                                                        <i class="fa fa-download"></i> Tải xuống
-                                                                    </a>
-                                                                    @if($user->vaiTro === 'Lãnh đạo' || $user->vaiTro === 'Quản trị viên')
-                                                                        @if(!$isSigned)
-                                                                            <button onclick="openSignModal('{{ $file }}', '{{ $hoSo->maHSXL }}')">
-                                                                                <i class="fa fa-pencil-square-o"></i> Ký số điện tử
-                                                                            </button>
-                                                                        @else
-                                                                            <button disabled style="opacity: 0.5; cursor: not-allowed;">
-                                                                                <i class="fa fa-check-circle"></i> Đã ký số
-                                                                            </button>
-                                                                        @endif
-                                                                    @endif
-                                                                    <button onclick="removeKetQuaFile('{{ $file }}', '{{ $hoSo->maHSXL }}')" style="color: #d9534f;">
-                                                                        <i class="fa fa-trash"></i> Xóa file
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                @else
-
-                                                @endif
-                                            @else
-                                            @endif
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1194,7 +1130,7 @@
                             <div class="info-section">
                                 <div class="row mb-4">
                                     <div class="col-12">
-                                        <h4 class="mb-4" style="color: #2c3e50; font-weight: 600; border-left: 4px solid #32C36C; padding-left: 15px;">
+                                        <h4 class="mb-4" style="color: #2c3e50; font-weight: 600; border-left: 4px solid #007bff; padding-left: 15px;">
                                             <i class="fa fa-history"></i> Lịch sử hoạt động
                                         </h4>
 
@@ -1239,9 +1175,9 @@
                                                         width: 14px;
                                                         height: 14px;
                                                         border-radius: 50%;
-                                                        background: {{ $index === 0 ? '#32C36C' : '#adb5bd' }};
+                                                        background: {{ $index === 0 ? '#007bff' : '#adb5bd' }};
                                                         border: 3px solid #fff;
-                                                        box-shadow: 0 0 0 1px {{ $index === 0 ? '#32C36C' : '#adb5bd' }};
+                                                        box-shadow: 0 0 0 1px {{ $index === 0 ? '#007bff' : '#adb5bd' }};
                                                         z-index: 1;
                                                     "></div>
 
@@ -1258,7 +1194,7 @@
                                                                 <span style="
                                                                     font-size: 12px;
                                                                     font-weight: 600;
-                                                                    color: {{ $index === 0 ? '#32C36C' : '#6c757d' }};
+                                                                    color: {{ $index === 0 ? '#007bff' : '#6c757d' }};
                                                                     background: {{ $index === 0 ? '#e8f5e9' : '#f8f9fa' }};
                                                                     padding: 2px 8px;
                                                                     border-radius: 4px;
@@ -1296,7 +1232,7 @@
                             <div class="info-section">
                                 <div class="row mb-4">
                                     <div class="col-12">
-                                        <h4 class="mb-3" style="color: #32C36C; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                                        <h4 class="mb-3" style="color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 10px;">
                                             <i class="fa fa-info"></i> Thông tin trả
                                         </h4>
                                         <div class="alert alert-warning">
@@ -1372,7 +1308,7 @@
 <div class="modal fade" id="mailHistoryModal" tabindex="-1" aria-labelledby="mailHistoryModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="max-width: 90%; width: 1200px;">
         <div class="modal-content" style="min-height: 600px;">
-            <div class="modal-header" style="background: #32C36C; color: white; padding: 20px;">
+            <div class="modal-header" style="background: #007bff; color: white; padding: 20px;">
                 <h4 class="modal-title" id="mailHistoryModalLabel" style="font-size: 20px; font-weight: bold; margin: 0;">
                     <i class="fa fa-history"></i> Lịch sử mail đã gửi cho chủ hồ sơ
                 </h4>
@@ -1419,8 +1355,8 @@
                                     <!-- Mail content hidden -->
                                     <tr id="mail-content-{{ $mail->id }}" style="display: none;">
                                         <td colspan="5" style="padding: 20px; background: #fafafa;">
-                                            <div class="card" style="border: 2px solid #32C36C; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                                                <div class="card-header" style="background: #32C36C; color: white; padding: 18px; border-radius: 6px 6px 0 0;">
+                                            <div class="card" style="border: 2px solid #007bff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                                <div class="card-header" style="background: #007bff; color: white; padding: 18px; border-radius: 6px 6px 0 0;">
                                                     @if($mail->direction == 'incoming')
                                                         <h5 style="margin: 0 0 12px 0; font-size: 16px; font-weight: bold;">
                                                             <i class="fa fa-arrow-left"></i> Email từ công dân
@@ -1441,7 +1377,7 @@
                                                 </div>
                                                 <div class="card-body" style="padding: 20px; max-height: 500px; overflow-y: auto; background: white;">
                                                     <strong style="font-size: 15px; color: #333; display: block; margin-bottom: 12px;">Nội dung:</strong>
-                                                    <div style="padding: 18px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #32C36C; white-space: pre-wrap; font-size: 14px; line-height: 1.8; color: #333; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 15px;">{{ $mail->content }}</div>
+                                                    <div style="padding: 18px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #007bff; white-space: pre-wrap; font-size: 14px; line-height: 1.8; color: #333; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 15px;">{{ $mail->content }}</div>
                                                     @if($mail->direction == 'incoming')
                                                         <div style="text-align: right; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
                                                             <button type="button" class="btn btn-success" onclick="replyToMail({{ $mail->id }}, '{{ addslashes($mail->subject) }}', '{{ addslashes($mail->email) }}')" style="font-size: 14px; padding: 10px 20px;">
@@ -1689,34 +1625,49 @@
                     </div>
                     
                     @if($hoSo->tthc && $hoSo->tthc->thanhPhanHoSos->count() > 0)
-                        @foreach($hoSo->tthc->thanhPhanHoSos as $tp)
-                            <div class="panel panel-default mb-3">
-                                <div class="panel-heading" style="background-color: #f5f5f5; padding: 10px;">
-                                    <strong><i class="fa fa-folder-open"></i> {{ $tp->tenThanhPhan }}</strong>
-                                </div>
-                                <div class="panel-body" style="padding: 10px;">
-                                    @if($tp->giayTos && $tp->giayTos->count() > 0)
-                                        <div style="max-height: 150px; overflow-y: auto;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead style="background-color: #007bff; color: white;">
+                                    <tr class="text-center">
+                                        <th style="width: 50px;">
+                                            <input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)">
+                                        </th>
+                                        <th style="width: 50px;">STT</th>
+                                        <th style="width: 200px;">Thành phần</th>
+                                        <th>Tên giấy tờ</th>
+                                        <th style="width: 100px;">Bản chính</th>
+                                        <th style="width: 100px;">Bản sao</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $stt = 1; @endphp
+                                    @foreach($hoSo->tthc->thanhPhanHoSos as $tp)
+                                        @if($tp->giayTos && $tp->giayTos->count() > 0)
                                             @foreach($tp->giayTos as $giayTo)
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" name="giayto[]" value="{{ $giayTo->maGiayTo }}" id="gt_{{ $giayTo->maGiayTo }}">
-                                                    <label class="form-check-label" for="gt_{{ $giayTo->maGiayTo }}">
-                                                        {{ $giayTo->tenGiayTo }}
-                                                        <small class="text-muted">
-                                                            ({{ $giayTo->loaiGiayTo }} - 
-                                                            Bản chính: {{ $giayTo->pivot->soLuongBanChinh }}, 
-                                                            Bản sao: {{ $giayTo->pivot->soLuongBanSao }})
-                                                        </small>
-                                                    </label>
-                                                </div>
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <input class="form-check-input" type="checkbox" name="giayto[]" value="{{ $giayTo->maGiayTo }}" id="gt_{{ $giayTo->maGiayTo }}">
+                                                    </td>
+                                                    <td class="text-center">{{ $stt++ }}</td>
+                                                    <td>{{ $tp->tenThanhPhan }}</td>
+                                                    <td>
+                                                        <label for="gt_{{ $giayTo->maGiayTo }}" style="margin: 0; cursor: pointer;">
+                                                            {{ $giayTo->tenGiayTo }}
+                                                        </label>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge badge-success">{{ $giayTo->pivot->soLuongBanChinh }}</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge badge-info">{{ $giayTo->pivot->soLuongBanSao }}</span>
+                                                    </td>
+                                                </tr>
                                             @endforeach
-                                        </div>
-                                    @else
-                                        <p class="text-muted mb-0"><i>Không có giấy tờ cụ thể nào.</i></p>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     @else
                         <p class="text-muted"><i class="fa fa-info-circle"></i> Không có thành phần hồ sơ nào được định nghĩa cho thủ tục này.</p>
                     @endif
@@ -1827,7 +1778,7 @@
 <div class="modal fade" id="signFileModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header" style="background: #32C36C; color: white;">
+            <div class="modal-header" style="background: #007bff; color: white;">
                 <h5 class="modal-title">
                     <i class="fa fa-pencil-square-o"></i> Ký số điện tử
                 </h5>
@@ -2625,6 +2576,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Save error:', xhr);
                 alert('Có lỗi khi lưu vào database. File vẫn được thêm vào danh sách tạm thời.');
             }
+        });
+    }
+
+    // Function to toggle all checkboxes in supplement request modal
+    function toggleAllCheckboxes(source) {
+        const checkboxes = document.querySelectorAll('#yeuCauBoSungModal input[name="giayto[]"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = source.checked;
         });
     }
 </script>

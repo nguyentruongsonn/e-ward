@@ -230,6 +230,33 @@ label {
     font-weight: 600;
 }
 
+/* ====== TEXT VISIBILITY ====== */
+.form-control-plaintext {
+    color: #212529 !important;
+    font-weight: 500 !important;
+    background-color: #f8f9fa !important;
+}
+
+.table {
+    color: #212529 !important;
+}
+
+.table td, .table th {
+    color: #212529 !important;
+}
+
+body {
+    color: #212529 !important;
+}
+
+p, div, span {
+    color: inherit;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
 /* ====== UTILITY ====== */
 .shadow-sm {
     box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1) !important;
@@ -437,12 +464,12 @@ hr {
                         @if(!empty($cauHinhForm) && isset($cauHinhForm[0]))
                             @foreach($cauHinhForm as $group)
                                 @if(isset($group['group']) && !empty($group['fields']))
-                                    <h6 class="mt-4 mb-3 text-primary border-bottom pb-2">{{ $group['group'] }}</h6>
+                                    <h6 class="mt-4 mb-3 text-color border-bottom pb-2">{{ $group['group'] }}</h6>
                                     
                                     @foreach($group['fields'] as $field)
                                         @if(isset($field['type']) && $field['type'] === 'row')
                                             @if(isset($field['title']) && !empty($field['title']))
-                                                <p class="font-italic text-muted">{{ $field['title'] }}</p>
+                                                <p class="font-italic">{{ $field['title'] }}</p>
                                             @endif
                                             
                                             <div class="row mb-3">

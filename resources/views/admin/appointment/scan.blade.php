@@ -31,7 +31,7 @@
     .appointment-info h4 {
         font-size: 18px;
         font-weight: 600;
-        color: #32C36C;
+        color: #007bff;
         border-bottom: 1px solid #eee;
         padding-bottom: 5px;
         margin-bottom: 20px;
@@ -50,7 +50,7 @@
     .so-thu-tu {
         font-size: 48px;
         font-weight: bold;
-        color: #32C36C;
+        color: #007bff;
         text-align: center;
         margin: 20px 0;
     }
@@ -58,7 +58,7 @@
     .btn-checkin {
         font-size: 18px;
         padding: 15px 30px;
-        background: #32C36C;
+        background: #007bff;
         border: none;
         color: white;
         border-radius: 5px;
@@ -82,12 +82,12 @@
     }
     
     #qr-reader__scan_region {
-        border: 2px solid #32C36C;
+        border: 2px solid #007bff;
         border-radius: 10px;
     }
     
     .btn-scan-qr {
-        background: #32C36C;
+        background: #007bff;
         color: white;
         border: none;
         padding: 10px 20px;
