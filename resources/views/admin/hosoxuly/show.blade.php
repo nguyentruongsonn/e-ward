@@ -1689,34 +1689,49 @@
                     </div>
                     
                     @if($hoSo->tthc && $hoSo->tthc->thanhPhanHoSos->count() > 0)
-                        @foreach($hoSo->tthc->thanhPhanHoSos as $tp)
-                            <div class="panel panel-default mb-3">
-                                <div class="panel-heading" style="background-color: #f5f5f5; padding: 10px;">
-                                    <strong><i class="fa fa-folder-open"></i> {{ $tp->tenThanhPhan }}</strong>
-                                </div>
-                                <div class="panel-body" style="padding: 10px;">
-                                    @if($tp->giayTos && $tp->giayTos->count() > 0)
-                                        <div style="max-height: 150px; overflow-y: auto;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead style="background-color: #32C36C; color: white;">
+                                    <tr class="text-center">
+                                        <th style="width: 50px;">
+                                            <input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)">
+                                        </th>
+                                        <th style="width: 50px;">STT</th>
+                                        <th style="width: 200px;">Thành phần</th>
+                                        <th>Tên giấy tờ</th>
+                                        <th style="width: 100px;">Bản chính</th>
+                                        <th style="width: 100px;">Bản sao</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $stt = 1; @endphp
+                                    @foreach($hoSo->tthc->thanhPhanHoSos as $tp)
+                                        @if($tp->giayTos && $tp->giayTos->count() > 0)
                                             @foreach($tp->giayTos as $giayTo)
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" name="giayto[]" value="{{ $giayTo->maGiayTo }}" id="gt_{{ $giayTo->maGiayTo }}">
-                                                    <label class="form-check-label" for="gt_{{ $giayTo->maGiayTo }}">
-                                                        {{ $giayTo->tenGiayTo }}
-                                                        <small class="text-muted">
-                                                            ({{ $giayTo->loaiGiayTo }} - 
-                                                            Bản chính: {{ $giayTo->pivot->soLuongBanChinh }}, 
-                                                            Bản sao: {{ $giayTo->pivot->soLuongBanSao }})
-                                                        </small>
-                                                    </label>
-                                                </div>
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <input class="form-check-input" type="checkbox" name="giayto[]" value="{{ $giayTo->maGiayTo }}" id="gt_{{ $giayTo->maGiayTo }}">
+                                                    </td>
+                                                    <td class="text-center">{{ $stt++ }}</td>
+                                                    <td>{{ $tp->tenThanhPhan }}</td>
+                                                    <td>
+                                                        <label for="gt_{{ $giayTo->maGiayTo }}" style="margin: 0; cursor: pointer;">
+                                                            {{ $giayTo->tenGiayTo }}
+                                                        </label>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge badge-success">{{ $giayTo->pivot->soLuongBanChinh }}</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge badge-info">{{ $giayTo->pivot->soLuongBanSao }}</span>
+                                                    </td>
+                                                </tr>
                                             @endforeach
-                                        </div>
-                                    @else
-                                        <p class="text-muted mb-0"><i>Không có giấy tờ cụ thể nào.</i></p>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     @else
                         <p class="text-muted"><i class="fa fa-info-circle"></i> Không có thành phần hồ sơ nào được định nghĩa cho thủ tục này.</p>
                     @endif
@@ -2625,6 +2640,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Save error:', xhr);
                 alert('Có lỗi khi lưu vào database. File vẫn được thêm vào danh sách tạm thời.');
             }
+        });
+    }
+
+    // Function to toggle all checkboxes in supplement request modal
+    function toggleAllCheckboxes(source) {
+        const checkboxes = document.querySelectorAll('#yeuCauBoSungModal input[name="giayto[]"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = source.checked;
         });
     }
 </script>

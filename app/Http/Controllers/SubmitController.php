@@ -30,6 +30,7 @@ class SubmitController extends Controller
                 'tph.tenThanhPhan',
                 'gt.maGiayTo',
                 'gt.tenGiayTo',
+                'gt.yeuCau',
                 'tpg.soLuongBanChinh',
                 'tpg.soLuongBanSao'
             )
@@ -71,6 +72,44 @@ class SubmitController extends Controller
                 $congDan = DB::table('congdan')->where('IDCD', $hoSo->IDCD)->first();
                 if ($congDan) {
                     $nguoiInfo = DB::table('nguoi')->where('IDnguoiDung', $congDan->IDnguoiDung)->first();
+                }
+            }
+        } else {
+            // Nếu KHÔNG phải success page, điền sẵn thông tin user đăng nhập
+            if (Auth::check() && empty($dulieu)) {
+                $user = Auth::user();
+                
+                // Lấy thông tin từ bảng nguoi
+                if ($user && $user->IDnguoiDung) {
+                    $nguoi = DB::table('nguoi')->where('IDnguoiDung', $user->IDnguoiDung)->first();
+                    
+                    if ($nguoi) {
+                        // Điền sẵn thông tin người dùng vào $dulieu
+                        // Map các field từ database sang field name trong form
+                        $dulieu = [
+                            // Thông tin cơ bản
+                            'ho_ten' => $nguoi->hoTen ?? '',
+                            'hoTen' => $nguoi->hoTen ?? '', // Giữ cả 2 format
+                            'ngay_sinh' => $nguoi->ngaySinh ?? '',
+                            'ngaySinh' => $nguoi->ngaySinh ?? '',
+                            'so_dien_thoai' => $nguoi->soDienThoai ?? '',
+                            'soDienThoai' => $nguoi->soDienThoai ?? '',
+                            'email' => $nguoi->email ?? '',
+                            
+                            // Giấy tờ tùy thân
+                            'so_giay_to' => $nguoi->cccd ?? '',
+                            'cccd' => $nguoi->cccd ?? '',
+                            'ngay_cap' => $nguoi->ngayCap ?? '',
+                            'ngayCap' => $nguoi->ngayCap ?? '',
+                            'noi_cap_giay_to' => $nguoi->noiCap ?? '',
+                            'noiCap' => $nguoi->noiCap ?? '',
+                            
+                            // Địa chỉ
+                            'dia_chi_chi_tiet' => $nguoi->diaChi ?? '',
+                            'diaChi' => $nguoi->diaChi ?? '',
+                            'gioiTinh' => $nguoi->gioiTinh ?? '',
+                        ];
+                    }
                 }
             }
         }
@@ -516,6 +555,7 @@ class SubmitController extends Controller
                 'tph.tenThanhPhan',
                 'gt.maGiayTo',
                 'gt.tenGiayTo',
+                'gt.yeuCau',
                 'tpg.soLuongBanChinh',
                 'tpg.soLuongBanSao'
             )
