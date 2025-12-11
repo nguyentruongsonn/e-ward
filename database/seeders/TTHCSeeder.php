@@ -188,54 +188,10 @@ class TTHCSeeder extends Seeder
             'ketQuaThucHien'=>'Bản sao được chứng thực từ bản chính',
             ],
 
-                        [
-            'maTTHC'=>6,
-            'tenTTHC'=>'Xác nhận thông tin về cư trú',
-            'maLinhVuc'=>'3',
-            'maQuayLamViec'=>'4',
-            'trinhTuThucHien'=>'
-                - Bước 1: Cá nhân, tổ chức chuẩn bị hồ sơ theo quy định của pháp luật.
-                - Bước 2: Cá nhân, tổ chức nộp hồ sơ tại Công an cấp xã.
-                - Bước 3: Khi tiếp nhận hồ sơ xác nhận thông tin về cư trú, cơ quan đăng ký cư trú kiểm tra tính pháp lý và nội dung hồ sơ:
-                + Trường hợp hồ sơ đã đầy đủ, hợp lệ thì tiếp nhận hồ sơ và cấp Phiếu tiếp nhận hồ sơ và hẹn trả kết quả (mẫu CT04 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký;
-                + Trường hợp hồ sơ đủ điều kiện nhưng chưa đủ hồ sơ thì hướng dẫn bổ sung, hoàn thiện và cấp Phiếu hướng dẫn bổ sung, hoàn thiện hồ sơ (mẫu CT05 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký;
-                + Trường hợp hồ sơ không đủ điều kiện thì từ chối và cấp Phiếu từ chối tiếp nhận, giải quyết hồ sơ (mẫu CT06 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký.
-                - Bước 4: Căn cứ theo ngày hẹn trên Phiếu tiếp nhận hồ sơ và hẹn trả kết quả để nhận thông báo kết quả giải quyết thủ tục đăng ký cư trú (nếu có).
-                ',
-            'doiTuongThucHien'=>'Công dân Việt Nam, Cán bộ, công chức, viên chức, Doanh nghiệp, Tổ chức (không bao gồm doanh nghiệp, HTX), Hợp tác xã',
-            'coQuanThucHien'=>'Công an Xã',
-            'trangThai'=>'Công khai',
-            'yeuCauDieuKien'=>'Không',
-            'canCuPhapLy'=>'Luật 60/2014/QH13',
-            'ketQuaThucHien'=>'Xác nhận thông tin về cư trú (CT07), Phiếu từ chối tiếp nhận, giải quyết hồ sơ (lĩnh vực cư trú)',
-            ],
-
-                        [
-            'maTTHC'=>7,
-            'tenTTHC'=>'Xóa đăng ký tạm trú',
-            'maLinhVuc'=>'3',
-            'maQuayLamViec'=>'5',
-            'trinhTuThucHien'=>'
-                - Bước 1: Cá nhân, tổ chức chuẩn bị hồ sơ theo quy định của pháp luật.
-                - Bước 2: Cá nhân, tổ chức nộp hồ sơ tại Công an cấp xã.
-                - Bước 3: Khi tiếp nhận hồ sơ xóa đăng ký tạm trú, cơ quan đăng ký cư trú kiểm tra tính pháp lý và nội dung hồ sơ:
-                + Trường hợp hồ sơ đã đầy đủ, hợp lệ thì tiếp nhận hồ sơ và cấp Phiếu tiếp nhận hồ sơ và hẹn trả kết quả (mẫu CT04 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký;
-                + Trường hợp hồ sơ đủ điều kiện nhưng chưa đủ hồ sơ thì hướng dẫn bổ sung, hoàn thiện và cấp Phiếu hướng dẫn bổ sung, hoàn thiện hồ sơ (mẫu CT05 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký;
-                + Trường hợp hồ sơ không đủ điều kiện thì từ chối và cấp Phiếu từ chối tiếp nhận, giải quyết hồ sơ (mẫu CT06 ban hành kèm theo Thông tư số 66/2023/TT-BCA) cho người đăng ký.
-                - Bước 4: Căn cứ theo ngày hẹn trên Phiếu tiếp nhận hồ sơ và hẹn trả kết quả để nhận thông báo kết quả giải quyết thủ tục đăng ký cư trú (nếu có).
-                ',
-            'doiTuongThucHien'=>'Công dân Việt Nam, Cán bộ, công chức, viên chức, Doanh nghiệp, Tổ chức (không bao gồm doanh nghiệp, HTX), Hợp tác xã',
-            'coQuanThucHien'=>'Công an Xã',
-            'trangThai'=>'Công khai',
-            'yeuCauDieuKien'=>'- Trong thời hạn 07 ngày kể từ ngày hộ gia đình có người thuộc diện xóa đăng ký tạm trú thì người thuộc diện xóa đăng ký tạm trú hoặc đại diện hộ gia đình có trách nhiệm nộp hồ sơ làm thủ tục xóa đăng ký tạm trú đến cơ quan đăng ký cư trú.
-                - Trường hợp hộ gia đình chỉ có 01 người hoặc người thuộc diện xóa đăng ký tạm trú hoặc đại diện hộ gia đình không thực hiện thủ tục xóa đăng ký tạm trú thì cơ quan đăng ký cư trú có trách nhiệm kiểm tra, xác minh, lập biên bản về việc công dân, đại diện hộ gia đình không thực hiện thủ tục xóa đăng ký tạm trú và thực hiện xóa đăng ký tạm trú đối với công dân.',
-            'canCuPhapLy'=>'Luật 60/2014/QH13',
-            'ketQuaThucHien'=>'Cập nhật thông tin trong Cơ sở dữ liệu quốc gia về dân cư, Thông báo kết quả giải quyết thủ tục về cư trú, hủy bỏ thủ tục về cư trú, Cập nhật thông tin trong Cơ sở dữ liệu về cư trú',
-            ],
 
 
             [
-            'maTTHC'=>8,
+            'maTTHC'=>6,
             'tenTTHC'=>'Liên thông các thủ tục hành chính về đăng ký khai sinh, cấp Thẻ bảo hiểm y tế cho trẻ em dưới 6 tuổi',
             'maLinhVuc'=>'1',
             'maQuayLamViec'=>'5',
@@ -261,7 +217,7 @@ class TTHCSeeder extends Seeder
 
 
             [
-            'maTTHC'=>9,
+            'maTTHC'=>7,
             'tenTTHC'=>'Gia hạn giấy phép xây dựng đối với công trình cấp III, cấp IV (công trình Không theo tuyến/Theo tuyến trong đô thị/Tín ngưỡng, tôn giáo/Tượng đài, tranh hoành tráng/Sửa chữa, cải tạo/Theo giai đoạn cho công trình không theo tuyến/Theo giai đoạn cho công trình theo tuyến trong đô thị/Dự án) và nhà ở riêng lẻ',
             'maLinhVuc'=>'2',
             'maQuayLamViec'=>'2',
@@ -273,6 +229,35 @@ class TTHCSeeder extends Seeder
             'yeuCauDieuKien'=>'Không có.',
             'canCuPhapLy'=>'Luật Xây dựng năm 2014, Luật sửa đổi, bổ sung một số điều của Luật Xây dựng năm 2020, Nghị định số 175/2024/NĐ-CP của Chính phủ quy định chi tiết một số điều và biện pháp thi hành Luật Xây dựng về quản lý hoạt động xây dựng, quy định về phân định thẩm quyền của chính quyền địa phương 02 cấp trong lĩnh vực quản lý nhà nước của Bộ Xây dựng, quy định về phân quyền, phân cấp trong lĩnh vực quản lý nhà nước của Bộ Xây dựng, quy định chi tiết một số điều và biện pháp thi hành luật phòng cháy, chữa cháy và cứu nạn, cứu hộ',
             'ketQuaThucHien'=>'Giấy phép xây dựng được gia hạn.',
+            ],
+            [
+            'maTTHC'=>8,
+            'tenTTHC'=>'Thủ tục cấp Giấy xác nhận tình trạng hôn nhân',
+            'maLinhVuc'=>'2',
+            'maQuayLamViec'=>'1',
+            'trinhTuThucHien'=>'- Nếu lựa chọn hình thức nộp hồ sơ trực tiếp, người yêu cầu cấp Giấy xác nhận tình trạng hôn nhân nộp hồ sơ yêu cầu cấp Giấy xác nhận tình trạng hôn nhân tại Trung tâm phục vụ hành chính công có thẩm quyền nộp lệ phí nếu thuộc trường hợp phải nộp lệ phí cấp Giấy xác nhận tình trạng hôn nhân.
+                - Nếu lựa chọn hình thức nộp hồ sơ trực tuyến, người yêu cầu cấp Giấy xác nhận tình trạng hôn nhân truy cập Cổng dịch vụ công quốc gia , xác thực người dùng theo hướng dẫn, đăng nhập vào hệ thống, lựa chọn Ủy ban nhân dân cấp xã có thẩm quyền.
+                Người yêu cầu cấp Giấy xác nhận tình trạng hôn nhân trực tuyến cung cấp thông tin theo mẫu điện tử tương tác cấp Giấy xác nhận tình trạng hôn nhân (cung cấp trên Cổng dịch vụ công), đính kèm bản chụp hoặc bản sao điện tử các giấy tờ, tài liệu theo quy định; nộp phí, lệ phí thông qua chức năng thanh toán trực tuyến hoặc bằng cách thức khác theo quy định pháp luật, hoàn tất việc nộp hồ sơ.
+                - Cán bộ tiếp nhận hồ sơ tại Trung tâm Phục vụ hành chính công có trách nhiệm kiểm tra tính chính xác, đầy đủ, thống nhất, hợp lệ của hồ sơ.
+                (i) Trường hợp hồ sơ đầy đủ, hợp lệ thì tiếp nhận hồ sơ; có Phiếu hẹn, trả kết quả cho người yêu cầu (nếu người yêu cầu nộp hồ sơ trực tiếp) hoặc gửi ngay Phiếu hẹn, trả kết quả qua thư điện tử hoặc gửi tin nhắn hẹn trả kết quả qua điện thoại di động cho người yêu cầu (nếu người yêu cầu nộp hồ sơ trực tuyến); chuyển hồ sơ để công chức tư pháp - hộ tịch xử lý; trường hợp tiếp nhận hồ sơ tại Trung tâm Phục vụ hành chính công cấp tỉnh, cán bộ tiếp nhận hồ sơ chuyển hồ sơ đến Ủy ban nhân dân cấp xã có thẩm quyền xử lý.
+                (ii) Trường hợp hồ sơ chưa đầy đủ, hợp lệ thì cán bộ tiếp nhận hồ sơ thông báo cho người yêu cầu bổ sung, hoàn thiện hồ sơ, nêu rõ loại giấy tờ, nội dung cần bổ sung để người yêu cầu bổ sung, hoàn thiện. Sau khi hồ sơ được bổ sung, thực hiện lại bước (i);
+                (iii) Nếu người yêu cầu cấp Giấy xác nhận tình trạng hôn nhân không bổ sung, hoàn thiện được hồ sơ thì báo cáo Lãnh đạo Trung tâm Phục vụ hành chính công có văn bản từ chối giải quyết yêu cầu cấp Giấy xác nhận tình trạng hôn nhân.
+                - Công chức tư pháp - hộ tịch thẩm tra hồ sơ (thẩm tra tính thống nhất, hợp lệ của các thông tin trong hồ sơ, giấy tờ, tài liệu đính kèm).
+                + Trường hợp hồ sơ cần bổ sung, hoàn thiện hoặc không đủ điều kiện giải quyết, phải từ chối thì công chức tư pháp - hộ tịch gửi thông báo về tình trạng hồ sơ tới Trung tâm Phục vụ hành chính công để thông báo cho người nộp hồ sơ – thực hiện lại bước (ii) hoặc (iii);
+                + Trường hợp cần phải kiểm tra, xác minh làm rõ hoặc do nguyên nhân khác mà không thể trả kết quả đúng thời gian đã hẹn thì công chức tư pháp - hộ tịch lập Phiếu xin lỗi và hẹn lại ngày trả kết quả, trong đó nêu rõ lý do chậm trả kết quả và thời gian hẹn trả kết quả, chuyển Trung tâm Phục vụ hành chính công để trả cho người yêu cầu (nếu người yêu cầu nộp hồ sơ trực tiếp), hoặc gửi Phiếu xin lỗi và hẹn lại ngày trả kết quả qua thư điện tử hoặc gửi tin nhắn qua điện thoại di động cho người yêu cầu (nếu người yêu cầu nộp hồ sơ trực tuyến).
+                - Trường hợp người yêu cầu cấp lại Giấy xác nhận tình trạng hôn nhân để kết hôn mà không nộp lại được Giấy xác nhận tình trạng hôn nhân đã được cấp trước đây, thì người yêu cầu phải trình bày rõ lý do không nộp lại được Giấy xác nhận tình trạng hôn nhân. Trong thời hạn 03 ngày làm việc kể từ ngày tiếp nhận hồ sơ, cơ quan đăng ký hộ tịch có văn bản trao đổi với nơi dự định đăng ký kết hôn trước đây để xác minh. Trường hợp không xác minh được hoặc không nhận được kết quả xác minh thì cơ quan đăng ký hộ tịch cho phép người yêu cầu lập văn bản cam đoan về tình trạng hôn nhân.
+                - Trường hợp tiếp nhận hồ sơ cấp Giấy xác nhận tình trạng hôn nhân theo hình thức trực tiếp, sau khi hoàn tất thủ tục thì công chức tư pháp - hộ tịch cập nhật thông tin xác nhận tình trạng hôn nhân trên Phần mềm đăng ký, quản lý hộ tịch điện tử dùng chung.
+                Trường hợp tiếp nhận hồ sơ xác nhận tình trạng hôn nhân theo hình thức trực tuyến, công chức tư pháp - hộ tịch gửi lại biểu mẫu Giấy xác nhận tình trạng hôn nhân điện tử với thông tin đầy đủ cho người yêu cầu qua thư điện tử hoặc thiết bị số.
+                Người yêu cầu có trách nhiệm kiểm tra tính chính xác, đầy đủ của các thông tin trên biểu mẫu Giấy xác nhận tình trạng hôn nhân điện tử và xác nhận (tối đa một ngày).
+                Nếu người yêu cầu xác nhận thông tin đã thống nhất, đầy đủ hoặc không có phản hồi sau thời hạn một ngày thì công chức tư pháp - hộ tịch cập nhật thông tin xác nhận tình trạng hôn nhân trên Phần mềm đăng ký, quản lý hộ tịch điện tử dùng chung.
+                - Công chức tư pháp - hộ tịch in Giấy xác nhận tình trạng hôn nhân, trình Lãnh đạo Ủy ban nhân dân cấp xã ký, chuyển tới Trung tâm Phục vụ hành chính công để trả kết quả cho người yêu cầu.
+                - Trong thời hạn 05 ngày làm việc kể từ ngày nhận đủ hồ sơ hợp lệ, cơ quan có thẩm quyền có trách nhiệm xem xét gia hạn giấy phép xây dựng.',
+            'doiTuongThucHien'=>'Công dân Việt Nam, Người Việt Nam định cư ở nước ngoài',
+            'coQuanThucHien'=>'Ủy ban nhân dân cấp xã',
+            'trangThai'=>'Công khai',
+            'yeuCauDieuKien'=>'Không có.',
+            'canCuPhapLy'=>'Luật Xây dựng năm 2014, Luật sửa đổi, bổ sung một số điều của Luật Xây dựng năm 2020, Nghị định số 175/2024/NĐ-CP của Chính phủ quy định chi tiết một số điều và biện pháp thi hành Luật Xây dựng về quản lý hoạt động xây dựng, quy định về phân định thẩm quyền của chính quyền địa phương 02 cấp trong lĩnh vực quản lý nhà nước của Bộ Xây dựng, quy định về phân quyền, phân cấp trong lĩnh vực quản lý nhà nước của Bộ Xây dựng, quy định chi tiết một số điều và biện pháp thi hành luật phòng cháy, chữa cháy và cứu nạn, cứu hộ',
+            'ketQuaThucHien'=>'Giấy xác nhận tình trạng hôn nhân',
             ],
         ]);
     }

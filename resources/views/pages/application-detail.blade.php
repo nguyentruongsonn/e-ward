@@ -331,6 +331,35 @@ hr {
                     </div>
                     @endif
 
+                    {{-- Result Files Alert --}}
+                    @if($hoSo->maTrangThai == 10 && !empty($hoSo->duongdanfileketqua))
+                        @php
+                            $files = json_decode($hoSo->duongdanfileketqua, true);
+                        @endphp
+                        @if(is_array($files) && count($files) > 0)
+                            <div class="alert alert-success mt-3 shadow-sm">
+                                <h5 class="text-success border-bottom pb-2 mb-3">
+                                    <i class="fa fa-check-circle"></i> KẾT QUẢ XỬ LÝ HỒ SƠ
+                                </h5>
+                                <p class="mb-2">Hồ sơ của bạn đã được xử lý xong. Vui lòng tải về kết quả tại đây:</p>
+                                <div class="d-flex flex-wrap mt-2">
+                                    @foreach($files as $file)
+                                        @php
+                                            $filename = basename($file);
+                                            $displayName = $filename;
+                                            if (preg_match('/^\d+_[a-zA-Z0-9]+_(.*)$/', $filename, $matches)) {
+                                                $displayName = $matches[1];
+                                            }
+                                        @endphp
+                                        <a href="{{ asset($file) }}" target="_blank" class="btn btn-success text-white mb-2 mr-2 shadow-sm">
+                                            <i class="fa fa-download me-1"></i> Tải kết quả: {{ $displayName }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    @endif
+
                     {{-- Supplement Request Alert --}}
                     @if($hoSo->maTrangThai == 5 && $yeuCauBoSung)
                         <div class="alert alert-warning">

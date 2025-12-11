@@ -251,6 +251,35 @@
                                     <div class="info-label"><i class="fa fa-money"></i> Lệ phí</div>
                                     <div class="info-value">{{ number_format($hoSo->lePhi ?? 0, 0, ',', '.') }} VNĐ</div>
                                 </div>
+
+                                <!-- Kết quả xử lý (Hiển thị khi đã có kết quả) -->
+                                @if($hoSo->maTrangThai == 10 && !empty($hoSo->duongdanfileketqua))
+                                    @php
+                                        $files = json_decode($hoSo->duongdanfileketqua, true);
+                                    @endphp
+                                    @if(is_array($files) && count($files) > 0)
+                                        <div class="info-item alert alert-success" style="grid-column: 1 / -1;">
+                                            <div class="info-label text-success fw-bold"><i class="fa fa-check-circle-o"></i> KẾT QUẢ XỬ LÝ</div>
+                                            <div class="info-value mt-2">
+                                                <div class="d-flex flex-wrap gap-2">
+                                                @foreach($files as $file)
+                                                    @php
+                                                        $filename = basename($file);
+                                                        // Clean filename for display (remove timestamp prefix)
+                                                        $displayName = $filename;
+                                                        if (preg_match('/^\d+_[a-zA-Z0-9]+_(.*)$/', $filename, $matches)) {
+                                                            $displayName = $matches[1];
+                                                        }
+                                                    @endphp
+                                                    <a href="{{ asset($file) }}" target="_blank" class="btn btn-sm btn-success text-white mb-2 me-2 shadow-sm">
+                                                        <i class="fa fa-download me-1"></i> Tải về: {{ $displayName }}
+                                                    </a>
+                                                @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endif
                             </div>
                         </div>
                     @endif

@@ -128,6 +128,8 @@ if (app()->environment('local')) {
 }
 Route::view('/404', 'pages.404')->name('404');
 
+
+
 // Admin routes
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminController::class, 'showLogin'])->name('admin.login');
