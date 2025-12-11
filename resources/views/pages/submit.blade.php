@@ -463,16 +463,9 @@
                     <label class="" for="xacNhanThongTin">Tôi chắc chắn rằng các thông tin khai báo trên là đúng sự thật.</label>
                 </div>
             </div>
-            <div class="mt-5 mb-1">
-                <h5>Đăng ký thông tin hoàn tiền</h5>
-                <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label">Số tài khoản</label><input type="text" name="so_tai_khoan" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label">Chủ tài khoản</label><input type="text" name="chu_tai_khoan" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label">Tên ngân hàng</label><input type="text" name="ten_ngan_hang" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label">Địa chỉ đơn vị hưởng thụ</label><input type="text" name="dia_chi_don_vi_huong_thu" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label">Chi nhánh ngân hàng</label><input type="text" name="chi_nhanh_ngan_hang" class="form-control"></div>
-                </div>
-            </div>
+
+
+
             <div class="d-flex justify-content-between mt-4">
                 <button type="button" class="btn btn-secondary prev-step">Quay lại</button>
                 <div><button type="button" class="btn btn-color" id="btnSubmitHoSo">Nộp hồ sơ</button></div>
@@ -618,22 +611,23 @@
                             <div class="col-4 text-center">
                                 <strong>Người nộp tiền</strong><br>
                                 <small class="text-muted">(Ký, ghi rõ họ tên)</small>
+                                {{-- Chữ ký dạng viết tay --}}
+                                <div style="margin-top:24px;">
+                                    <span class="signature-name"
+                                          style="display:inline-block;font-size:20px;font-family:'Segoe Script','Brush Script MT',cursive;color:#c0392b;">
+                                        {{ $hoSo->nguoiNop->hoTen ?? '' }}
+                                    </span>
+                                </div>
+                                {{-- Họ tên in rõ nét dưới chữ ký --}}
+                                <div>
+                                    <small class="text-muted">({{ $hoSo->nguoiNop->hoTen ?? '' }})</small>
+                                </div>
                             </div>
                             <div class="col-4"></div>
                             <div class="col-4 text-center">
                                 <strong>Cán bộ tiếp nhận</strong><br>
                                 <small class="text-muted d-block">(Ký, ghi rõ họ tên)</small>
-                                {{-- Chữ ký dạng viết tay --}}
-                                <div style="margin-top:24px;">
-                                    <span class="signature-name"
-                                          style="display:inline-block;font-size:20px;font-family:'Segoe Script','Brush Script MT',cursive;color:#c0392b;">
-                                        P. Trung Nghĩa
-                                    </span>
-                                </div>
-                                {{-- Họ tên in rõ nét dưới chữ ký --}}
-                                <div>
-                                    <small class="text-muted">(Phạm Trung Nghĩa)</small>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -915,7 +909,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ========== KIỂM TRA THANH TOÁN VỚI CASSO API ==========
-    const api_key = 'AK_CS.1f57ef80bd2d11f0a73fcb966f33aa53.ZbCZFwFUAE2cm31dPyfnRq9k3FVcCLTPPiYCrS4wNt8xQ9DeKu1v75GM5Q6MMQlnggRcZulM';
+    const api_key = 'AK_CS.56fde8b0d69411f0b4b251e5c21af78a.boRC5ZRLptvCZt2bXXMmD2znXfS1WBIoPYOd3AyUtjbCKhpxVcYa4u7m0IolgEWMlBMdAb7p';
     const api_get_paid = 'https://oauth.casso.vn/v2/transactions';
 
     let paymentCheckInterval = null;

@@ -22,7 +22,7 @@
                     
                     <!-- Header -->
                     <tr>
-                        <td style="background: linear-gradient(135deg, #32C36C 0%, #28a745 100%); padding: 30px 40px; text-align: center; border-radius: 8px 8px 0 0;">
+                        <td style="background: linear-gradient(135deg, #007bff 0%, #28a745 100%); padding: 30px 40px; text-align: center; border-radius: 8px 8px 0 0;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: 1px;">
                                 DỊCH VỤ CÔNG TRỰC TUYẾN
                             </h1>
@@ -46,11 +46,11 @@
                             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 30px 0;">
                                 <tr>
                                     <td align="center">
-                                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #32C36C; border-radius: 12px; padding: 25px 30px; display: inline-block;">
+                                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #007bff; border-radius: 12px; padding: 25px 30px; display: inline-block;">
                                             <p style="margin: 0 0 10px 0; color: #666666; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
                                                 Mã xác thực của bạn
                                             </p>
-                                            <div style="font-size: 36px; font-weight: 700; color: #32C36C; letter-spacing: 8px; font-family: 'Courier New', monospace; line-height: 1.2;">
+                                            <div style="font-size: 36px; font-weight: 700; color: #007bff; letter-spacing: 8px; font-family: 'Courier New', monospace; line-height: 1.2;">
                                                 {{ $code }}
                                             </div>
                                         </div>

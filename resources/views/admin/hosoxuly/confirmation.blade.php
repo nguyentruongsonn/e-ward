@@ -84,7 +84,7 @@
                         <div class="panel-body">
                             <div class="text-center mb-3">
                                 <h3 class="invoice-title text-uppercase" style="font-weight:700;">
-                                    GIẤY XÁC NHẬN TIẾP NHẬN HỒ SƠ
+                                    GIẤY XÁC NHẬN TIẾP NHẬN HỒ SƠ VÀ HẸN TRẢ KẾT QUẢ
                                 </h3>
                                 <p>
                                     Mã hồ sơ: <strong>{{ $hoSo->maHSXL }}</strong>

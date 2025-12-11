@@ -209,8 +209,18 @@ class LichHenController extends Controller
             ], 422);
         }
 
-        // Lấy danh sách giờ đã đầy (>= 2 lịch hẹn ở tất cả quầy)
+        // Check if selected date is weekend (Saturday = 6, Sunday = 0)
         $ngay = Carbon::parse($ngayHen)->setTimezone('Asia/Ho_Chi_Minh');
+        $dayOfWeek = $ngay->dayOfWeek;
+        
+        if ($dayOfWeek === 0 || $dayOfWeek === 6) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể đặt lịch vào thứ 7 và chủ nhật. Vui lòng chọn ngày làm việc (Thứ 2 - Thứ 6).',
+            ], 422);
+        }
+
+        // Lấy danh sách giờ đã đầy (>= 2 lịch hẹn ở tất cả quầy)
         $startOfDay = $ngay->copy()->startOfDay();
         $endOfDay = $ngay->copy()->endOfDay();
 
@@ -229,12 +239,12 @@ class LichHenController extends Controller
         $gioDaDay = [];
         $allQuays = DB::table('quaylamviec')->pluck('maQuayLamViec')->toArray();
 
-        // Lấy tất cả giờ làm việc
+        // Lấy tất cả giờ làm việc (loại bỏ 17:30)
         $gioLamViec = [];
         for ($h = 7; $h <= 11; $h++) {
             $gioLamViec[] = str_pad($h, 2, '0', STR_PAD_LEFT) . ':30';
         }
-        for ($h = 13; $h <= 17; $h++) {
+        for ($h = 13; $h <= 16; $h++) { // Changed from <= 17 to <= 16 to exclude 17:30
             $gioLamViec[] = str_pad($h, 2, '0', STR_PAD_LEFT) . ':30';
         }
 
@@ -362,6 +372,45 @@ class LichHenController extends Controller
                 'message' => 'Lịch hẹn này đã được check-in rồi.',
                 'soThuTu' => $lichHen->soThuTu,
                 'maQuayLamViec' => $lichHen->maQuayLamViec,
+            ], 422);
+        }
+
+        // Kiểm tra thời gian check-in
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
+        $thoiGianHen = Carbon::parse($lichHen->thoiGianHen)->setTimezone('Asia/Ho_Chi_Minh');
+        
+        // Kiểm tra nếu chưa đến ngày hẹn
+        if (!$thoiGianHen->isToday()) {
+            if ($thoiGianHen->isFuture()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Chưa đến ngày hẹn. Bạn chỉ có thể check-in vào ngày ' . $thoiGianHen->format('d/m/Y') . '.',
+                ], 422);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Đã quá ngày hẹn. Bạn không thể check-in được nữa. Vui lòng đặt lịch mới.',
+                ], 422);
+            }
+        }
+        
+        // Nếu là ngày hôm nay, kiểm tra khoảng thời gian
+        $hoursDifference = $now->diffInHours($thoiGianHen, false);
+        
+        // Kiểm tra nếu đã qua giờ hẹn
+        if ($hoursDifference < 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã quá giờ hẹn. Bạn không thể check-in được nữa. Vui lòng đặt lịch mới.',
+            ], 422);
+        }
+        
+        // Kiểm tra nếu còn quá sớm (hơn 3 tiếng)
+        if ($hoursDifference > 3) {
+            $thoiGianCoTheCheckIn = $thoiGianHen->copy()->subHours(3);
+            return response()->json([
+                'success' => false,
+                'message' => 'Chưa đến thời gian check-in. Bạn chỉ có thể check-in trong vòng 3 tiếng trước giờ hẹn. Vui lòng quay lại sau ' . $thoiGianCoTheCheckIn->format('H:i d/m/Y') . '.',
             ], 422);
         }
 

@@ -15,7 +15,7 @@
     .form-section h5 {
         font-size: 18px;
         font-weight: 600;
-        color: #32C36C;
+        color: #007bff;
         border-bottom: 1px solid #eee;
         padding-bottom: 5px;
         margin-bottom: 20px;
@@ -31,12 +31,12 @@
         background: #fff;
     }
     .time-slot:hover:not(.disabled) {
-        border-color: #32C36C;
+        border-color: #007bff;
         background: #f0f9f4;
     }
     .time-slot.selected {
-        border-color: #32C36C;
-        background: #32C36C;
+        border-color: #007bff;
+        background: #007bff;
         color: #fff;
     }
     .time-slot.disabled {
@@ -54,12 +54,12 @@
         transition: all 0.3s;
     }
     .quay-item:hover {
-        border-color: #32C36C;
+        border-color: #007bff;
         background: #f0f9f4;
     }
     .quay-item.selected {
-        border-color: #32C36C;
-        background: #32C36C;
+        border-color: #007bff;
+        background: #007bff;
         color: #fff;
     }
 </style>
@@ -69,14 +69,8 @@
     <div class="container py-5">
         <form class="d-flex wow fadeInUp" data-wow-delay="0.3s" role="search">
             <input class="form-control me-2" type="search" placeholder="Nhập từ khóa tìm kiếm" aria-label="Search">
-            <button class="btn btn-primary" type="submit">TÌM KIẾM</button>
+            <button class="btn btn-color" type="submit">TÌM KIẾM</button>
         </form>
-        <nav aria-label="breadcrumb" class="mt-3">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a class="text-white" href="{{ route('home') }}">TRANG CHỦ</a></li>
-                <li class="breadcrumb-item"><a class="text-white" href="#">DỊCH VỤ CÔNG NỔI BẬT</a></li>
-            </ol>
-        </nav>
     </div>
 </div>
 <!--Page header-->
@@ -144,7 +138,7 @@
 
             <div class="d-flex justify-content-end gap-2">
                 <a href="{{ route('outstanding-service.show', $tthc->maTTHC) }}" class="btn btn-secondary">Hủy</a>
-                <button type="button" class="btn btn-primary" id="btnDatLich">Đặt lịch</button>
+                <button type="button" class="btn btn-color" id="btnDatLich">Đặt lịch</button>
             </div>
         </div>
 
@@ -171,7 +165,7 @@
             </div>
             <div class="modal-body text-center">
                 <div class="mb-3">
-                    <p class="mb-2"><strong>Mã lịch hẹn:</strong> <span id="modalMaLichHen" class="text-primary fw-bold"></span></p>
+                    <p class="mb-2"><strong>Mã lịch hẹn:</strong> <span id="modalMaLichHen" class="text-color fw-bold"></span></p>
                     <p class="mb-2"><strong>Thời gian:</strong> <span id="modalThoiGian"></span></p>
                 </div>
                 <div class="mb-3">
@@ -186,7 +180,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <a href="{{ route('outstanding-service.show', $tthc->maTTHC) }}" class="btn btn-primary">Về trang chi tiết</a>
+                <a href="{{ route('outstanding-service.show', $tthc->maTTHC) }}" class="btn btn-color">Về trang chi tiết</a>
             </div>
         </div>
     </div>
@@ -207,6 +201,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Xử lý thay đổi ngày hẹn
     ngayHenInput.addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        const dayOfWeek = selectedDate.getDay();
+        
+        // Check if weekend (0 = Sunday, 6 = Saturday)
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            alert('Không thể đặt lịch vào thứ 7 và chủ nhật. Vui lòng chọn ngày làm việc (Thứ 2 - Thứ 6).');
+            this.value = '';
+            timeSlotsContainer.innerHTML = '<p class="text-muted">Vui lòng chọn ngày hẹn trước</p>';
+            selectedTime = null;
+            gioHenInput.value = '';
+            return;
+        }
+        
         selectedTime = null;
         gioHenInput.value = '';
         updateTimeSlots();
@@ -244,10 +251,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Render danh sách giờ hẹn
     function renderTimeSlots(gioDaDay, gioKhongChoDat, gioLamViec) {
-        // Sử dụng danh sách giờ làm việc từ server (cách nhau 1 tiếng)
+        // Sử dụng danh sách giờ làm việc từ server (cách nhau 1 tiếng, không bao gồm 17:30)
         const hours = gioLamViec.length > 0 ? gioLamViec : [
             '07:30', '08:30', '09:30', '10:30', '11:30',
-            '13:30', '14:30', '15:30', '16:30', '17:30'
+            '13:30', '14:30', '15:30', '16:30'  // Removed 17:30
         ];
 
         let html = '<div class="d-flex flex-wrap">';

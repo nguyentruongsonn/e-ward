@@ -22,7 +22,7 @@
     .so-thu-tu {
         font-size: 48px;
         font-weight: bold;
-        color: #32C36C;
+        color: #007bff;
         text-align: center;
         margin: 20px 0;
     }

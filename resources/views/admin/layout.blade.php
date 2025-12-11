@@ -131,9 +131,38 @@
 
                 @php
                     $user = Auth::user();
+                    
+                    // Count applications for each status
+                    $countChoTiepNhan = DB::table('hosoxuly')->where('maTrangThai', 1)->count();
+                    $countNhanTrucTiep = DB::table('hosoxuly')->where('maTrangThai', 11)->count();
+                    $countDaTiepNhan = DB::table('hosoxuly')->where('maTrangThai', 2)->where('nguoiDuyet', null)->count();
+                    $countChoPheDuyet = DB::table('hosoxuly')->where('maTrangThai', 4)->where('nguoiDuyet', null)->count();
+                    $countYeuCauBoSung = DB::table('hosoxuly')->whereIn('maTrangThai', [5, 6])->count();
+                    $countDaXuLyXong = DB::table('hosoxuly')->where('maTrangThai', 9)->count();
+                    
+                    // Count appointments for today only
+                    $countLichHenHomNay = DB::table('lichhen')
+                        ->whereDate('thoiGianHen', now()->toDateString())
+                        ->where('trangThai', '!=', 'Đã hủy')
+                        ->count();
                 @endphp
 
-                {{-- Quản lý hồ sơ - All staff roles can see --}}
+                {{-- Checkin role - simplified menu --}}
+                @if(trim($user->vaiTro) === 'Checkin')
+                    <li>
+                        <a href="{{ route('admin.appointment.scan') }}" class="{{ request()->routeIs('admin.appointment.scan') ? 'active' : '' }}">
+                            <i class="fa fa-qrcode"></i>
+                            <span>Quét QR Check-in</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('home') }}" target="_blank">
+                            <i class="fa fa-globe"></i>
+                            <span>Về trang chủ</span>
+                        </a>
+                    </li>
+                @else
+                {{-- Regular admin menu for other roles --}}
                 <li class="sub-menu">
                     <a href="javascript:;" class="{{ request()->routeIs('admin.hosoxuly.*') ? 'active' : '' }}">
                         <i class="fa fa-file-text"></i>
@@ -141,17 +170,59 @@
                     </a>
                     <ul class="sub">
                         @if($user->vaiTro === 'Cán bộ một cửa' || $user->vaiTro === 'Quản trị viên')
-                            <li><a href="{{ route('admin.hosoxuly.index') }}" class="{{ request()->routeIs('admin.hosoxuly.index') ? 'active' : '' }}">Hồ sơ chờ tiếp nhận</a></li>
-                            <li><a href="{{ route('admin.hosoxuly.nhan-truc-tiep') }}" class="{{ request()->routeIs('admin.hosoxuly.nhan-truc-tiep') ? 'active' : '' }}">Hồ sơ nhận trực tiếp</a></li>
+                            <li>
+                                <a href="{{ route('admin.hosoxuly.index') }}" class="{{ request()->routeIs('admin.hosoxuly.index') ? 'active' : '' }}">
+                                    Hồ sơ chờ tiếp nhận
+                                    @if($countChoTiepNhan > 0)
+                                        <span class="badge bg-warning" style="margin-left: 40px; margin-top: 2px;">{{ $countChoTiepNhan }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.hosoxuly.nhan-truc-tiep') }}" class="{{ request()->routeIs('admin.hosoxuly.nhan-truc-tiep') ? 'active' : '' }}">
+                                    Hồ sơ nhận trực tiếp
+                                    @if($countNhanTrucTiep > 0)
+                                        <span class="badge bg-info" style="margin-left: 40px; margin-top: 2px;">{{ $countNhanTrucTiep }}</span>
+                                    @endif
+                                </a>
+                            </li>
                         @endif
                         @if($user->vaiTro === 'Cán bộ thụ lý' || $user->vaiTro === 'Quản trị viên')
-                            <li><a href="{{ route('admin.hosoxuly.tiepnhan') }}" class="{{ request()->routeIs('admin.hosoxuly.tiepnhan') ? 'active' : '' }}">Hồ sơ đã tiếp nhận</a></li>
+                            <li>
+                                <a href="{{ route('admin.hosoxuly.tiepnhan') }}" class="{{ request()->routeIs('admin.hosoxuly.tiepnhan') ? 'active' : '' }}">
+                                    Hồ sơ đã tiếp nhận
+                                    @if($countDaTiepNhan > 0)
+                                        <span class="badge bg-primary" style="margin-left: 40px;margin-top: 2px;">{{ $countDaTiepNhan }}</span>
+                                    @endif
+                                </a>
+                            </li>
                         @endif
                         @if($user->vaiTro === 'Lãnh đạo' || $user->vaiTro === 'Quản trị viên')
-                            <li><a href="{{ route('admin.hosoxuly.cho-xuly') }}" class="{{ request()->routeIs('admin.hosoxuly.cho-xuly') ? 'active' : '' }}">Hồ sơ chờ phê duyệt</a></li>
+                            <li>
+                                <a href="{{ route('admin.hosoxuly.cho-xuly') }}" class="{{ request()->routeIs('admin.hosoxuly.cho-xuly') ? 'active' : '' }}">
+                                    Hồ sơ chờ phê duyệt
+                                    @if($countChoPheDuyet > 0)
+                                        <span class="badge bg-danger" style="margin-left: 40px;margin-top: 2px;">{{ $countChoPheDuyet }}</span>
+                                    @endif
+                                </a>
+                            </li>
                         @endif
-                        <li><a href="{{ route('admin.hosoxuly.danh-sach-yeu-cau-bo-sung') }}" class="{{ request()->routeIs('admin.hosoxuly.danh-sach-yeu-cau-bo-sung') ? 'active' : '' }}">Hồ sơ yêu cầu bổ sung</a></li>
-                        <li><a href="{{ route('admin.hosoxuly.da-xu-ly-xong') }}" class="{{ request()->routeIs('admin.hosoxuly.da-xu-ly-xong') ? 'active' : '' }}">Hồ sơ đã xử lý xong</a></li>
+                        <li>
+                            <a href="{{ route('admin.hosoxuly.danh-sach-yeu-cau-bo-sung') }}" class="{{ request()->routeIs('admin.hosoxuly.danh-sach-yeu-cau-bo-sung') ? 'active' : '' }}">
+                                Hồ sơ yêu cầu bổ sung
+                                @if($countYeuCauBoSung > 0)
+                                    <span class="badge bg-warning" style="margin-left: 40px; margin-top: 2px;">{{ $countYeuCauBoSung }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.hosoxuly.da-xu-ly-xong') }}" class="{{ request()->routeIs('admin.hosoxuly.da-xu-ly-xong') ? 'active' : '' }}">
+                                Hồ sơ đã xử lý xong
+                                @if($countDaXuLyXong > 0)
+                                    <span class="badge bg-success" style="margin-left: 40px; margin-top: 2px;">{{ $countDaXuLyXong }}</span>
+                                @endif
+                            </a>
+                        </li>
                         <li><a href="{{ route('admin.hosoxuly.da-tra-ket-qua') }}" class="{{ request()->routeIs('admin.hosoxuly.da-tra-ket-qua') ? 'active' : '' }}">Hồ sơ đã trả kết quả</a></li>
                         <li><a href="{{ route('admin.hosoxuly.all') }}" class="{{ request()->routeIs('admin.hosoxuly.all') ? 'active' : '' }}">Danh sách tất cả hồ sơ</a></li>
                     </ul>
@@ -170,7 +241,14 @@
                         <li><a href="{{ route('admin.appointment.scan') }}" class="{{ request()->routeIs('admin.appointment.scan') ? 'active' : '' }}">Quét QR Code</a></li>
                         @endif
                         <li><a href="{{ route('admin.appointment.index') }}" class="{{ request()->routeIs('admin.appointment.index') ? 'active' : '' }}">Danh sách lịch hẹn</a></li>
-                        <li><a href="{{ route('admin.appointment.today') }}" class="{{ request()->routeIs('admin.appointment.today') ? 'active' : '' }}">Lịch hẹn hôm nay</a></li>
+                        <li>
+                            <a href="{{ route('admin.appointment.today') }}" class="{{ request()->routeIs('admin.appointment.today') ? 'active' : '' }}">
+                                Lịch hẹn hôm nay
+                                @if($countLichHenHomNay > 0)
+                                    <span class="badge bg-primary" style="margin-left: 40px; margin-top: 2px;">{{ $countLichHenHomNay }}</span>
+                                @endif
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 @endif
@@ -231,6 +309,7 @@
                         <span>Về trang chủ</span>
                     </a>
                 </li>
+                @endif
             </ul>
         </div>
         <!-- sidebar menu end-->

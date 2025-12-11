@@ -42,21 +42,18 @@ class SupportController extends Controller
             ->groupBy('id_loaicauhoi', 'name_loaicauhoi')
             ->orderBy('id_loaicauhoi')
             ->get();
-        // Chỉ truy vấn khi có từ khóa hoặc đã chọn loại; ngược lại trả danh sách rỗng
-        if ($q !== '' || $categoryId !== null) {
-            $faqs = Faq::query()
-                ->when($q !== '', function ($qb) use ($q) {
-                    return $qb->where(function ($inner) use ($q) {
-                        $inner->where('cauhoi', 'like', "%{$q}%")
-                              ->orWhere('dapan', 'like', "%{$q}%");
-                    });
-                })
-                ->when($categoryId !== null, fn($qb) => $qb->where('id_loaicauhoi', $categoryId))
-                ->orderBy('id', 'desc')
-                ->get();
-        } else {
-            $faqs = collect();
-        }
+        
+        // Hiển thị tất cả FAQ khi không có tìm kiếm, hoặc lọc theo điều kiện
+        $faqs = Faq::query()
+            ->when($q !== '', function ($qb) use ($q) {
+                return $qb->where(function ($inner) use ($q) {
+                    $inner->where('cauhoi', 'like', "%{$q}%")
+                          ->orWhere('dapan', 'like', "%{$q}%");
+                });
+            })
+            ->when($categoryId !== null, fn($qb) => $qb->where('id_loaicauhoi', $categoryId))
+            ->orderBy('id', 'desc')
+            ->get();
 
         return view('support.faq', compact('categories', 'faqs', 'q', 'categoryId'));
     }

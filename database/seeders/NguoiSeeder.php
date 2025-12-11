@@ -85,19 +85,20 @@ class NguoiSeeder extends Seeder
                 'soDienThoai' => '0918123456',
                 'vaiTro' => 'Quản trị viên'
             ],
-            // [
-            //     'IDnguoiDung' => 3,
-            //     'maCCCD' => '012345678903',
-            //     'hoTen' => 'Lê Văn C',
-            //     'gioiTinh' => 'Nam',
-            //     'ngaySinh' => '1999-12-05',
-            //     'queQuan' => 'Hà Nội',
-            //     'noiThuongTru' => 'Hà Nội',
-            //     'noiTamTru' => 'Hà Đông, Hà Nội',
-            //     'email' => 'levanc@example.com',
-            //     'soDienThoai' => '0987654321',
-            //     'vaiTro' => 'Công dân/ Tổ chức'
-            // ],
+            [
+                'IDnguoiDung' => 6,
+                'maCCCD' => '012345678903',
+                'hoTen' => 'Kiosk',
+                'gioiTinh' => 'Nam',
+                'ngaySinh' => '1999-12-05',
+                'queQuan' => 'Hà Nội',
+                'noiThuongTru' => 'Hà Nội',
+                'noiTamTru' => 'Hà Đông, Hà Nội',
+                'email' => 'kiosk@gmail.com',
+                'password'=> '$2y$12$QqCkYxiF0yeSl1FqtBGLKO9eFBKo2H5OWd/QJoIOqQlJMUTY7/ovm',
+                'soDienThoai' => '0987654321',
+                'vaiTro' => 'Checkin'
+            ],
             // [
             //     'IDnguoiDung' => 4,
             //     'maCCCD' => '012345678904',

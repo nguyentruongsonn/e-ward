@@ -60,6 +60,135 @@
                     <a href="{{ route('support.notice') }}" class="dropdown-item">THÔNG BÁO</a>
                 </div>
             </div>
+            
+            {{-- Notification Dropdown (Only for authenticated users) --}}
+            @auth
+                @php
+                    // Lấy thông báo mới nhất (5 thông báo gần nhất)
+                    $authUser = Auth::user();
+                    $notifications = collect();
+                    
+                    // Định nghĩa tên trạng thái theo maTrangThai
+                    $statusNames = [
+                        1 => 'Chờ tiếp nhận',
+                        2 => 'Được tiếp nhận',
+                        3 => 'Không được tiếp nhận',
+                        4 => 'Đang xử lý',
+                        5 => 'Yêu cầu bổ sung',
+                        6 => 'Đã bổ sung',
+                        7 => 'Chờ lãnh đạo duyệt',
+                        9 => 'Đã xử lý xong',
+                        10 => 'Đã trả kết quả',
+                        11 => 'Hủy'
+                    ];
+                    
+                    if ($authUser && $authUser->IDnguoiDung) {
+                        // Tìm IDCD của công dân
+                        $congDan = DB::table('congdan')
+                            ->where('IDnguoiDung', $authUser->IDnguoiDung)
+                            ->first();
+                        
+                        if ($congDan) {
+                            // Lấy các hồ sơ của công dân
+                            $notifications = DB::table('hosoxuly as h')
+                                ->join('tthc as t', 'h.maTTHC', '=', 't.maTTHC')
+                                ->where('h.IDCD', $congDan->IDCD)
+                                ->whereIn('h.maTrangThai', [2, 3, 4, 5, 6, 9, 10]) // Các trạng thái quan trọng
+                                ->select(
+                                    'h.maHSXL',
+                                    't.tenTTHC',
+                                    'h.maTrangThai',
+                                    'h.ngayTiepNhan'
+                                )
+                                ->orderBy('h.ngayTiepNhan', 'desc')
+                                ->limit(5)
+                                ->get()
+                                ->map(function($item) use ($statusNames) {
+                                    $item->tenTrangThai = $statusNames[$item->maTrangThai] ?? 'Chưa xác định';
+                                    return $item;
+                                });
+                        }
+                    }
+                    
+                    // Lấy thời điểm đã xem thông báo lần cuối từ session
+                    $lastViewedTime = session('notifications_last_viewed', null);
+                    
+                    // Đếm số thông báo chưa đọc (những thông báo sau lần xem cuối)
+                    $unreadCount = 0;
+                    if ($lastViewedTime) {
+                        $unreadCount = $notifications->filter(function($notification) use ($lastViewedTime) {
+                            return strtotime($notification->ngayTiepNhan) > strtotime($lastViewedTime);
+                        })->count();
+                    } else {
+                        // Nếu chưa từng xem, tất cả đều là chưa đọc
+                        $unreadCount = $notifications->count();
+                    }
+                    
+                    $notificationCount = $notifications->count();
+                @endphp
+                
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle position-relative" data-bs-toggle="dropdown" 
+                       id="notificationDropdown" onclick="markNotificationsAsRead()" 
+                       >
+                        <i class="fa fa-bell" style="font-size: 1.2rem;"></i>
+                        @if($unreadCount > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                  id="notificationBadge"
+                                  style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                                {{ $unreadCount }}
+                                <span class="visually-hidden">thông báo mới</span>
+                            </span>
+                        @endif
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end bg-light m-0" style="min-width: 350px; max-height: 400px; position: absolute; right: -150px; ">
+                        <div class="dropdown-header bg-color text-white" style="font-weight: bold;">
+                            <i class="fa fa-bell"></i> Thông báo
+                        </div>
+                        
+                        @if($notifications->count() > 0)
+                            @foreach($notifications as $notification)
+                                @php
+                                    // Xác định màu badge theo trạng thái
+                                    $badgeClass = match($notification->maTrangThai) {
+                                        2 => 'bg-info',           // Được tiếp nhận
+                                        3 => 'bg-danger',         // Không được tiếp nhận
+                                        4 => 'bg-primary',        // Đang xử lý
+                                        5 => 'bg-warning',        // Yêu cầu bổ sung
+                                        6 => 'bg-info',           // Đã bổ sung
+                                        9 => 'bg-success',        // Đã xử lý xong
+                                        10 => 'bg-success',       // Đã trả kết quả
+                                        default => 'bg-secondary'
+                                    };
+                                    
+                                    $timeAgo = \Carbon\Carbon::parse($notification->ngayTiepNhan)->diffForHumans();
+                                @endphp
+                                
+                                <a href="{{ route('profile.hoso.show', $notification->maHSXL) }}" 
+                                   class="dropdown-item border-bottom" 
+                                   style="padding: 0.75rem 1rem; white-space: normal;">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-grow-1">
+                                            <strong style="font-size: 0.9rem;">{{ $notification->tenTTHC }}</strong>
+                                            <br>
+                                            <small class="text-muted">Mã HS: {{ $notification->maHSXL }}</small>
+                                            <br>
+                                            <span class="badge {{ $badgeClass }} mt-1" style="font-size: 0.75rem;">
+                                                {{ $notification->tenTrangThai }}
+                                            </span>
+                                            <br>
+                                            <small class="text-muted" style="font-size: 0.75rem;">
+                                                <i class="fa fa-clock-o"></i> {{ $timeAgo }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endforeach
+                        
+                        @endif
+                    </div>
+                </div>
+            @endauth
 
 
         </div>
@@ -267,3 +396,30 @@
         });
     </script>
 @endif
+
+<script>
+// Function to mark notifications as read
+function markNotificationsAsRead() {
+    // Send AJAX request to mark notifications as read
+    fetch('/notifications/mark-read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Hide the badge
+            const badge = document.getElementById('notificationBadge');
+            if (badge) {
+                badge.style.display = 'none';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error marking notifications as read:', error);
+    });
+}
+</script>
