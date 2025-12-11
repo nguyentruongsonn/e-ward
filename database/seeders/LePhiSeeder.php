@@ -15,20 +15,67 @@ class LePhiSeeder extends Seeder
         DB::table('lephi')->insert([
             [
                 'maLePhi'=>1,
-                'loaiLePhi'=>'Lệ phí',
-                'maTTHC'=>2,
-                'soTien'=>0,
+                'loaiLePhi'=>'Phí số lượng bản',
+                'maTTHC'=>1,
+                'soTien'=>8000,
                 'batBuoc'=>'Không',
-                'moTa'=>'Thu phí bằng 0 đồng trường hợp nộp hồ sơ trực tuyến (Theo Nghị quyết: 08/2025/NQ-HĐND ngày 23/06/2025)'
+                'moTa'=>'8000/ bản sao'
             ],
-
             [
                 'maLePhi'=>2,
                 'loaiLePhi'=>'Phí số lượng bản',
                 'maTTHC'=>2,
-                'soTien'=>2000,
+                'soTien'=>8000,
                 'batBuoc'=>'Không',
                 'moTa'=>'8000/ bản sao'
+            ],
+            [
+                'maLePhi'=>3,
+                'loaiLePhi'=>'Phí số lượng bản',
+                'maTTHC'=>3,
+                'soTien'=>8000,
+                'batBuoc'=>'Không',
+                'moTa'=>'Trường hợp được tính là một hoặc nhiều chữ ký trong một giấy tờ, văn bản'
+            ],
+            [
+                'maLePhi'=>4,
+                'loaiLePhi'=>'Phí số lượng bản',
+                'maTTHC'=>4,
+                'soTien'=>10000,
+                'batBuoc'=>'Không',
+                'moTa'=>'trường hợp được tính là một hoặc nhiều chữ ký trong một giấy tờ, văn bản'
+            ],
+            [
+                'maLePhi'=>5,
+                'loaiLePhi'=>'Phí số lượng bản',
+                'maTTHC'=>5,
+                'soTien'=>8000,
+                'batBuoc'=>'Không',
+                'moTa'=>'trường hợp được tính là một hoặc nhiều chữ ký trong một giấy tờ, văn bản'
+            ],
+            [
+                'maLePhi'=>6,
+                'loaiLePhi'=>'Phí, lệ phí   ',
+                'maTTHC'=>6,
+                'soTien'=>0,
+                'batBuoc'=>'Không',
+                'moTa'=>'trường hợp được tính là một hoặc nhiều chữ ký trong một giấy tờ, văn bản'
+            ],
+            [
+                'maLePhi'=>7,
+                'loaiLePhi'=>'Phí số lượng bản',
+                'maTTHC'=>7,
+                'soTien'=>8000,
+                'batBuoc'=>'Không',
+                'moTa'=>'trường hợp được tính là một hoặc nhiều chữ ký trong một giấy tờ, văn bản'
+            ],
+            [
+                'maLePhi'=>8,
+                'loaiLePhi'=>'Lệ phí',
+                'maTTHC'=>8,
+                'soTien'=>8000,
+                'batBuoc'=>'Không',
+                'moTa'=>'trường hợp được tính là một hoặc nhiều chữ ký trong một giấy tờ, văn bản'
             ],
         ]);
     }

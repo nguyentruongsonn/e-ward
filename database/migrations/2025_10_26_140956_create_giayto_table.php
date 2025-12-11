@@ -22,6 +22,7 @@ return new class extends Migration
                 'Bản ghi',
                 'Khác',
             ]);
+            $table->enum('yeuCau',['Bắt buộc','Không bắt buộc']);
 
         });
     }

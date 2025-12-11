@@ -1769,3 +1769,43 @@ button:hover {
     font-weight: bold;
     text-align: center;
 }
+
+/* ====== REMOVE GREEN / FORCE BLUE THEME ====== */
+.btn-success,
+.btn-outline-success {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #fff !important;
+}
+
+.btn-success:hover,
+.btn-outline-success:hover {
+    background-color: #0056b3 !important;
+    /* Darker Blue */
+    border-color: #0056b3 !important;
+    color: #fff !important;
+}
+
+.alert-success {
+    background-color: #e3f2fd !important;
+    /* Light Blue */
+    border-color: #b8daff !important;
+    color: #004085 !important;
+    /* Dark Blue Text */
+}
+
+.text-success {
+    color: var(--primary) !important;
+}
+
+.bg-success {
+    background-color: var(--primary) !important;
+}
+
+.badge.bg-success {
+    background-color: var(--primary) !important;
+}
+
+.border-success {
+    border-color: var(--primary) !important;
+}
