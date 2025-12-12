@@ -32,7 +32,8 @@ class DatabaseSeeder extends Seeder
             ThanhPhanGiayToSeeder::class,
             FormTrucTuyenSeeder::class,
             LePhiSeeder::class,
-            TrangThaiHoSoSeeder::class
+            TrangThaiHoSoSeeder::class,
+            FaqSeeder::class,
         ]);
 
     }
