@@ -36,6 +36,12 @@ class LoginController extends Controller
             
             // Kiểm tra nếu là admin thì redirect về admin dashboard
             if ($this->isAdmin($user)) {
+                // Redirect Checkin role to scan page
+                if (trim($user->vaiTro) === 'Checkin') {
+                    return redirect()->route('admin.appointment.scan')
+                        ->with('success', 'Đăng nhập thành công!');
+                }
+
                 return redirect()->route('admin.dashboard')
                     ->with('success', 'Chúc mừng bạn đã đăng nhập thành công!');
             }
@@ -81,7 +87,7 @@ class LoginController extends Controller
         }
 
         // Kiểm tra vaiTro trong bảng nguoi (bao gồm Cán bộ và Quản trị viên)
-        if (in_array($user->vaiTro, ['Quản trị viên', 'Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo'])) {
+        if (in_array($user->vaiTro, ['Quản trị viên', 'Cán bộ một cửa', 'Cán bộ thụ lý', 'Lãnh đạo', 'Checkin'])) {
             return true;
         }
 

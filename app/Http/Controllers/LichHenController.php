@@ -379,6 +379,15 @@ class LichHenController extends Controller
         $now = Carbon::now('Asia/Ho_Chi_Minh');
         $thoiGianHen = Carbon::parse($lichHen->thoiGianHen)->setTimezone('Asia/Ho_Chi_Minh');
         
+        // Debug logging
+        \Log::info('Check-in validation', [
+            'now' => $now->toDateTimeString(),
+            'appointment' => $thoiGianHen->toDateTimeString(),
+            'isToday' => $thoiGianHen->isToday(),
+            'isFuture' => $thoiGianHen->isFuture(),
+            'diffInHours' => $now->diffInHours($thoiGianHen, false),
+        ]);
+        
         // Kiểm tra nếu chưa đến ngày hẹn
         if (!$thoiGianHen->isToday()) {
             if ($thoiGianHen->isFuture()) {
@@ -401,7 +410,7 @@ class LichHenController extends Controller
         if ($hoursDifference < 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'Đã quá giờ hẹn. Bạn không thể check-in được nữa. Vui lòng đặt lịch mới.',
+                'message' => 'Đã quá giờ hẹn. Bạn không thể check-in được nữa. Vui lòngđặt lịch mới.',
             ], 422);
         }
         

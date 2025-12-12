@@ -551,7 +551,7 @@
                                                         <a href="{{ route('profile.payments.invoice', $gd->id) }}"
                                                            class="btn btn-sm btn-outline-primary"
                                                            target="_blank">
-                                                            <i class="fa fa-print me-1"></i> In hóa đơn
+                                                            <i class="fa fa-print me-1 bg-color"  ></i> In hóa đơn
                                                         </a>
                                                     </td>
                                                 </tr>

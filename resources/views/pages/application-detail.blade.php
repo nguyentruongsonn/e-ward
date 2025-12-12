@@ -660,10 +660,10 @@ hr {
                                                             <td>
                                                                 @foreach($uploadedFiles as $file)
                                                                     <div class="mb-1">
-                                                                        <a href="{{ asset('storage/' . $file->duongDan) }}" target="_blank" class="text-primary">
+                                                                        <a href="{{ asset('storage/' . $file->duongDan) }}" target="_blank" class="text-color">
                                                                             <i class="fa fa-paperclip"></i> {{ $file->tenTep }}
                                                                         </a>
-                                                                        <small class="text-muted">({{ number_format($file->kichThuoc / 1024, 2) }} KB)</small>
+                                                                        <small class="">({{ number_format($file->kichThuoc / 1024, 2) }} KB)</small>
                                                                     </div>
                                                                 @endforeach
                                                             </td>

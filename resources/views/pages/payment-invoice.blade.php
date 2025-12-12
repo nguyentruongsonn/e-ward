@@ -203,20 +203,18 @@
             <div class="col-4 text-center">
                 <strong>Người nộp tiền</strong><br>
                 <small class="text-muted">(Ký, ghi rõ họ tên)</small>
+                <div style="margin-top:24px;">
+                    <span class="signature-name"
+                          style="display:inline-block;font-size:20px;font-family:'Segoe Script','Brush Script MT',cursive;color:#c0392b;">
+                        {{ $hoSo->tenChuHoSo ?? ($dulieu['ho_ten'] ?? ($nguoiInfo->hoTen ?? '—')) }}
+                    </span>
+                </div>
             </div>
             <div class="col-4"></div>
             <div class="col-4 text-center">
                 <strong>Cán bộ thu tiền</strong><br>
                 <small class="text-muted d-block">(Ký, ghi rõ họ tên)</small>
-                <div style="margin-top:24px;">
-                    <span class="signature-name"
-                          style="display:inline-block;font-size:20px;font-family:'Segoe Script','Brush Script MT',cursive;color:#c0392b;">
-                        P. Trung Nghĩa
-                    </span>
-                </div>
-                <div>
-                    <small class="text-muted">(Phạm Trung Nghĩa)</small>
-                </div>
+
             </div>
         </div>
 

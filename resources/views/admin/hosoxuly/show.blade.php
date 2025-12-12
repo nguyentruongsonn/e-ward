@@ -951,14 +951,15 @@
                                         <h4 class="panel-title">
                                             <i class="fa fa-file-text-o"></i> Ý kiến xử lý
                                             @if(!$isReadOnly)
+                                                @if($user->vaiTro === 'Quản trị viên' || $user->vaiTro === 'Lãnh đạo' || $user->vaiTro === 'Cán bộ thụ lý')
                                                 <button type="button" class="btn btn-xs btn-success pull-right" data-toggle="modal" data-target="#yKienXuLyModal">
                                                     <i class="fa fa-upload"></i> Tải lên
                                                 </button>
                                             @endif
+                                            @endif
                                         </h4>
                                     </div>
                                     <div class="panel-body" id="mainYKienContent">
-                                        <p><strong>Nội dung:</strong> <span id="mainNoiDungYKien">{{ $hoSo->yKienXuLy ?? 'Chưa có ý kiến' }}</span></p>
                                         <div id="mainFileList">
                                             @php
                                                 $files = json_decode($hoSo->duongdanfileykien, true) ?? [];
@@ -979,7 +980,9 @@
                                                                     </button>
                                                                     <div class="dropdown-menu dropdown-menu-right">
                                                                         <a class="dropdown-item" href="{{ asset($file) }}" download><i class="fa fa-download"></i> Tải xuống</a>
+                                                                        @if($user->vaiTro === 'Quản trị viên' || $user->vaiTro ==='Lãnh đạo')
                                                                         <a class="dropdown-item" href="#" onclick="convertYKienFile('{{ $file }}'); return false;"><i class="fa fa-check-circle"></i> Chuyển thành kết quả</a>
+                                                                        @endif
                                                                         <div class="dropdown-divider"></div>
                                                                         <a class="dropdown-item text-danger" href="#" onclick="deleteYKienFile('{{ $file }}'); return false;"><i class="fa fa-trash"></i> Xóa file</a>
                                                                     </div>
@@ -1001,9 +1004,11 @@
                                         <h4 class="panel-title">
                                             <i class="fa fa-file-text"></i> Kết quả xử lý
                                             @if(!$isReadOnly)
+                                            @if($user->vaiTro === 'Quản trị viên' || $user->vaiTro === 'Lãnh đạo' || $user->vaiTro === 'Cán bộ thụ lý')
                                                 <button type="button" class="btn btn-xs btn-success pull-right" data-toggle="modal" data-target="#ketQuaXuLyModal">
                                                     <i class="fa fa-upload"></i> Tải lên
                                                 </button>
+                                            @endif
                                             @endif
                                         </h4>
                                     </div>
@@ -1029,7 +1034,9 @@
                                                                     <div class="dropdown-menu dropdown-menu-right">
                                                                         <a class="dropdown-item" href="{{ asset($file) }}" download><i class="fa fa-download"></i> Tải xuống</a>
                                                                         <div class="dropdown-divider"></div>
+                                                                        @if($user->vaiTro === 'Quản trị viên' || $user->vaiTro === 'Lãnh đạo')
                                                                         <a class="dropdown-item text-danger" href="#" onclick="deleteKetQuaFile('{{ $file }}'); return false;"><i class="fa fa-trash"></i> Xóa file</a>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                             @endif
@@ -1039,87 +1046,6 @@
                                             @else
                                             @endif
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                                    <div class="panel-body">
-                                        <style>
-                                            /* File actions dropdown */
-                                            .file-actions-dropdown {
-                                                position: relative;
-                                                display: inline-block;
-                                            }
-                                            .file-actions-btn {
-                                                background: none;
-                                                border: none;
-                                                font-size: 18px;
-                                                cursor: pointer;
-                                                padding: 5px 10px;
-                                                color: #666;
-                                                transition: color 0.2s;
-                                            }
-                                            .file-actions-btn:hover {
-                                                color: #333;
-                                            }
-                                            .file-actions-menu {
-                                                display: none;
-                                                position: absolute;
-                                                right: 0;
-                                                top: 100%;
-                                                background: white;
-                                                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                                                border-radius: 6px;
-                                                min-width: 200px;
-                                                z-index: 1000;
-                                                margin-top: 5px;
-                                                border: 1px solid #e0e0e0;
-                                            }
-                                            .file-actions-menu.show {
-                                                display: block;
-                                            }
-                                            .file-actions-menu a,
-                                            .file-actions-menu button {
-                                                display: block;
-                                                padding: 10px 15px;
-                                                color: #333;
-                                                text-decoration: none;
-                                                border: none;
-                                                background: none;
-                                                width: 100%;
-                                                text-align: left;
-                                                cursor: pointer;
-                                                transition: background 0.2s;
-                                                font-size: 14px;
-                                            }
-                                            .file-actions-menu a:hover,
-                                            .file-actions-menu button:hover {
-                                                background: #f5f5f5;
-                                            }
-                                            .file-actions-menu a:first-child,
-                                            .file-actions-menu button:first-child {
-                                                border-radius: 6px 6px 0 0;
-                                            }
-                                            .file-actions-menu a:last-child,
-                                            .file-actions-menu button:last-child {
-                                                border-radius: 0 0 6px 6px;
-                                            }
-                                            .file-actions-menu i {
-                                                margin-right: 8px;
-                                                width: 16px;
-                                                text-align: center;
-                                            }
-                                            .file-signed-badge {
-                                                display: inline-block;
-                                                background: #007bff;
-                                                color: white;
-                                                padding: 2px 8px;
-                                                border-radius: 3px;
-                                                font-size: 11px;
-                                                margin-left: 8px;
-                                                font-weight: 500;
-                                            }
-                                        </style>
-
                                     </div>
                                 </div>
                             </div>

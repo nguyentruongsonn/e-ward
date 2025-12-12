@@ -36,6 +36,10 @@ Route::get('/danh-gia-dich-vu/{maTTHC}', [App\Http\Controllers\PublicServiceCont
 Route::get('/tra-cuu-ho-so', [App\Http\Controllers\PublicController::class, 'trackingForm'])->name('tracking');
 Route::post('/tra-cuu-ho-so', [App\Http\Controllers\PublicController::class, 'trackingSearch'])->name('tracking.search');
 
+// API Địa giới hành chính
+Route::get('/api/provinces', [App\Http\Controllers\PublicController::class, 'getProvinces'])->name('api.provinces');
+Route::get('/api/provinces/{maTinh}/wards', [App\Http\Controllers\PublicController::class, 'getWards'])->name('api.wards');
+
 Route::view('/chatbot', 'pages.chatbot')->name('chatbot');
 Route::view('/history', 'pages.history')->name('history');
 Route::view('/register', 'pages.register')->name('register');
