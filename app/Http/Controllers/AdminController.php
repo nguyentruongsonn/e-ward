@@ -1691,6 +1691,45 @@ class AdminController extends Controller
             ], 422);
         }
 
+        // Kiểm tra thời gian check-in
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
+        $thoiGianHen = Carbon::parse($lichHen->thoiGianHen)->setTimezone('Asia/Ho_Chi_Minh');
+
+        // Kiểm tra nếu chưa đến ngày hẹn
+        if (!$thoiGianHen->isToday()) {
+            if ($thoiGianHen->isFuture()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Chưa đến ngày hẹn. Bạn chỉ có thể check-in vào ngày ' . $thoiGianHen->format('d/m/Y') . '.',
+                ], 422);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Đã quá ngày hẹn. Bạn không thể check-in được nữa. Vui lòng đặt lịch mới.',
+                ], 422);
+            }
+        }
+
+        // Nếu là ngày hôm nay, kiểm tra khoảng thời gian
+        $hoursDifference = $now->diffInHours($thoiGianHen, false);
+
+        // Kiểm tra nếu đã qua giờ hẹn
+        if ($hoursDifference < 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã quá giờ hẹn. Bạn không thể check-in được nữa. Vui lòng đặt lịch mới.',
+            ], 422);
+        }
+
+        // Kiểm tra nếu còn quá sớm (hơn 3 tiếng)
+        if ($hoursDifference > 3) {
+            $thoiGianCoTheCheckIn = $thoiGianHen->copy()->subHours(3);
+            return response()->json([
+                'success' => false,
+                'message' => 'Chưa đến thời gian check-in. Bạn chỉ có thể check-in trong vòng 3 tiếng trước giờ hẹn. Vui lòng quay lại sau ' . $thoiGianCoTheCheckIn->format('H:i d/m/Y') . '.',
+            ], 422);
+        }
+
         // Tự động chọn quầy còn trống trong giờ đó
         $thoiGianHen = Carbon::parse($lichHen->thoiGianHen)->setTimezone('Asia/Ho_Chi_Minh');
         $startTime = $thoiGianHen->copy()->startOfHour();

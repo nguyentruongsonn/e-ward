@@ -86,4 +86,21 @@ class PublicController extends Controller
 
         return view('pages.services', compact('tthcs', 'linhVucs'));
     }
+    /**
+     * API to get all provinces
+     */
+    public function getProvinces()
+    {
+        $tinhs = DB::table('tinh')->orderBy('tenTinh')->get();
+        return response()->json($tinhs);
+    }
+
+    /**
+     * API to get wards by province ID
+     */
+    public function getWards($maTinh)
+    {
+        $xas = DB::table('xa')->where('maTinh', $maTinh)->orderBy('tenXa')->get();
+        return response()->json($xas);
+    }
 }

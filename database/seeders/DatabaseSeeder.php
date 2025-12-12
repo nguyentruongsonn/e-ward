@@ -33,7 +33,8 @@ class DatabaseSeeder extends Seeder
             FormTrucTuyenSeeder::class,
             LePhiSeeder::class,
             TrangThaiHoSoSeeder::class,
-            FaqSeeder::class,
+            TinhSeeder::class,
+            XaSeeder::class,
         ]);
 
     }

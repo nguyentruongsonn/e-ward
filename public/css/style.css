@@ -34,6 +34,9 @@
     z-index: 99;
 }
 
+.border-color {
+    border-color: var(--primary);
+}
 
 /*** Spinner ***/
 #spinner {

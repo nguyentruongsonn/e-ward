@@ -96,6 +96,28 @@
         border-color: #dc3545;
     }
 
+    /* ====== FIX HIỂN THỊ RÕ RÀNG ====== */
+    .form-control, .form-select {
+        color: #222; /* Text đậm hơn */
+        font-weight: 500; 
+    }
+    
+    /* Input bị disable hoặc readonly vẫn phải hiển thị rõ */
+    .form-control:disabled, .form-control[readonly],
+    .form-select:disabled, .form-select[readonly] {
+        background-color: #f2f2f2; 
+        opacity: 1 !important; /* Bắt buộc không mờ */
+        color: #000 !important; /* Chữ đen tuyệt đối */
+        font-weight: 600; /* Chữ đậm hơn chút */
+        cursor: not-allowed;
+    }
+
+    /* Label rõ ràng hơn */
+    label {
+        font-weight: 600; /* Đậm hơn */
+        color: #000; /* Đen hơn */
+    }
+
     /* ====== PRINT STYLES FOR RECEIPT / INVOICE ====== */
     @media print {
         body {
@@ -205,7 +227,9 @@
                                     <div class="col-12">
                                         {{-- Tiêu đề của Row --}}
                                         @if(isset($field['title']) && !empty($field['title']))
-                                            <p class="mt-3 mb-2 " style="color: black; font-size: 17px; font-style: italic;">{{ $field['title'] }}</p>
+                                            <p class="mt-3 mb-2 " style="color: #000077
+
+; font-size: 18px; font-style: italic;">{{ $field['title'] }}</p>
                                         @endif
 
                                         <div class="row g-3 mb-2">
@@ -615,7 +639,7 @@
                                 <div style="margin-top:24px;">
                                     <span class="signature-name"
                                           style="display:inline-block;font-size:20px;font-family:'Segoe Script','Brush Script MT',cursive;color:#c0392b;">
-                                        {{ $hoSo->nguoiNop->hoTen ?? '' }}
+                                        {{ $hoSo->tenChuHoSo ?? ($dulieu['ho_ten'] ?? ($nguoiInfo->hoTen ?? '—')) }}
                                     </span>
                                 </div>
                                 {{-- Họ tên in rõ nét dưới chữ ký --}}
@@ -1365,6 +1389,136 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     initDynamicForms();
+
+    // ========== DYNAMIC ADDRESS SELECTION (PROVINCE -> WARD) ==========
+    const provinceApiUrl = '{{ route("api.provinces") }}';
+    const wardApiUrlTemplate = '{{ route("api.wards", ["maTinh" => ":maTinh"]) }}';
+
+    function initAddressSelectors() {
+        // Selector string for ALL Province Selects (static + dynamic)
+        // We target names starting with or containing specific patterns
+        const provinceSelector = 'select[name*="tinh_thanh"], select[name*="tinh_tp"], select[name="noi_cap_giay_to"]';
+
+        const provinceSelects = document.querySelectorAll(provinceSelector);
+        
+        if (provinceSelects.length === 0) return;
+
+        // Fetch Provinces once
+        fetch(provinceApiUrl)
+            .then(response => response.json())
+            .then(data => {
+                provinceSelects.forEach(select => {
+                    // Save selected value if any
+                    const selectedValue = select.getAttribute('data-selected') || select.value;
+                    
+                    // Keep the first option ("-- Chọn Tỉnh/TP --") and clear others
+                    const firstOption = select.options[0] ? select.options[0].cloneNode(true) : new Option('-- Chọn Tỉnh/TP --', '');
+                    select.innerHTML = '';
+                    select.appendChild(firstOption);
+
+                    data.forEach(tinh => {
+                        const option = document.createElement('option');
+                        option.value = tinh.maTinh;
+                        option.textContent = tinh.tenTinh;
+                        if (selectedValue == tinh.maTinh) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    });
+
+                    // Trigger change to load wards if a value is pre-selected
+                    if (selectedValue) {
+                        select.dispatchEvent(new Event('change'));
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching provinces:', error));
+
+        
+        provinceSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                const maTinh = this.value;
+                const parentRow = this.closest('.row');
+                if (!parentRow) return;
+
+                // Determine likely Ward field name
+                // Pattern: tinh_thanh_XXX -> phuong_xa_XXX
+                // Pattern: tinh_tp_XXX -> phuong_xa_XXX
+                let wardNameCandidates = [];
+                const pName = this.name;
+                
+                if (pName.includes('tinh_thanh')) {
+                    wardNameCandidates.push(pName.replace('tinh_thanh', 'phuong_xa'));
+                }
+                if (pName.includes('tinh_tp')) {
+                    wardNameCandidates.push(pName.replace('tinh_tp', 'phuong_xa'));
+                }
+                
+                // Special cases
+                if (pName === 'noi_cap_giay_to') {
+                    // Usually no ward for this
+                }
+
+                let wardInput = null;
+                // Try finding by candidates
+                for (let name of wardNameCandidates) {
+                    const candidate = parentRow.querySelector(`[name="${name}"]`);
+                    if (candidate) {
+                        wardInput = candidate;
+                        break;
+                    }
+                }
+                
+                // Fallback: search for any 'phuong_xa' input in the same row if strict name match fails
+                if (!wardInput) {
+                    wardInput = parentRow.querySelector('[name*="phuong_xa"]');
+                }
+
+                if (!wardInput) return;
+
+                // If currently an Input, swap to Select
+                if (wardInput.tagName === 'INPUT') {
+                    const newSelect = document.createElement('select');
+                    newSelect.className = wardInput.className;
+                    // Ensure form-select class is present for styling
+                    if (!newSelect.classList.contains('form-select')) newSelect.classList.add('form-select');
+                    
+                    newSelect.name = wardInput.name;
+                    newSelect.id = wardInput.id;
+                    newSelect.required = wardInput.required;
+                    
+                    wardInput.parentNode.replaceChild(newSelect, wardInput);
+                    wardInput = newSelect; // Update reference
+                }
+
+                // Reset options
+                wardInput.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+                if (maTinh) {
+                    const url = wardApiUrlTemplate.replace(':maTinh', maTinh);
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.length === 0) {
+                                // If no wards found, keep empty
+                            } else {
+                                data.forEach(xa => {
+                                    const option = document.createElement('option');
+                                    option.value = xa.tenXa; 
+                                    option.textContent = xa.tenXa;
+                                    wardInput.appendChild(option);
+                                });
+                            }
+                        })
+                        .catch(error => console.error('Error fetching wards:', error));
+                }
+            });
+        });
+    }
+
+    // Call it
+    initAddressSelectors();
+
     // ========== TỰ ĐỘNG HIỂN THỊ STEP 4 NẾU THÀNH CÔNG ==========
     @if(isset($isSuccess) && $isSuccess)
         // Đánh dấu tất cả các step trước đó là completed

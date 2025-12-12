@@ -27,7 +27,7 @@
                             <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" class="form-control" required>
                         </div>
                         <div class="d-grid gap-2">
-                            <button class="btn btn-primary" type="submit">Xác nhận</button>
+                            <button class="btn btn-color" type="submit">Xác nhận</button>
                         </div>
                     </form>
 

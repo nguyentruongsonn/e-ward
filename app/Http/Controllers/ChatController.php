@@ -37,11 +37,14 @@ class ChatController extends Controller
                 if($proc->lePhi) {
                     $context .= "   - Lệ phí: " . number_format($proc->lePhi) . " VNĐ\n";
                 }
+                // Truncate long fields to avoid Rate Limit (Token Limit)
                 if($proc->trinhTuThucHien) {
-                    $context .= "   - Trình tự thực hiện: " . $proc->trinhTuThucHien . "\n";
+                    $shortTrinhTu = \Illuminate\Support\Str::limit($proc->trinhTuThucHien, 150);
+                    $context .= "   - Trình tự thực hiện: " . $shortTrinhTu . "\n";
                 }
                 if($proc->yeuCauDieuKien) {
-                    $context .= "   - Yêu cầu điều kiện: " . $proc->yeuCauDieuKien . "\n";
+                    $shortYeuCau = \Illuminate\Support\Str::limit($proc->yeuCauDieuKien, 150);
+                    $context .= "   - Yêu cầu điều kiện: " . $shortYeuCau . "\n";
                 }
                 $context .= "\n";
             }
