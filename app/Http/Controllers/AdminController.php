@@ -3619,6 +3619,12 @@ class AdminController extends Controller
                 ->withErrors(['error' => 'Không thể xóa thủ tục này vì đang có ' . $count . ' hồ sơ sử dụng.']);
         }
 
+        // Xóa các bản ghi liên quan trong các bảng con trước
+        DB::table('cachthuchien')->where('maTTHC', $id)->delete();
+        DB::table('lephi')->where('maTTHC', $id)->delete();
+        DB::table('thanhphanhoso')->where('maTTHC', $id)->delete();
+        DB::table('lichhen')->where('maTTHC', $id)->delete();
+
         DB::table('tthc')->where('maTTHC', $id)->delete();
 
         return redirect()->route('admin.tthc.index')
