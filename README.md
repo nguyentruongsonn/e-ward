@@ -1,155 +1,142 @@
-Dưới đây là mẫu **README.md** hoàn chỉnh cho dự án GitHub của bạn. Bạn có thể copy trực tiếp và chỉnh sửa lại tên nhóm, công nghệ sử dụng cho phù hợp.
+Dưới đây là phiên bản **README chuyên nghiệp – chuẩn GitHub – có link demo** cho dự án của bạn.
+Bạn có thể copy trực tiếp vào file `README.md`.
 
 ---
 
-# 🏢 HỆ THỐNG ĐẶT LỊCH VÀ THEO DÕI TIẾN ĐỘ XỬ LÝ HỒ SƠ
+# 🏛️ HỆ THỐNG ĐẶT LỊCH & THEO DÕI TIẾN ĐỘ XỬ LÝ HỒ SƠ TRUNG TÂM HÀNH CHÍNH CÔNG CỦA PHƯỜNG
 
-### Trung tâm Hành chính công cấp phường
-
-## 📌 Giới thiệu
-
-Hệ thống được xây dựng nhằm hỗ trợ công dân/tổ chức thực hiện các thủ tục hành chính một cách thuận tiện, minh bạch và tiết kiệm thời gian thông qua việc đặt lịch hẹn trực tuyến và theo dõi tiến độ xử lý hồ sơ.
-
-Hệ thống hoạt động trên:
-
-* 🌐 Website (PC, Tablet)
-* 📱 Ứng dụng Mobile (iOS, Android)
-* 🖥️ Kiosk tại Trung tâm hành chính công
+🔗 **Demo hệ thống:**
+[https://ewardabc.online/](https://ewardabc.online/)
 
 ---
 
-## 🎯 Mục tiêu dự án
+## 1. Tổng quan dự án
 
-* Giảm thời gian chờ đợi tại Bộ phận Một cửa
-* Minh bạch hóa quá trình xử lý hồ sơ
-* Nâng cao hiệu suất làm việc của cán bộ
-* Hỗ trợ lãnh đạo theo dõi, thống kê và ra quyết định
+Hệ thống được xây dựng nhằm **số hóa quy trình tiếp nhận và xử lý hồ sơ hành chính** tại Trung tâm Hành chính công cấp phường.
 
----
+Dự án tập trung vào:
 
-## 👥 Nhóm người dùng chính
+* Chuẩn hóa quy trình xử lý 3 cấp
+* Giảm tải cho bộ phận một cửa
+* Minh bạch tiến độ xử lý hồ sơ
+* Ứng dụng AI hỗ trợ tư vấn thủ tục
 
-### 1️⃣ Công dân / Tổ chức
-
-* Đăng ký, đăng nhập tài khoản
-* Đặt lịch hẹn nộp hồ sơ online
-* Nộp hồ sơ trực tuyến (upload PDF/scan)
-* Nhận mã hồ sơ để theo dõi trạng thái
-* Theo dõi tiến độ xử lý hồ sơ
-* Nhận thông báo qua OTP, email, app
-* Theo dõi số thứ tự, số quầy, loa gọi số
-
-### 2️⃣ Cán bộ / Chuyên viên
-
-* Xem danh sách lịch hẹn trong ngày
-* Gọi số, dừng xử lý, gọi lại số
-* Cập nhật trạng thái hồ sơ
-* Xuất thống kê, báo cáo theo:
-
-  * Thời gian
-  * Lĩnh vực
-  * Quầy tiếp nhận
-  * Thời gian xử lý trung bình
-
-### 3️⃣ Người quản trị hệ thống (Admin)
-
-* Quản lý tài khoản và phân quyền
-* Quản lý danh mục thủ tục hành chính
-* Cấu hình hệ thống (kiosk, màn hình, loa)
-* Sao lưu và bảo mật dữ liệu
-
-### 4️⃣ Lãnh đạo / Quản lý
-
-* Theo dõi báo cáo tổng hợp
-* Giám sát hiệu suất làm việc
-* Thống kê hồ sơ đúng hạn / trễ hạn
-* Hỗ trợ ra quyết định điều hành
+Hệ thống được phát triển theo mô hình **Web-based Application** với kiến trúc tách biệt Backend – Frontend.
 
 ---
 
-## ⚙️ Các chức năng chính
+## 2. Mục tiêu hệ thống
 
-### ✅ Đặt lịch nộp hồ sơ
-
-* Chọn thủ tục hành chính
-* Chọn ngày, giờ còn trống
-* Xác nhận lịch hẹn
-* Nhận mã QR hoặc mã hồ sơ
-
-### ✅ Quản lý hồ sơ điện tử
-
-* Tạo hồ sơ điện tử
-* Upload tài liệu PDF/scan
-* Chỉnh sửa, cập nhật hồ sơ
-
-### ✅ Theo dõi tiến độ xử lý
-
-* Tra cứu bằng mã hồ sơ
-* Xem trạng thái xử lý
-* Nhận thông báo khi thay đổi trạng thái
-
-### ✅ Hệ thống gọi số tự động
-
-* Hiển thị số thứ tự trên màn hình trung tâm
-* Thông báo qua loa
-* Quản lý hàng đợi tại quầy
-
-### ✅ Báo cáo & Thống kê
-
-* Thống kê theo ngày/tháng/năm
-* Theo lĩnh vực thủ tục
-* Theo quầy tiếp nhận
-* Thời gian xử lý trung bình
+* Cung cấp nền tảng đặt lịch trực tuyến cho người dân
+* Tự động hóa quy trình tiếp nhận – xử lý – phê duyệt hồ sơ
+* Theo dõi trạng thái xử lý theo thời gian thực
+* Hỗ trợ tư vấn thủ tục hành chính bằng AI
+* Tạo báo cáo thống kê phục vụ quản lý
 
 ---
 
-## 🏗️ Kiến trúc hệ thống (Đề xuất)
+##  3. Đối tượng sử dụng
 
-* Frontend: ReactJS / VueJS / Flutter
-* Backend: NodeJS / Spring Boot / .NET
-* Database: MySQL / PostgreSQL
-* Authentication: OTP SMS / Email
-* API: RESTful API
+### 🔹 Người dân
 
----
+* Đăng ký / đăng nhập
+* Đặt lịch nộp hồ sơ
+* Nộp hồ sơ trực tuyến
+* Theo dõi trạng thái xử lý
+* Nhận thông báo email
+* Đánh giá dịch vụ
 
-## 🔐 Bảo mật
+### 🔹 Cán bộ một cửa
 
-* Mã hóa mật khẩu (bcrypt hoặc tương đương)
-* Xác thực OTP
-* Phân quyền theo vai trò (Role-based access control)
-* Sao lưu dữ liệu định kỳ
+* Tiếp nhận hồ sơ
+* Kiểm tra tính hợp lệ
+* Chuyển hồ sơ cho cán bộ thụ lý
 
----
+### 🔹 Cán bộ thụ lý
 
-## 🚀 Hướng phát triển tương lai
+* Xử lý hồ sơ
+* Yêu cầu bổ sung
+* Trình lãnh đạo phê duyệt
 
-* Tích hợp Cổng Dịch vụ công quốc gia
-* Thanh toán lệ phí trực tuyến
-* Chatbot hỗ trợ công dân
-* Phân tích dữ liệu phục vụ cải cách hành chính
+### 🔹 Lãnh đạo
 
----
+* Phê duyệt / từ chối hồ sơ
 
-## 📊 Tính năng nổi bật
+### 🔹 Quản trị viên
 
-✔️ Giảm thời gian chờ
-✔️ Minh bạch trạng thái xử lý
-✔️ Tối ưu vận hành trung tâm hành chính
-✔️ Hỗ trợ đa nền tảng
+* Quản lý người dùng
+* Quản lý danh mục thủ tục
+* Thống kê & báo cáo
 
 ---
 
-## 👨‍💻 Nhóm phát triển
+## 4. Chức năng chính
 
-* Tên sinh viên: …
-* Lớp: …
-* Giảng viên hướng dẫn: …
+### 4.1 Quản lý tài khoản & phân quyền
+
+* Hệ thống phân quyền theo vai trò (RBAC)
+* Middleware kiểm soát truy cập
+
+### 4.2 Quản lý thủ tục hành chính
+
+* Danh mục thủ tục
+* Hồ sơ yêu cầu
+* Thời gian xử lý
+
+### 4.3 Đặt lịch & Check-in QR
+
+* Chọn ngày giờ linh hoạt
+* Sinh mã QR xác nhận lịch hẹn
+* Kiểm soát số lượng theo khung giờ
+
+### 4.4 Nộp hồ sơ trực tuyến
+
+* Upload tài liệu
+* Theo dõi trạng thái
+* Email Notification
+
+### 4.5 Quy trình xử lý 3 cấp
+
+Người dân → Một cửa → Thụ lý → Lãnh đạo → Hoàn tất
+
+### 4.6 Chatbot AI (Gemini Integration)
+
+* Trả lời câu hỏi về thủ tục hành chính
+* Hướng dẫn quy trình
+* Hỗ trợ tra cứu nhanh
+
+### 4.7 Báo cáo & thống kê
+
+* Số lượng hồ sơ theo thời gian
+* Tỷ lệ xử lý đúng hạn
+* Biểu đồ trực quan
 
 ---
 
-Nếu bạn muốn, mình có thể:
+## 5. Kiến trúc hệ thống
 
-* Viết thêm **README chuyên nghiệp hơn (chuẩn production)**
-* Hoặc viết bản **README cho đồ án tốt nghiệp (có mục cài đặt, hướng dẫn chạy project, API docs)**
-* Hoặc viết thêm phần **Database schema mô tả ERD** cho GitHub 🚀
+### 🔹 Backend
+
+* Laravel 10
+* RESTful API
+* Eloquent ORM
+
+### 🔹 Frontend
+
+* Blade Template Engine
+* Bootstrap / TailwindCSS
+* AJAX
+
+### 🔹 Database
+
+* MySQL
+
+### 🔹 Cache & Performance
+
+* Redis Cache
+
+### 🔹 AI Integration
+
+* Google Gemini API
+
+---
