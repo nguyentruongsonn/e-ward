@@ -1,4 +1,4 @@
-# 🏛️ HỆ THỐNG ĐẶT LỊCH & THEO DÕI TIẾN ĐỘ XỬ LÝ HỒ SƠ TRUNG TÂM HÀNH CHÍNH CÔNG CỦA PHƯỜNG
+# HỆ THỐNG ĐẶT LỊCH & THEO DÕI TIẾN ĐỘ XỬ LÝ HỒ SƠ TRUNG TÂM HÀNH CHÍNH CÔNG CỦA PHƯỜNG
 
 🔗 **Demo hệ thống:**
 [https://ewardabc.online/](https://ewardabc.online/)
