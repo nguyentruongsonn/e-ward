@@ -1,8 +1,3 @@
-Dưới đây là phiên bản **README chuyên nghiệp – chuẩn GitHub – có link demo** cho dự án của bạn.
-Bạn có thể copy trực tiếp vào file `README.md`.
-
----
-
 # 🏛️ HỆ THỐNG ĐẶT LỊCH & THEO DÕI TIẾN ĐỘ XỬ LÝ HỒ SƠ TRUNG TÂM HÀNH CHÍNH CÔNG CỦA PHƯỜNG
 
 🔗 **Demo hệ thống:**
