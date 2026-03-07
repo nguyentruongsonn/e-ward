@@ -16,10 +16,8 @@ class ChatController extends Controller
                 return response()->json(['error'=>'Message is required'],400);
             }
 
-            // Fetch all procedures with related data
             $procedures = TTHC::with('linhVuc')->get();
             
-            // Build context from database
             $context = "Bạn là trợ lý AI của Cổng dịch vụ công điện tử phường ABC. Hãy tư vấn thân thiện, ngắn gọn, dễ hiểu.\n\n";
             $context .= "DANH SÁCH THỦ TỤC HÀNH CHÍNH:\n\n";
             
@@ -37,7 +35,6 @@ class ChatController extends Controller
                 if($proc->lePhi) {
                     $context .= "   - Lệ phí: " . number_format($proc->lePhi) . " VNĐ\n";
                 }
-                // Truncate long fields to avoid Rate Limit (Token Limit)
                 if($proc->trinhTuThucHien) {
                     $shortTrinhTu = \Illuminate\Support\Str::limit($proc->trinhTuThucHien, 150);
                     $context .= "   - Trình tự thực hiện: " . $shortTrinhTu . "\n";
@@ -51,7 +48,7 @@ class ChatController extends Controller
             
             $context .= "\nKhi trả lời, hãy dựa vào thông tin trên để tư vấn chính xác về các thủ tục hành chính.";
 
-            // Groq API request
+            // Groq API
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer ' . env('GROQ_API_KEY'),
